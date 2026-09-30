@@ -48,9 +48,27 @@ class Database:
                 strictly_complied INTEGER NOT NULL DEFAULT 1,
                 source_type TEXT NOT NULL DEFAULT 'official',  -- 'official' or 'user'
                 weight REAL NOT NULL DEFAULT 1.0,
+                prompt_tokens INTEGER NOT NULL DEFAULT 0,
+                completion_tokens INTEGER NOT NULL DEFAULT 0,
+                total_tokens INTEGER NOT NULL DEFAULT 0,
+                perturbation_type TEXT NOT NULL DEFAULT 'none',
+                perturbation_prefix TEXT NOT NULL DEFAULT '',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             """)
+
+            # Ensure new columns exist on existing databases
+            cursor.execute("PRAGMA table_info(samples)")
+            existing_cols = {row["name"] for row in cursor.fetchall()}
+            for col_name, col_type in [
+                ("prompt_tokens", "INTEGER NOT NULL DEFAULT 0"),
+                ("completion_tokens", "INTEGER NOT NULL DEFAULT 0"),
+                ("total_tokens", "INTEGER NOT NULL DEFAULT 0"),
+                ("perturbation_type", "TEXT NOT NULL DEFAULT 'none'"),
+                ("perturbation_prefix", "TEXT NOT NULL DEFAULT ''")
+            ]:
+                if col_name not in existing_cols:
+                    cursor.execute(f"ALTER TABLE samples ADD COLUMN {col_name} {col_type};")
 
             # Pre-aggregated token frequency table
             cursor.execute("""
@@ -96,18 +114,26 @@ class Database:
         is_valid: bool = True,
         strictly_complied: bool = True,
         source_type: str = "official",
-        weight: float = 1.0
+        weight: float = 1.0,
+        prompt_tokens: int = 0,
+        completion_tokens: int = 0,
+        total_tokens: int = 0,
+        perturbation_type: str = "none",
+        perturbation_prefix: str = ""
     ) -> int:
         """
         Adds a sample and immediately updates token_counts.
         """
+        if total_tokens == 0 and (prompt_tokens > 0 or completion_tokens > 0):
+            total_tokens = prompt_tokens + completion_tokens
         parsed_json = json.dumps(parsed_tokens, ensure_ascii=False)
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
             INSERT INTO samples 
-            (model_name, probe_id, raw_text, parsed_value, is_valid, strictly_complied, source_type, weight)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (model_name, probe_id, raw_text, parsed_value, is_valid, strictly_complied, source_type, weight,
+             prompt_tokens, completion_tokens, total_tokens, perturbation_type, perturbation_prefix)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 model_name,
                 probe_id,
@@ -116,7 +142,12 @@ class Database:
                 1 if is_valid else 0,
                 1 if strictly_complied else 0,
                 source_type,
-                float(weight)
+                float(weight),
+                int(prompt_tokens),
+                int(completion_tokens),
+                int(total_tokens),
+                perturbation_type,
+                perturbation_prefix
             ))
             sample_id = cursor.lastrowid
 
@@ -282,10 +313,77 @@ class Database:
             """)
             probe_breakdown = [dict(r) for r in cursor.fetchall()]
 
+            # Token usage summary
+            cursor.execute("""
+            SELECT 
+                COALESCE(SUM(prompt_tokens), 0) as total_prompt_tokens,
+                COALESCE(SUM(completion_tokens), 0) as total_completion_tokens,
+                COALESCE(SUM(total_tokens), 0) as grand_total_tokens,
+                COUNT(CASE WHEN total_tokens > 0 THEN 1 END) as recorded_api_calls
+            FROM samples
+            """)
+            token_usage = dict(cursor.fetchone())
+
+            cursor.execute("""
+            SELECT perturbation_type, COUNT(*) as count
+            FROM samples
+            GROUP BY perturbation_type
+            ORDER BY count DESC
+            """)
+            perturbation_breakdown = [dict(r) for r in cursor.fetchall()]
+
             return {
                 "total_samples": total_samples,
                 "official_samples": official_samples,
                 "user_samples": user_samples,
                 "model_breakdown": model_breakdown,
-                "probe_breakdown": probe_breakdown
+                "probe_breakdown": probe_breakdown,
+                "token_usage": token_usage,
+                "perturbation_breakdown": perturbation_breakdown
+            }
+
+    def get_token_usage_stats(self) -> Dict[str, Any]:
+        """Returns detailed breakdown of tokens consumed by model and perturbation."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT 
+                COALESCE(SUM(prompt_tokens), 0) as total_prompt_tokens,
+                COALESCE(SUM(completion_tokens), 0) as total_completion_tokens,
+                COALESCE(SUM(total_tokens), 0) as grand_total_tokens,
+                COUNT(CASE WHEN total_tokens > 0 THEN 1 END) as recorded_api_calls,
+                COUNT(*) as total_samples
+            FROM samples
+            """)
+            overall = dict(cursor.fetchone())
+
+            cursor.execute("""
+            SELECT 
+                model_name,
+                COUNT(*) as sample_count,
+                COUNT(CASE WHEN total_tokens > 0 THEN 1 END) as api_call_count,
+                COALESCE(SUM(prompt_tokens), 0) as prompt_tokens,
+                COALESCE(SUM(completion_tokens), 0) as completion_tokens,
+                COALESCE(SUM(total_tokens), 0) as total_tokens
+            FROM samples
+            GROUP BY model_name
+            ORDER BY total_tokens DESC
+            """)
+            by_model = [dict(r) for r in cursor.fetchall()]
+
+            cursor.execute("""
+            SELECT 
+                perturbation_type,
+                COUNT(*) as sample_count,
+                COALESCE(SUM(total_tokens), 0) as total_tokens
+            FROM samples
+            GROUP BY perturbation_type
+            ORDER BY sample_count DESC
+            """)
+            by_perturbation = [dict(r) for r in cursor.fetchall()]
+
+            return {
+                "overall": overall,
+                "by_model": by_model,
+                "by_perturbation": by_perturbation
             }

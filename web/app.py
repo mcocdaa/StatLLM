@@ -75,6 +75,10 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     def get_stats():
         return db.get_stats()
 
+    @app.get("/api/token-usage")
+    def get_token_usage():
+        return db.get_token_usage_stats()
+
     @app.get("/api/cluster")
     def get_cluster():
         return cluster_projector.get_cluster_data()
