@@ -1,0 +1,350 @@
+[
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_int5",
+    "run_index": 1,
+    "raw_text": "[47, 23, 81, 6, 55]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_int5",
+    "run_index": 2,
+    "raw_text": "[37, 82, 14, 56, 91]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_int5",
+    "run_index": 3,
+    "raw_text": "[42, 17, 83, 56, 9]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_int5",
+    "run_index": 4,
+    "raw_text": "[37, 82, 15, 56, 4]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_color5",
+    "run_index": 1,
+    "raw_text": "[\"黄\", \"蓝\", \"红\", \"青\", \"橙\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_color5",
+    "run_index": 2,
+    "raw_text": "[\"青\", \"红\", \"紫\", \"黄\", \"蓝\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_color5",
+    "run_index": 3,
+    "raw_text": "[\"紫\", \"黄\", \"绿\", \"橙\", \"蓝\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_color5",
+    "run_index": 4,
+    "raw_text": "[\"黄\", \"青\", \"红\", \"紫\", \"橙\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_color5",
+    "run_index": 5,
+    "raw_text": "[\"黄\", \"青\", \"红\", \"紫\", \"橙\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_letter5",
+    "run_index": 1,
+    "raw_text": "[\"Q\", \"B\", \"T\", \"N\", \"W\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_letter5",
+    "run_index": 2,
+    "raw_text": "[\"Q\", \"B\", \"T\", \"M\", \"L\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_letter5",
+    "run_index": 3,
+    "raw_text": "[\"B\", \"Q\", \"T\", \"M\", \"F\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_letter5",
+    "run_index": 4,
+    "raw_text": "[\"B\", \"Q\", \"T\", \"M\", \"W\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_letter5",
+    "run_index": 5,
+    "raw_text": "[\"B\", \"Q\", \"T\", \"L\", \"W\"]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_perm5",
+    "run_index": 1,
+    "raw_text": "[3, 5, 1, 4, 2]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_perm5",
+    "run_index": 2,
+    "raw_text": "[2, 5, 1, 4, 3]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_perm5",
+    "run_index": 3,
+    "raw_text": "[4, 1, 5, 3, 2]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_perm5",
+    "run_index": 4,
+    "raw_text": "[2, 5, 1, 4, 3]"
+  },
+  {
+    "model": "Grok-4.7",
+    "probe_id": "arr_perm5",
+    "run_index": 5,
+    "raw_text": "[2, 5, 1, 4, 3]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_int5",
+    "run_index": 1,
+    "raw_text": "[41, 51, 41, 26, 49]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_int5",
+    "run_index": 2,
+    "raw_text": "[37, 84, 12, 65, 9]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_int5",
+    "run_index": 3,
+    "raw_text": "[27, 41, 19, 43, 12]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_int5",
+    "run_index": 4,
+    "raw_text": "[37, 84, 12, 59, 96]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_int5",
+    "run_index": 5,
+    "raw_text": "[12, 45, 78, 3, 99]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_color5",
+    "run_index": 1,
+    "raw_text": "[\"蓝\", \"红\", \"紫\", \"绿\", \"黄\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_color5",
+    "run_index": 2,
+    "raw_text": "[\"绿\", \"橙\", \"蓝\", \"红\", \"紫\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_color5",
+    "run_index": 3,
+    "raw_text": "[\"橙\", \"紫\", \"绿\", \"蓝\", \"红\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_color5",
+    "run_index": 4,
+    "raw_text": "[\"绿\", \"紫\", \"黄\", \"青\", \"蓝\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_color5",
+    "run_index": 5,
+    "raw_text": "[\"蓝\", \"红\", \"紫\", \"绿\", \"橙\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_letter5",
+    "run_index": 1,
+    "raw_text": "[\"Q\", \"B\", \"T\", \"L\", \"W\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_letter5",
+    "run_index": 2,
+    "raw_text": "[\"Q\", \"B\", \"H\", \"T\", \"W\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_letter5",
+    "run_index": 3,
+    "raw_text": "[\"Q\", \"L\", \"Z\", \"B\", \"N\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_letter5",
+    "run_index": 4,
+    "raw_text": "[\"Q\", \"B\", \"L\", \"T\", \"W\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_letter5",
+    "run_index": 5,
+    "raw_text": "[\"Q\", \"F\", \"B\", \"N\", \"W\"]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_perm5",
+    "run_index": 1,
+    "raw_text": "[4, 1, 5, 3, 2]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_perm5",
+    "run_index": 3,
+    "raw_text": "[4, 1, 5, 2, 3]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_perm5",
+    "run_index": 4,
+    "raw_text": "[4, 1, 5, 2, 3]"
+  },
+  {
+    "model": "DeepSeek-V4.1-Flash",
+    "probe_id": "arr_perm5",
+    "run_index": 5,
+    "raw_text": "[2, 5, 1, 4, 3]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_int5",
+    "run_index": 1,
+    "raw_text": "[17, 64, 92, 8, 41]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_int5",
+    "run_index": 2,
+    "raw_text": "[17, 64, 92, 8, 41]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_int5",
+    "run_index": 3,
+    "raw_text": "[17, 64, 92, 8, 41]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_int5",
+    "run_index": 4,
+    "raw_text": "[17, 64, 92, 8, 45]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_int5",
+    "run_index": 5,
+    "raw_text": "[17, 64, 92, 8, 41]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_color5",
+    "run_index": 1,
+    "raw_text": "[\"青\",\"红\",\"紫\",\"蓝\",\"黄\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_color5",
+    "run_index": 2,
+    "raw_text": "[\"橙\",\"蓝\",\"绿\",\"红\",\"紫\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_color5",
+    "run_index": 3,
+    "raw_text": "[\"青\",\"红\",\"紫\",\"黄\",\"蓝\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_color5",
+    "run_index": 4,
+    "raw_text": "[\"青\",\"红\",\"紫\",\"绿\",\"蓝\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_color5",
+    "run_index": 5,
+    "raw_text": "[\"青\",\"红\",\"紫\",\"黄\",\"蓝\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_letter5",
+    "run_index": 1,
+    "raw_text": "[\"Q\",\"L\",\"V\",\"B\",\"N\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_letter5",
+    "run_index": 2,
+    "raw_text": "[\"Q\",\"L\",\"T\",\"B\",\"N\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_letter5",
+    "run_index": 3,
+    "raw_text": "[\"Q\",\"B\",\"T\",\"N\",\"L\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_letter5",
+    "run_index": 4,
+    "raw_text": "[\"Q\",\"L\",\"T\",\"B\",\"Y\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_letter5",
+    "run_index": 5,
+    "raw_text": "[\"Q\", \"L\", \"T\", \"B\", \"Z\"]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_perm5",
+    "run_index": 1,
+    "raw_text": "[4, 2, 5, 1, 3]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_perm5",
+    "run_index": 2,
+    "raw_text": "[4, 1, 5, 3, 2]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_perm5",
+    "run_index": 3,
+    "raw_text": "[4, 1, 5, 3, 2]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_perm5",
+    "run_index": 4,
+    "raw_text": "[4, 1, 5, 3, 2]"
+  },
+  {
+    "model": "GPT-5.6-Luna",
+    "probe_id": "arr_perm5",
+    "run_index": 5,
+    "raw_text": "[4, 1, 5, 3, 2]"
+  }
+]
