@@ -24,6 +24,7 @@ class EvaluateRequest(BaseModel):
     submissions: List[SubmissionItem] = Field(..., min_items=1)
     consent_to_collect: bool = False
     claimed_model: Optional[str] = None
+    positional_lambda: Optional[float] = Field(0.5, ge=0.0, le=1.0)
 
 
 class ContributeRequest(BaseModel):
@@ -41,7 +42,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     )
 
     db = Database(db_path)
-    evaluator = LikelihoodEvaluator(db)
+    evaluator = LikelihoodEvaluator(db, positional_lambda=0.5)
     cluster_projector = ClusterProjector(db)
     cluster_projector.fit(n_points_per_model=25)
 
@@ -79,8 +80,9 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     @app.post("/api/evaluate")
     def evaluate(req: EvaluateRequest):
         items = [{"probe_id": s.probe_id, "raw_text": s.raw_text} for s in req.submissions]
+        lam = req.positional_lambda if req.positional_lambda is not None else 0.5
         try:
-            eval_res = evaluator.evaluate(items, n_boot=800)
+            eval_res = evaluator.evaluate(items, positional_lambda=lam, n_boot=800)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 

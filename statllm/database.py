@@ -156,13 +156,21 @@ class Database:
             sample_id = cursor.lastrowid
 
             # Update token counts for each token in array
-            for tok in parsed_tokens:
+            for idx, tok in enumerate(parsed_tokens):
                 cursor.execute("""
                 INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
                 VALUES (?, ?, ?, ?)
                 ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
                 weighted_count = weighted_count + ?
                 """, (model_name, probe_id, tok, float(weight), float(weight)))
+
+                pos_tok = f"pos:{idx}:{tok}"
+                cursor.execute("""
+                INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
+                weighted_count = weighted_count + ?
+                """, (model_name, probe_id, pos_tok, float(weight), float(weight)))
 
             # Update sequence trait counts
             if traits:
@@ -227,8 +235,9 @@ class Database:
                 pid = s["probe_id"]
                 w = float(s.get("weight", 1.0))
                 tokens = s.get("parsed_tokens", [])
-                for t in tokens:
+                for idx, t in enumerate(tokens):
                     token_deltas[(m, pid, str(t))] += w
+                    token_deltas[(m, pid, f"pos:{idx}:{t}")] += w
                 
                 traits = s.get("traits", {})
                 if "has_duplicates" in traits:
@@ -246,6 +255,35 @@ class Database:
                 weighted_count = weighted_count + ?
                 """, (m, pid, tok, w, w))
 
+            conn.commit()
+
+    def rebuild_token_counts(self):
+        """Rebuilds token_counts table from all valid samples in database."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM token_counts")
+            cursor.execute("SELECT model_name, probe_id, parsed_value, weight FROM samples WHERE is_valid = 1")
+            rows = cursor.fetchall()
+            token_deltas = defaultdict(float)
+            for row in rows:
+                m = row["model_name"]
+                pid = row["probe_id"]
+                w = float(row["weight"])
+                try:
+                    tokens = json.loads(row["parsed_value"])
+                except Exception:
+                    continue
+                for idx, tok in enumerate(tokens):
+                    token_deltas[(m, pid, str(tok))] += w
+                    token_deltas[(m, pid, f"pos:{idx}:{tok}")] += w
+
+            for (m, pid, tok), w in token_deltas.items():
+                cursor.execute("""
+                INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
+                weighted_count = weighted_count + ?
+                """, (m, pid, tok, w, w))
             conn.commit()
 
     def get_sample_count(self, model_name: str, probe_id: Optional[str] = None) -> int:
@@ -282,8 +320,8 @@ class Database:
                 p = row["probe_id"]
                 tok = row["token"]
                 w = float(row["weighted_count"])
-                # Only count primary element tokens (exclude trait: tokens from total denominator)
-                if not tok.startswith("trait:") and not tok.startswith("perm:"):
+                # Only count primary element tokens (exclude trait:, perm:, pos: tokens from total denominator)
+                if not tok.startswith("trait:") and not tok.startswith("perm:") and not tok.startswith("pos:"):
                     res[m][p][0][tok] = w
                     res[m][p][1] += w
                 else:
