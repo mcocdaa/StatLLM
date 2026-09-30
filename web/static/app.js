@@ -1,5 +1,5 @@
 /**
- * StatLLM Frontend Application Logic
+ * StatLLM Frontend Application Logic (Array Probes Edition)
  */
 
 let PROBES_DATA = [];
@@ -8,46 +8,49 @@ let cardCounter = 0;
 let posteriorsChart = null;
 let currentClusterData = null;
 
-// Presets for quick evaluation
+// Presets for quick evaluation (All Arrays!)
 const PRESETS = {
-  gpt4o: [
-    { probe_id: "q1_int", raw_text: "1. 42" },
-    { probe_id: "q1_int", raw_text: "1. 37" },
-    { probe_id: "q2_color", raw_text: "蓝色" },
-    { probe_id: "q3_rps", raw_text: "石头" }
+  grok: [
+    { probe_id: "arr_int5", raw_text: "[27, 83, 5, 61, 44]" },
+    { probe_id: "arr_color5", raw_text: '["黄", "青", "红", "紫", "橙"]' },
+    { probe_id: "arr_letter5", raw_text: '["K", "W", "B", "R", "M"]' },
+    { probe_id: "arr_perm5", raw_text: "[4, 1, 5, 3, 2]" }
   ],
-  claude: [
-    { probe_id: "q1_int", raw_text: "1. 47" },
-    { probe_id: "q1_int", raw_text: "1. 77" },
-    { probe_id: "q2_color", raw_text: "绿色" },
-    { probe_id: "q3_rps", raw_text: "剪刀" }
+  gpt: [
+    { probe_id: "arr_int5", raw_text: "[7, 17, 37, 42, 73]" },
+    { probe_id: "arr_color5", raw_text: '["蓝", "红", "绿", "蓝", "紫"]' },
+    { probe_id: "arr_rps5", raw_text: '["石头", "剪刀", "石头", "石头", "布"]' },
+    { probe_id: "arr_letter5", raw_text: '["M", "R", "X", "A", "T"]' }
   ],
   deepseek: [
-    { probe_id: "q1_int", raw_text: "1. 66" },
-    { probe_id: "q1_int", raw_text: "1. 88" },
-    { probe_id: "q2_color", raw_text: "红色" },
-    { probe_id: "q3_rps", raw_text: "布" }
+    { probe_id: "arr_int5", raw_text: "[18, 55, 66, 88, 99]" },
+    { probe_id: "arr_color5", raw_text: '["红", "蓝", "黄", "红", "青"]' },
+    { probe_id: "arr_rps5", raw_text: '["布", "石头", "布", "布", "石头"]' },
+    { probe_id: "arr_perm5", raw_text: "[5, 3, 1, 4, 2]" }
+  ],
+  claude: [
+    { probe_id: "arr_int5", raw_text: "[14, 23, 47, 77, 89]" },
+    { probe_id: "arr_color5", raw_text: '["绿", "紫", "蓝", "绿", "黄"]' },
+    { probe_id: "arr_rps5", raw_text: '["剪刀", "布", "剪刀", "布", "石头"]' },
+    { probe_id: "arr_letter5", raw_text: '["S", "C", "L", "K", "H"]' }
   ],
   gemini: [
-    { probe_id: "q1_int", raw_text: "1. 27" },
-    { probe_id: "q1_int", raw_text: "1. 64" },
-    { probe_id: "q2_color", raw_text: "黄色" },
-    { probe_id: "q3_rps", raw_text: "石头" }
+    { probe_id: "arr_int5", raw_text: "[3, 12, 27, 64, 81]" },
+    { probe_id: "arr_color5", raw_text: '["黄", "青", "橙", "黄", "绿"]' },
+    { probe_id: "arr_letter5", raw_text: '["G", "M", "O", "B", "L"]' }
   ],
   qwen: [
-    { probe_id: "q1_int", raw_text: "1. 8" },
-    { probe_id: "q1_int", raw_text: "1. 28" },
-    { probe_id: "q2_color", raw_text: "青色" },
-    { probe_id: "q3_rps", raw_text: "剪刀" }
+    { probe_id: "arr_int5", raw_text: "[8, 16, 28, 68, 88]" },
+    { probe_id: "arr_color5", raw_text: '["青", "红", "橙", "青", "蓝"]' },
+    { probe_id: "arr_letter5", raw_text: '["Q", "W", "E", "N", "A"]' }
   ]
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
   setupTabs();
   await loadInitialData();
-  // Add 2 default cards
-  addSubmissionCard("q1_int", "1. 42");
-  addSubmissionCard("q2_color", "蓝色");
+  // Default to Grok-4.7 real array sample
+  loadPreset("grok");
 });
 
 function setupTabs() {
@@ -102,7 +105,7 @@ async function loadInitialData() {
 function updateHeaderStats(stats) {
   const badge = document.getElementById("header-db-stats");
   if (badge) {
-    badge.innerText = `已索引 ${stats.total_samples} 份基准样本 (${stats.official_samples} 官方 / ${stats.user_samples} 众包)`;
+    badge.innerText = `已索引 ${stats.total_samples} 组数组样本 (${stats.official_samples} 官方 / ${stats.user_samples} 众包)`;
   }
 }
 
@@ -145,7 +148,7 @@ function renderProbeQuickCards() {
       <div class="flex items-center justify-between mb-1.5">
         <span class="font-bold text-slate-200">${p.title}</span>
         <button onclick="copyPromptText('${p.id}')" class="px-2 py-0.5 text-[11px] rounded bg-slate-800 hover:bg-slate-700 text-sky-400 font-medium transition flex items-center gap-1">
-          <span>📋 复制提示词</span>
+          <span>📋 复制Prompt</span>
         </button>
       </div>
       <p class="text-slate-400 text-[11px] leading-relaxed font-mono bg-slate-950 p-2 rounded border border-slate-850 select-all">${p.prompt}</p>
@@ -158,11 +161,11 @@ function copyPromptText(probeId) {
   const probe = PROBES_DATA.find(p => p.id === probeId);
   if (!probe) return;
   navigator.clipboard.writeText(probe.prompt).then(() => {
-    alert(`提示词已复制到剪贴板！可以直接发送给待测 AI 模型进行测试。`);
+    alert(`提示词已复制到剪贴板！可以直接发送给目标 AI 模型。`);
   });
 }
 
-function addSubmissionCard(probeId = "q1_int", rawText = "") {
+function addSubmissionCard(probeId = "arr_int5", rawText = "") {
   cardCounter++;
   const container = document.getElementById("submissions-list");
   if (!container) return;
@@ -191,7 +194,7 @@ function addSubmissionCard(probeId = "q1_int", rawText = "") {
       </button>
     </div>
     <div>
-      <textarea class="sub-raw-text w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-sky-500" rows="2" placeholder="粘贴该题目下模型的实际回答文本...">${rawText}</textarea>
+      <textarea class="sub-raw-text w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-sky-500" rows="2" placeholder="粘贴模型的数组回答 (例如: [14, 58, 23, 91, 7])...">${rawText}</textarea>
     </div>
   `;
 
@@ -236,7 +239,7 @@ function loadPreset(key) {
 async function executeEvaluation() {
   const cards = document.querySelectorAll(".submission-card");
   if (cards.length === 0) {
-    alert("请至少添加一条待测回答！");
+    alert("请至少添加一条待测数组回答！");
     return;
   }
 
@@ -250,7 +253,7 @@ async function executeEvaluation() {
   });
 
   if (submissions.length === 0) {
-    alert("请在回答框内填入文字！");
+    alert("请在回答框内填入数组内容！");
     return;
   }
 
@@ -292,39 +295,38 @@ function renderEvaluationResults(data) {
   const evalRes = data.evaluation;
   const clusterData = data.cluster_data;
 
-  // Reveal results panel
   document.getElementById("results-empty-state").classList.add("hidden");
   document.getElementById("results-panel").classList.remove("hidden");
 
-  // Top verdict
   document.getElementById("verdict-model-name").innerText = evalRes.top_model;
   document.getElementById("verdict-prob-badge").innerText = `${(evalRes.top_probability * 100).toFixed(1)}%`;
   
   const topCI = evalRes.confidence_intervals[evalRes.top_model] || [0, 0];
   document.getElementById("verdict-ci-range").innerText = `[${(topCI[0] * 100).toFixed(1)}% ~ ${(topCI[1] * 100).toFixed(1)}%]`;
 
-  // Stats
   document.getElementById("stat-margin").innerText = `+${(evalRes.margin * 100).toFixed(1)}%`;
   document.getElementById("stat-entropy").innerText = `${evalRes.entropy} bit`;
   document.getElementById("stat-n1").innerText = evalRes.unique_probes_tested;
   document.getElementById("stat-n2").innerText = evalRes.sample_count;
 
-  // Render horizontal bar chart with CI error whiskers
   renderPosteriorsChart(evalRes.posteriors, evalRes.confidence_intervals);
-
-  // Render 2D Cluster Canvas
   renderClusterCanvas(clusterData);
 
-  // Render parsed table
   const tbody = document.getElementById("parsed-table-body");
   tbody.innerHTML = "";
   evalRes.parsed_submissions.forEach(rec => {
     const tr = document.createElement("tr");
+    const tokenBadges = rec.parsed_tokens.map(t => 
+      `<span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 mr-1 font-bold">${t}</span>`
+    ).join("");
+
+    const traitsStr = Object.entries(rec.traits || {}).map(([k, v]) => `${k}:${v}`).join(", ");
+
     tr.innerHTML = `
       <td class="p-2.5 font-sans">${rec.probe_id}</td>
-      <td class="p-2.5 font-bold text-sky-300">${rec.parsed_value}</td>
-      <td class="p-2.5">${rec.is_valid ? '<span class="text-emerald-400">✓ 正常合规</span>' : '<span class="text-rose-400">✗ 格式异常</span>'}</td>
-      <td class="p-2.5">${rec.strictly_complied ? '<span class="text-emerald-400">✓ 无冗余</span>' : '<span class="text-amber-400">△ 带解释文字</span>'}</td>
+      <td class="p-2.5">${tokenBadges}</td>
+      <td class="p-2.5 text-slate-400 text-[11px] font-sans">${traitsStr || "-"}</td>
+      <td class="p-2.5">${rec.strictly_complied ? '<span class="text-emerald-400">✓ 纯JSON</span>' : '<span class="text-amber-400">△ 代码块包装</span>'}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -333,7 +335,6 @@ function renderEvaluationResults(data) {
 function renderPosteriorsChart(posteriors, confidenceIntervals) {
   const ctx = document.getElementById("posteriors-chart").getContext("2d");
   
-  // Sort models by probability descending
   const sortedEntries = Object.entries(posteriors).sort((a, b) => b[1] - a[1]);
   const labels = sortedEntries.map(e => e[0]);
   const values = sortedEntries.map(e => (e[1] * 100).toFixed(1));
@@ -408,11 +409,9 @@ function renderClusterCanvas(clusterData) {
   const w = rect.width;
   const h = rect.height;
 
-  // Background
   ctx.fillStyle = "#090d16";
   ctx.fillRect(0, 0, w, h);
 
-  // Draw grid
   ctx.strokeStyle = "rgba(30, 41, 59, 0.7)";
   ctx.lineWidth = 1;
   for (let x = 0; x < w; x += 40) {
@@ -428,7 +427,6 @@ function renderClusterCanvas(clusterData) {
     ctx.stroke();
   }
 
-  // Find min/max bounds across all points
   let minX = -1.5, maxX = 1.5, minY = -1.5, maxY = 1.5;
   clusterData.clusters.forEach(c => {
     c.points.forEach(p => {
@@ -446,7 +444,6 @@ function renderClusterCanvas(clusterData) {
     maxY = Math.max(maxY, clusterData.user_point[1]);
   }
 
-  // Add 15% padding
   const padX = (maxX - minX) * 0.15;
   const padY = (maxY - minY) * 0.15;
   minX -= padX; maxX += padX;
@@ -458,12 +455,10 @@ function renderClusterCanvas(clusterData) {
     return [sx, sy];
   }
 
-  // Draw clusters
   clusterData.clusters.forEach(c => {
     const color = c.color || "#3b82f6";
 
-    // 1. Draw cloud points
-    ctx.fillStyle = color + "44"; // transparent
+    ctx.fillStyle = color + "44";
     c.points.forEach(p => {
       const [sx, sy] = toScreen(p[0], p[1]);
       ctx.beginPath();
@@ -471,7 +466,6 @@ function renderClusterCanvas(clusterData) {
       ctx.fill();
     });
 
-    // 2. Draw center
     const [cx, cy] = toScreen(c.center[0], c.center[1]);
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -481,23 +475,19 @@ function renderClusterCanvas(clusterData) {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Center label
     ctx.fillStyle = "#e2e8f0";
     ctx.font = "bold 11px sans-serif";
     ctx.fillText(c.model_name, cx + 9, cy + 4);
   });
 
-  // Draw user point if present
   if (clusterData.user_point) {
     const [ux, uy] = toScreen(clusterData.user_point[0], clusterData.user_point[1]);
 
-    // Outer glow
     ctx.fillStyle = "rgba(251, 191, 36, 0.25)";
     ctx.beginPath();
     ctx.arc(ux, uy, 18, 0, Math.PI * 2);
     ctx.fill();
 
-    // Star icon
     ctx.fillStyle = "#f59e0b";
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 2;
@@ -506,7 +496,6 @@ function renderClusterCanvas(clusterData) {
     ctx.fill();
     ctx.stroke();
 
-    // Text callout
     ctx.fillStyle = "#fef08a";
     ctx.font = "bold 12px sans-serif";
     ctx.fillText("★ 当前测试样本点 (You)", ux + 12, uy - 6);
@@ -528,7 +517,7 @@ async function refreshDbStats() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="p-2.5 font-bold font-sans">${row.model_name}</td>
-        <td class="p-2.5 text-slate-300">${row.count} 条</td>
+        <td class="p-2.5 text-slate-300">${row.count} 组数组</td>
         <td class="p-2.5 text-sky-400 font-bold">${parseFloat(row.weighted_count).toFixed(1)}</td>
       `;
       tbody.appendChild(tr);
@@ -567,7 +556,7 @@ async function submitContribution(e) {
     }
 
     const resData = await res.json();
-    statusEl.innerText = `✓ 标注样本入库成功！解析值: ${resData.parsed_value}，已按权重 ${resData.weight} 计入数据库。`;
+    statusEl.innerText = `✓ 数组样本入库成功！已提取 ${resData.parsed_tokens.length} 个Token，按权重 ${resData.weight} 计入数据库。`;
     statusEl.className = "text-xs text-center text-emerald-400 font-bold mt-2";
     document.getElementById("contrib-text").value = "";
     refreshDbStats();

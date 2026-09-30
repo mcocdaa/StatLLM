@@ -1,83 +1,71 @@
 import pytest
 from statllm.probes import PROBES, get_probe
 
-def test_q1_int_parsing():
-    p = get_probe("q1_int")
+def test_arr_int5_parsing():
+    p = get_probe("arr_int5")
     assert p is not None
-    
-    # Clean output
-    res = p.parse("1. 42")
+
+    # Clean JSON array
+    res = p.parse("[42, 17, 89, 5, 63]")
     assert res["is_valid"] is True
-    assert res["parsed_value"] == "42"
+    assert res["parsed_tokens"] == ["42", "17", "89", "5", "63"]
     assert res["strictly_complied"] is True
+    assert res["traits"]["has_duplicates"] is False
+    assert res["traits"]["first_token"] == "42"
 
-    # Extra prefix / Chinese punctuation
-    res2 = p.parse("1、73")
+    # With markdown code blocks or text
+    res2 = p.parse("```json\n[42, 17, 89, 5, 63]\n```")
     assert res2["is_valid"] is True
-    assert res2["parsed_value"] == "73"
+    assert res2["parsed_tokens"] == ["42", "17", "89", "5", "63"]
+    assert res2["strictly_complied"] is False
 
-    # With rambling explanation
-    res3 = p.parse("好的，根据您的要求，我生成了一个随机数：1. 88。希望对您有帮助！")
-    assert res3["is_valid"] is True
-    assert res3["parsed_value"] == "88"
-    assert res3["strictly_complied"] is False
+    # Duplicates detection
+    res3 = p.parse("[42, 42, 10, 20, 30]")
+    assert res3["traits"]["has_duplicates"] is True
 
-    # Out of bounds
-    res4 = p.parse("1. 999")
-    assert res4["is_valid"] is False
-    assert res4["parsed_value"] == "OUT_OF_BOUNDS"
+    # Sorting bias detection
+    res4 = p.parse("[5, 12, 45, 78, 99]")
+    assert res4["traits"]["is_sorted"] is True
 
-    # Completely invalid
-    res5 = p.parse("我无法为您生成随机数")
+    # Invalid length
+    res5 = p.parse("[1, 2, 3]")
     assert res5["is_valid"] is False
-    assert res5["parsed_value"] == "INVALID"
 
 
-def test_q2_color_parsing():
-    p = get_probe("q2_color")
+def test_arr_color5_parsing():
+    p = get_probe("arr_color5")
     assert p is not None
 
-    res1 = p.parse("红色")
-    assert res1["parsed_value"] == "红色"
-    assert res1["strictly_complied"] is True
-
-    res2 = p.parse("我随机选择了蓝色。")
-    assert res2["parsed_value"] == "蓝色"
-    assert res2["strictly_complied"] is False
+    res = p.parse('["黄", "青", "红", "紫", "橙"]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["黄", "青", "红", "紫", "橙"]
+    assert res["traits"]["has_duplicates"] is False
 
 
-def test_q3_rps_parsing():
-    p = get_probe("q3_rps")
+def test_arr_rps5_parsing():
+    p = get_probe("arr_rps5")
     assert p is not None
 
-    res1 = p.parse("石头")
-    assert res1["parsed_value"] == "石头"
-    assert res1["strictly_complied"] is True
-
-    res2 = p.parse("剪刀")
-    assert res2["parsed_value"] == "剪刀"
+    res = p.parse('["布", "剪刀", "石头", "布", "剪刀"]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["布", "剪刀", "石头", "布", "剪刀"]
+    assert res["traits"]["has_duplicates"] is True
 
 
-def test_q4_letter_parsing():
-    p = get_probe("q4_letter")
+def test_arr_letter5_parsing():
+    p = get_probe("arr_letter5")
     assert p is not None
 
-    res1 = p.parse("M")
-    assert res1["parsed_value"] == "M"
-    assert res1["strictly_complied"] is True
-
-    res2 = p.parse("The random letter is X.")
-    assert res2["parsed_value"] == "X"
-    assert res2["strictly_complied"] is False
+    res = p.parse('["K", "W", "B", "R", "M"]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["K", "W", "B", "R", "M"]
 
 
-def test_q5_sequence_parsing():
-    p = get_probe("q5_sequence")
+def test_arr_perm5_parsing():
+    p = get_probe("arr_perm5")
     assert p is not None
 
-    res1 = p.parse("3, 7, 2")
-    assert res1["parsed_value"] == "3,7,2"
-    assert res1["strictly_complied"] is True
-
-    res2 = p.parse("3，7，2")  # Full width comma
-    assert res2["parsed_value"] == "3,7,2"
+    res = p.parse('[4, 1, 5, 3, 2]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["4", "1", "5", "3", "2"]
+    assert res["traits"]["canonical_perm"] == "4,1,5,3,2"

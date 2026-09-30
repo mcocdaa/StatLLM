@@ -2,11 +2,11 @@
 StatLLM Inference Engine.
 
 Performs:
-1. Regex extraction on user submissions.
-2. Dirichlet-smoothed Categorical Log-Likelihood computation.
-3. Multi-sample joint Maximum Likelihood / Posterior probability estimation.
+1. Parsing of raw text into discrete arrays and structural traits.
+2. Dirichlet-smoothed Categorical Joint Log-Likelihood computation across array elements.
+3. Multi-sample Maximum Likelihood & Posterior probability estimation.
 4. Bootstrap 95% Confidence Interval (CI) calculation.
-5. Statistical diagnostics (Margin of victory, Shannon entropy, Likelihood Ratio Test).
+5. Statistical diagnostics (Margin, Shannon entropy, Likelihood Ratio Test).
 """
 
 import math
@@ -27,7 +27,7 @@ class LikelihoodEvaluator:
         self.db = db
         self.alpha = alpha
 
-    def get_prob(
+    def get_token_prob(
         self,
         counts_dict: Dict[str, float],
         total_weight: float,
@@ -36,7 +36,7 @@ class LikelihoodEvaluator:
     ) -> float:
         """
         Calculates smoothed conditional probability:
-        P(val | probe, model) = (Count(val) + alpha) / (Total + alpha * vocab_size)
+        P(token | probe, model) = (Count(token) + alpha) / (Total + alpha * vocab_size)
         """
         c = counts_dict.get(val, 0.0)
         return (c + self.alpha) / (total_weight + self.alpha * vocab_size)
@@ -44,22 +44,10 @@ class LikelihoodEvaluator:
     def evaluate(
         self,
         submissions: List[Dict[str, str]],
-        n_boot: int = 1000
+        n_boot: int = 800
     ) -> Dict[str, Any]:
         """
-        Evaluates a set of user submissions.
-        
-        submissions: list of dicts with {"probe_id": str, "raw_text": str}
-        n_boot: number of bootstrap iterations for 95% confidence intervals
-        
-        Returns:
-            parsed_submissions: list of parsed records
-            posteriors: Dict[model_name, float]
-            confidence_intervals: Dict[model_name, [lower_ci, upper_ci]]
-            log_likelihoods: Dict[model_name, float]
-            top_model: str
-            confidence_score: float (percentage margin)
-            entropy: float
+        Evaluates a set of user submissions containing array answers.
         """
         if not submissions:
             raise ValueError("No submissions provided for evaluation.")
@@ -77,10 +65,11 @@ class LikelihoodEvaluator:
             parsed.append({
                 "probe_id": pid,
                 "raw_text": raw,
-                "parsed_value": parse_res["parsed_value"],
+                "parsed_tokens": parse_res["parsed_tokens"],
                 "is_valid": parse_res["is_valid"],
                 "strictly_complied": parse_res["strictly_complied"],
-                "vocab_size": probe.vocab_size
+                "traits": parse_res.get("traits", {}),
+                "element_vocab_size": probe.element_vocab_size
             })
 
         # 2. Load count table from database
@@ -97,12 +86,31 @@ class LikelihoodEvaluator:
             ll = 0.0
             for record in parsed:
                 pid = record["probe_id"]
-                val = record["parsed_value"]
-                v_size = record["vocab_size"]
+                tokens = record["parsed_tokens"]
+                v_size = record["element_vocab_size"]
+                traits = record["traits"]
                 
                 counts_dict, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
-                p = self.get_prob(counts_dict, tot, val, v_size)
-                ll += math.log(max(p, 1e-12))
+                
+                # Element-wise log likelihoods
+                for tok in tokens:
+                    p = self.get_token_prob(counts_dict, tot, tok, v_size)
+                    ll += math.log(max(p, 1e-12))
+
+                # Trait log likelihoods (e.g. duplicate avoidance, sorting habits)
+                if "has_duplicates" in traits:
+                    dup_tok = f"trait:has_dup_{traits['has_duplicates']}"
+                    p_dup = self.get_token_prob(counts_dict, tot, dup_tok, 2)
+                    ll += 0.5 * math.log(max(p_dup, 1e-12))
+                if "is_sorted" in traits:
+                    sort_tok = f"trait:is_sorted_{traits['is_sorted']}"
+                    p_sort = self.get_token_prob(counts_dict, tot, sort_tok, 2)
+                    ll += 0.5 * math.log(max(p_sort, 1e-12))
+                if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
+                    perm_tok = f"perm:{traits['canonical_perm']}"
+                    p_perm = self.get_token_prob(counts_dict, tot, perm_tok, 120)
+                    ll += 0.8 * math.log(max(p_perm, 1e-12))
+
             log_likelihoods[m] = ll
 
         # 4. Compute posterior probabilities via Log-Sum-Exp
@@ -111,14 +119,13 @@ class LikelihoodEvaluator:
         # 5. Bootstrap 95% Confidence Intervals
         ci = self._compute_bootstrap_ci(parsed, matrix, model_names, n_boot=n_boot)
 
-        # 6. Diagnostics: Margin, Shannon Entropy, Top Model
+        # 6. Diagnostics
         sorted_models = sorted(posteriors.items(), key=lambda x: x[1], reverse=True)
         top_model = sorted_models[0][0]
         top_prob = sorted_models[0][1]
         second_prob = sorted_models[1][1] if len(sorted_models) > 1 else 0.0
         margin = top_prob - second_prob
 
-        # Shannon Entropy H(P) = -sum(p * log2(p))
         entropy = -sum(p * math.log2(p) for p in posteriors.values() if p > 1e-9)
 
         return {
@@ -135,7 +142,6 @@ class LikelihoodEvaluator:
         }
 
     def _log_likelihoods_to_posteriors(self, log_likelihoods: Dict[str, float]) -> Dict[str, float]:
-        """Converts log likelihoods to normalized posterior probabilities using Log-Sum-Exp."""
         if not log_likelihoods:
             return {}
         max_ll = max(log_likelihoods.values())
@@ -148,32 +154,32 @@ class LikelihoodEvaluator:
         parsed_records: List[Dict[str, Any]],
         matrix: Dict[str, Dict[str, Tuple[Dict[str, float], float]]],
         model_names: List[str],
-        n_boot: int = 1000
+        n_boot: int = 800
     ) -> Dict[str, List[float]]:
-        """
-        Computes 95% empirical bootstrap confidence intervals [2.5%, 97.5%].
-        If n=1, interval reflects the uncertainty of a single observation.
-        """
         n = len(parsed_records)
         boot_posteriors = defaultdict(list)
 
-        # Precompute per-sample log-likelihood array: shape (n_samples, n_models)
         sample_lls = np.zeros((n, len(model_names)), dtype=np.float64)
         for i, record in enumerate(parsed_records):
             pid = record["probe_id"]
-            val = record["parsed_value"]
-            v_size = record["vocab_size"]
+            tokens = record["parsed_tokens"]
+            v_size = record["element_vocab_size"]
+            traits = record["traits"]
             for j, m in enumerate(model_names):
                 counts_dict, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
-                p = self.get_prob(counts_dict, tot, val, v_size)
-                sample_lls[i, j] = math.log(max(p, 1e-12))
+                ll_item = 0.0
+                for tok in tokens:
+                    p = self.get_token_prob(counts_dict, tot, tok, v_size)
+                    ll_item += math.log(max(p, 1e-12))
+                if "has_duplicates" in traits:
+                    p_dup = self.get_token_prob(counts_dict, tot, f"trait:has_dup_{traits['has_duplicates']}", 2)
+                    ll_item += 0.5 * math.log(max(p_dup, 1e-12))
+                sample_lls[i, j] = ll_item
 
-        # Bootstrap resampling
         rng = np.random.default_rng(42)
         indices = rng.integers(0, n, size=(n_boot, n))
         
         for b in range(n_boot):
-            # Sum log likelihoods of resampled indices
             boot_ll = sample_lls[indices[b]].sum(axis=0)
             max_ll = np.max(boot_ll)
             exp_ll = np.exp(boot_ll - max_ll)
@@ -182,7 +188,6 @@ class LikelihoodEvaluator:
             for j, m in enumerate(model_names):
                 boot_posteriors[m].append(boot_p[j])
 
-        # Extract 2.5% and 97.5% quantiles
         ci = {}
         for m in model_names:
             arr = boot_posteriors[m]

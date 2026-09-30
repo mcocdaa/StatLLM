@@ -87,15 +87,18 @@
 
         <!-- Preset Quick Load Buttons -->
         <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-wrap items-center gap-2">
-          <span class="text-xs text-slate-400 font-medium">快速体验仿真样本：</span>
-          <button onclick="loadPreset('gpt4o')" class="px-2.5 py-1 text-xs rounded-md bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:bg-emerald-900/60 transition">
-            🟢 GPT-4o 仿真
+          <span class="text-xs text-slate-400 font-medium">快速体验数组样本：</span>
+          <button onclick="loadPreset('grok')" class="px-2.5 py-1 text-xs rounded-md bg-sky-950/60 border border-sky-800 text-sky-300 hover:bg-sky-900/60 transition">
+            🌌 Grok 4.7 实测
+          </button>
+          <button onclick="loadPreset('gpt')" class="px-2.5 py-1 text-xs rounded-md bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:bg-emerald-900/60 transition">
+            🟢 GPT-5.6 Luna 仿真
+          </button>
+          <button onclick="loadPreset('deepseek')" class="px-2.5 py-1 text-xs rounded-md bg-cyan-950/60 border border-cyan-800 text-cyan-300 hover:bg-cyan-900/60 transition">
+            🔵 DeepSeek V4.1 仿真
           </button>
           <button onclick="loadPreset('claude')" class="px-2.5 py-1 text-xs rounded-md bg-purple-950/60 border border-purple-800 text-purple-300 hover:bg-purple-900/60 transition">
             🟣 Claude 3.5 仿真
-          </button>
-          <button onclick="loadPreset('deepseek')" class="px-2.5 py-1 text-xs rounded-md bg-cyan-950/60 border border-cyan-800 text-cyan-300 hover:bg-cyan-900/60 transition">
-            🔵 DeepSeek V3 仿真
           </button>
           <button onclick="loadPreset('gemini')" class="px-2.5 py-1 text-xs rounded-md bg-amber-950/60 border border-amber-800 text-amber-300 hover:bg-amber-900/60 transition">
             🟡 Gemini 2.0 仿真
@@ -254,9 +257,9 @@
                   <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
                     <tr>
                       <th class="p-2.5">题目</th>
-                      <th class="p-2.5">解析离散值</th>
-                      <th class="p-2.5">格式合规性</th>
-                      <th class="p-2.5">严格单Token</th>
+                      <th class="p-2.5">解析数组元素 (Tokens)</th>
+                      <th class="p-2.5">序列特征 (Traits)</th>
+                      <th class="p-2.5">JSON格式合规</th>
                     </tr>
                   </thead>
                   <tbody id="parsed-table-body" class="divide-y divide-slate-800/60 font-mono">

@@ -93,8 +93,6 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
 
         # Optional crowdsource collection with user consent
         if req.consent_to_collect:
-            # If user consented, record the samples with smaller weight (0.2)
-            # Label as the highest confidence model or claimed model if valid
             assigned_label = req.claimed_model if req.claimed_model else eval_res["top_model"]
             for parsed_rec in eval_res["parsed_submissions"]:
                 if parsed_rec["is_valid"]:
@@ -102,7 +100,8 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
                         model_name=assigned_label,
                         probe_id=parsed_rec["probe_id"],
                         raw_text=parsed_rec["raw_text"],
-                        parsed_value=parsed_rec["parsed_value"],
+                        parsed_tokens=parsed_rec["parsed_tokens"],
+                        traits=parsed_rec.get("traits", {}),
                         is_valid=parsed_rec["is_valid"],
                         strictly_complied=parsed_rec["strictly_complied"],
                         source_type="user",
@@ -122,13 +121,14 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
         
         parse_res = probe.parse(req.raw_text)
         if not parse_res["is_valid"]:
-            raise HTTPException(status_code=400, detail=f"Response could not be parsed: {parse_res['parsed_value']}")
+            raise HTTPException(status_code=400, detail="Response could not be parsed into a valid array")
 
         sample_id = db.add_sample(
             model_name=req.model_name,
             probe_id=req.probe_id,
             raw_text=req.raw_text,
-            parsed_value=parse_res["parsed_value"],
+            parsed_tokens=parse_res["parsed_tokens"],
+            traits=parse_res.get("traits", {}),
             is_valid=parse_res["is_valid"],
             strictly_complied=parse_res["strictly_complied"],
             source_type="user",
@@ -138,7 +138,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
         return {
             "status": "success",
             "sample_id": sample_id,
-            "parsed_value": parse_res["parsed_value"],
+            "parsed_tokens": parse_res["parsed_tokens"],
             "weight": req.weight,
             "updated_stats": db.get_stats()
         }
