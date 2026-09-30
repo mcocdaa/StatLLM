@@ -16,13 +16,14 @@ class Database:
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, timeout=60.0)
         conn.row_factory = sqlite3.Row
         return conn
 
     def _init_db(self):
         """Initializes tables and indices."""
         with self._get_connection() as conn:
+            conn.execute("PRAGMA journal_mode=WAL;")
             cursor = conn.cursor()
             
             # Models table
@@ -65,7 +66,8 @@ class Database:
                 ("completion_tokens", "INTEGER NOT NULL DEFAULT 0"),
                 ("total_tokens", "INTEGER NOT NULL DEFAULT 0"),
                 ("perturbation_type", "TEXT NOT NULL DEFAULT 'none'"),
-                ("perturbation_prefix", "TEXT NOT NULL DEFAULT ''")
+                ("perturbation_prefix", "TEXT NOT NULL DEFAULT ''"),
+                ("temperature", "REAL NOT NULL DEFAULT 0.8")
             ]:
                 if col_name not in existing_cols:
                     cursor.execute(f"ALTER TABLE samples ADD COLUMN {col_name} {col_type};")
@@ -119,7 +121,8 @@ class Database:
         completion_tokens: int = 0,
         total_tokens: int = 0,
         perturbation_type: str = "none",
-        perturbation_prefix: str = ""
+        perturbation_prefix: str = "",
+        temperature: float = 0.8
     ) -> int:
         """
         Adds a sample and immediately updates token_counts.
@@ -132,8 +135,8 @@ class Database:
             cursor.execute("""
             INSERT INTO samples 
             (model_name, probe_id, raw_text, parsed_value, is_valid, strictly_complied, source_type, weight,
-             prompt_tokens, completion_tokens, total_tokens, perturbation_type, perturbation_prefix)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             prompt_tokens, completion_tokens, total_tokens, perturbation_type, perturbation_prefix, temperature)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 model_name,
                 probe_id,
@@ -147,7 +150,8 @@ class Database:
                 int(completion_tokens),
                 int(total_tokens),
                 perturbation_type,
-                perturbation_prefix
+                perturbation_prefix,
+                float(temperature)
             ))
             sample_id = cursor.lastrowid
 
@@ -243,6 +247,22 @@ class Database:
                 """, (m, pid, tok, w, w))
 
             conn.commit()
+
+    def get_sample_count(self, model_name: str, probe_id: Optional[str] = None) -> int:
+        """Returns the number of samples for a model and optional probe."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            if probe_id:
+                cursor.execute(
+                    "SELECT count(*) FROM samples WHERE model_name = ? AND probe_id = ?",
+                    (model_name, probe_id)
+                )
+            else:
+                cursor.execute(
+                    "SELECT count(*) FROM samples WHERE model_name = ?",
+                    (model_name,)
+                )
+            return cursor.fetchone()[0]
 
     def get_all_model_probe_counts(self) -> Dict[str, Dict[str, Tuple[Dict[str, float], float]]]:
         """

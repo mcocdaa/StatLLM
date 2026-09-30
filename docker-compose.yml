@@ -6,7 +6,9 @@ services:
     ports:
       - "8008:8000"
     volumes:
-      - statllm-data:/app/data
+      - ./statllm.db:/app/statllm.db
+      - ./web:/app/web
+      - ./statllm:/app/statllm
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:
@@ -14,6 +16,3 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-
-volumes:
-  statllm-data:
