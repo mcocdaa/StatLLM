@@ -243,6 +243,8 @@ async function executeEvaluation() {
 
   const consent = document.getElementById("consent-checkbox").checked;
   const claimedModel = document.getElementById("claimed-model-select").value;
+  const lambdaEl = document.getElementById("lambda-slider");
+  const posLambda = lambdaEl ? parseFloat(lambdaEl.value) : 0.5;
 
   const runBtn = document.getElementById("run-eval-btn");
   const spinner = document.getElementById("run-btn-spinner");
@@ -256,7 +258,8 @@ async function executeEvaluation() {
       body: JSON.stringify({
         submissions: submissions,
         consent_to_collect: consent,
-        claimed_model: claimedModel || null
+        claimed_model: claimedModel || null,
+        positional_lambda: posLambda
       })
     });
 
