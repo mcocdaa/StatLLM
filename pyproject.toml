@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "statllm"
+version = "0.1.0"
+description = "Statistical Large Language Model Fingerprinting & Model Attribution Framework"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "mcocdaa", email = "mcocdaa@users.noreply.github.com"}
+]
+keywords = [
+    "llm",
+    "fingerprinting",
+    "model-attribution",
+    "statistics",
+    "maximum-likelihood",
+    "confidence-interval",
+    "pca",
+    "clustering"
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "pydantic>=2.0.0",
+    "numpy>=1.22.0",
+    "scipy>=1.9.0",
+    "scikit-learn>=1.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0"
+]
+
+[project.scripts]
+statllm = "statllm.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,32 @@
+/* StatLLM Custom Styles */
+
+.nav-tab.active {
+  background-color: rgb(15 23 42);
+  color: rgb(56 189 248);
+  border: 1px solid rgb(12 74 110);
+  box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.1), 0 2px 4px -2px rgba(2, 132, 199, 0.1);
+}
+
+/* Card hover animation */
+.submission-card {
+  transition: all 0.2s ease;
+}
+.submission-card:hover {
+  border-color: rgb(51 65 85);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(15 23 42);
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(51 65 85);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(71 85 105);
+}

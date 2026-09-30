@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  statllm:
+    build: .
+    container_name: statllm-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - statllm-data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/stats"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  statllm-data:

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StatLLM - 大模型统计指纹与归因分析平台</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center font-bold text-xl shadow-lg shadow-sky-500/20">
+          📊
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">StatLLM</span>
+          <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-sky-950 text-sky-400 border border-sky-800">
+            v0.1.0 统计指纹验证
+          </span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-2 sm:space-x-4">
+        <button id="tab-lab-btn" class="nav-tab active px-3 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5">
+          <span>🧪 测定实验室</span>
+        </button>
+        <button id="tab-db-btn" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+          <span>🗄️ 基准与演进</span>
+        </button>
+        <button id="tab-paper-btn" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+          <span>📑 学术论文依据</span>
+        </button>
+      </nav>
+
+      <!-- Database Status Badge -->
+      <div class="hidden md:flex items-center space-x-2 text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="header-db-stats">已加载 6 个模型基准</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ==================== TAB 1: ATTRIBUTION LAB ==================== -->
+    <div id="tab-lab" class="tab-content space-y-8">
+      
+      <!-- Intro Banner -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800/80 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="max-w-3xl">
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
+            根据回答精准鉴定大模型底座
+          </h1>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+            基于离散多项分布偏置（Numeric Generation Bias）与指令覆写遵从度，通过向黑盒模型发送 <span class="text-sky-400 font-semibold">$n_1$</span> 个标准随机探针并收集 <span class="text-sky-400 font-semibold">$n_2$</span> 次回答，构建联合对数似然函数并计算 <span class="text-purple-400 font-semibold">95% Bootstrap 置信区间</span>。
+          </p>
+        </div>
+
+        <!-- Preset Quick Load Buttons -->
+        <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-wrap items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium">快速体验仿真样本：</span>
+          <button onclick="loadPreset('gpt4o')" class="px-2.5 py-1 text-xs rounded-md bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:bg-emerald-900/60 transition">
+            🟢 GPT-4o 仿真
+          </button>
+          <button onclick="loadPreset('claude')" class="px-2.5 py-1 text-xs rounded-md bg-purple-950/60 border border-purple-800 text-purple-300 hover:bg-purple-900/60 transition">
+            🟣 Claude 3.5 仿真
+          </button>
+          <button onclick="loadPreset('deepseek')" class="px-2.5 py-1 text-xs rounded-md bg-cyan-950/60 border border-cyan-800 text-cyan-300 hover:bg-cyan-900/60 transition">
+            🔵 DeepSeek V3 仿真
+          </button>
+          <button onclick="loadPreset('gemini')" class="px-2.5 py-1 text-xs rounded-md bg-amber-950/60 border border-amber-800 text-amber-300 hover:bg-amber-900/60 transition">
+            🟡 Gemini 2.0 仿真
+          </button>
+          <button onclick="loadPreset('qwen')" class="px-2.5 py-1 text-xs rounded-md bg-rose-950/60 border border-rose-800 text-rose-300 hover:bg-rose-900/60 transition">
+            🔴 Qwen 2.5 仿真
+          </button>
+          <button onclick="clearSubmissions()" class="px-2 py-1 text-xs rounded-md bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 transition ml-auto">
+            清空输入
+          </button>
+        </div>
+      </div>
+
+      <!-- Testing Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left: Input Area (5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <span>📝</span> 待测样本输入 (<span id="submission-count-badge">0</span> 条回答)
+              </h2>
+              <button onclick="addSubmissionCard()" class="text-xs px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium transition shadow-sm">
+                + 添加回答
+              </button>
+            </div>
+
+            <div id="submissions-list" class="space-y-4">
+              <!-- Dynamically populated submission cards -->
+            </div>
+
+            <!-- Crowdsourcing Consent Checkbox -->
+            <div class="mt-6 pt-4 border-t border-slate-800 flex items-start gap-3">
+              <input type="checkbox" id="consent-checkbox" checked class="mt-1 w-4 h-4 rounded text-sky-500 focus:ring-sky-500 border-slate-700 bg-slate-900">
+              <label for="consent-checkbox" class="text-xs text-slate-400 leading-normal select-none">
+                同意将清洗后的测试结果以 <strong class="text-slate-300">0.2 较低权重</strong> 纳入众包数据集持续演进（不保存敏感前缀，仅记录解析 Token）。
+              </label>
+            </div>
+
+            <!-- Claimed model optional selector -->
+            <div class="mt-3 flex items-center gap-2">
+              <label class="text-xs text-slate-400 shrink-0">宣称标签(可选):</label>
+              <select id="claimed-model-select" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 w-full focus:outline-none focus:border-sky-500">
+                <option value="">-- 未知模型 (完全盲测) --</option>
+              </select>
+            </div>
+
+            <!-- Run Button -->
+            <button id="run-eval-btn" onclick="executeEvaluation()" class="mt-6 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold shadow-lg shadow-sky-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+              <span id="run-btn-spinner" class="hidden animate-spin">⏳</span>
+              <span>开始统计指纹判定 (Maximum Likelihood)</span>
+            </button>
+          </div>
+
+          <!-- Probe Reference List Accordion -->
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+            <h3 class="text-sm font-bold text-slate-300 mb-3 flex items-center justify-between">
+              <span>📋 可用标准探针库 (点击一键复制提示词)</span>
+            </h3>
+            <div id="probe-quick-cards" class="space-y-2 text-xs">
+              <!-- Dynamically populated probe quick reference cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Results Dashboard (7 Cols) -->
+        <div class="lg:col-span-7 space-y-6">
+
+          <!-- Results Placeholder (before execution) -->
+          <div id="results-empty-state" class="bg-slate-950/60 border border-dashed border-slate-800 rounded-2xl p-12 text-center text-slate-500 space-y-3">
+            <div class="text-4xl">🎯</div>
+            <div class="text-base font-semibold text-slate-400">尚未进行模型测定</div>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">
+              在左侧选择题目并粘贴 AI 的单轮回答，或点击上方的“快速体验仿真样本”，点击“开始统计指纹判定”获取置信区间和 2D 聚类图。
+            </p>
+          </div>
+
+          <!-- Active Results Card (hidden by default) -->
+          <div id="results-panel" class="hidden space-y-6">
+            
+            <!-- Verdict Hero Banner -->
+            <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-sky-500/40 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <span class="text-xs uppercase tracking-wider text-sky-400 font-semibold">最高似然判定结果 (Top Match)</span>
+                  <div class="text-3xl font-black text-white mt-1 flex items-center gap-3">
+                    <span id="verdict-model-name">-</span>
+                    <span id="verdict-prob-badge" class="text-sm px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800 font-bold">
+                      0.0%
+                    </span>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <div class="text-xs text-slate-400">95% Bootstrap 置信区间</div>
+                  <div id="verdict-ci-range" class="text-lg font-mono font-bold text-purple-300 mt-0.5">
+                    [--% ~ --%]
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metrics Strip -->
+              <div class="mt-6 pt-4 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div class="bg-slate-900/60 rounded-lg p-2.5 border border-slate-800/60">
+                  <div class="text-[11px] text-slate-400">胜出优势 (Margin)</div>
+                  <div id="stat-margin" class="text-sm font-mono font-bold text-slate-200 mt-0.5">+0.00%</div>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-2.5 border border-slate-800/60">
+                  <div class="text-[11px] text-slate-400">不确定性熵 (Entropy)</div>
+                  <div id="stat-entropy" class="text-sm font-mono font-bold text-slate-200 mt-0.5">0.00 bit</div>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-2.5 border border-slate-800/60">
+                  <div class="text-[11px] text-slate-400">测试题目数 (n₁)</div>
+                  <div id="stat-n1" class="text-sm font-mono font-bold text-sky-400 mt-0.5">0</div>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-2.5 border border-slate-800/60">
+                  <div class="text-[11px] text-slate-400">总样本回答 (n₂)</div>
+                  <div id="stat-n2" class="text-sm font-mono font-bold text-sky-400 mt-0.5">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Probability Distribution & Confidence Intervals -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+              <h3 class="text-sm font-bold text-slate-200 mb-4 flex items-center justify-between">
+                <span>📊 各候选模型后验概率与 95% 置信区间</span>
+                <span class="text-xs font-normal text-slate-400">Bootstrap B=800</span>
+              </h3>
+              <div class="h-64">
+                <canvas id="posteriors-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- 2D PCA Cluster Map (You Are Here) -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+              <div class="flex items-center justify-between mb-2">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-200">🌌 2D 分布降维聚类图 (PCA Cluster Projection)</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">
+                    各模型特征云团展示。<span class="text-amber-400 font-semibold">★ 金色星标</span> 为您本次输入的经验特征投影坐标。
+                  </p>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">PCA (2D)</span>
+              </div>
+              <div class="relative w-full h-80 rounded-xl bg-slate-900/80 border border-slate-800 overflow-hidden mt-3">
+                <canvas id="cluster-canvas" class="w-full h-full"></canvas>
+              </div>
+            </div>
+
+            <!-- Parsed Details Table -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+              <h3 class="text-sm font-bold text-slate-200 mb-3">🔍 回答文本解析详情 (Discrete Parsing)</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300">
+                  <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                    <tr>
+                      <th class="p-2.5">题目</th>
+                      <th class="p-2.5">解析离散值</th>
+                      <th class="p-2.5">格式合规性</th>
+                      <th class="p-2.5">严格单Token</th>
+                    </tr>
+                  </thead>
+                  <tbody id="parsed-table-body" class="divide-y divide-slate-800/60 font-mono">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2: DATABASE & EVOLUTION ==================== -->
+    <div id="tab-db" class="tab-content hidden space-y-8">
+      
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-xl font-bold text-white mb-2">🗄️ 基准数据集与众包持续演进</h2>
+        <p class="text-slate-400 text-sm">
+          StatLLM 采用加权计数表实现动态演进：官方实验室数据权重 <strong class="text-sky-400">w = 1.0</strong>，审核/合规众包数据权重 <strong class="text-purple-400">w = 0.2</strong>。无需重新训练模型，毫秒级更新后验分布！
+        </p>
+
+        <!-- Stats Counter Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <div class="text-xs text-slate-400">总样本记录数 (Total)</div>
+            <div id="db-total-count" class="text-2xl font-bold font-mono text-white mt-1">-</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <div class="text-xs text-slate-400">官方基准样本 (w=1.0)</div>
+            <div id="db-official-count" class="text-2xl font-bold font-mono text-sky-400 mt-1">-</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <div class="text-xs text-slate-400">众包贡献样本 (w=0.2)</div>
+            <div id="db-user-count" class="text-2xl font-bold font-mono text-purple-400 mt-1">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Models & Probe Distribution breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Model Sample Breakdown -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <h3 class="text-sm font-bold text-white mb-4">🤖 模型样本与加权频次统计</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="p-2.5">模型名称</th>
+                  <th class="p-2.5">记录数</th>
+                  <th class="p-2.5">有效加权量 (Weighted)</th>
+                </tr>
+              </thead>
+              <tbody id="db-model-table-body" class="divide-y divide-slate-800 font-mono">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Manual Labeled Sample Form -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <h3 class="text-sm font-bold text-white mb-2">📥 手动贡献真实标注样本</h3>
+          <p class="text-xs text-slate-400 mb-4">输入已知模型的真实回答以扩展基准库：</p>
+
+          <form id="contribute-form" onsubmit="submitContribution(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">目标模型：</label>
+              <select id="contrib-model" required class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">对应题目：</label>
+              <select id="contrib-probe" required class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">模型回答原文：</label>
+              <textarea id="contrib-text" required rows="3" placeholder="例如：1. 42" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500 font-mono"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">贡献权重 (Weight)：</label>
+              <input type="number" id="contrib-weight" step="0.1" min="0.1" max="1.0" value="0.2" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500 font-mono">
+            </div>
+
+            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition shadow-md">
+              提交标注数据入库
+            </button>
+            <div id="contrib-status" class="text-xs text-center font-medium mt-2"></div>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 3: PAPERS & RESEARCH ==================== -->
+    <div id="tab-paper" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold text-white mb-2">📑 理论基石与前沿文献调研</h2>
+          <p class="text-slate-400 text-sm">
+            StatLLM 建立在近两年安全与 NLP 顶会对“黑盒大语言模型指纹与数字偏置归因”的严谨科学发现之上。
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          
+          <!-- Paper 1 -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-sky-950 text-sky-400 border border-sky-800">
+                arXiv 2026 核心文献
+              </span>
+              <a href="https://arxiv.org/abs/2607.10252" target="_blank" class="text-xs text-sky-400 hover:underline">查看论文 ↗</a>
+            </div>
+            <h3 class="text-base font-bold text-white mt-2">
+              One Token Is Enough: Fingerprinting and Verifying Large Language Models from Single-Token Output Distributions
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Tomáš Bruckner (2026.07) | 开源项目: ToseaAI/llm-fingerprint-detector</p>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              <strong>论文核心结论：</strong>大语言模型缺乏真正的物理熵，当被要求生成“1到100之间的随机数”时，其单 Token 输出具有稳定的非均匀偏好（Numeric Generation Bias）。通过比较经验离散分布的 Jensen-Shannon 散度与多项似然，仅需几十次简单查询即可精准验证 API 是否存在偷梁换柱或静默量化。
+            </p>
+          </div>
+
+          <!-- Paper 2 -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-950 text-purple-400 border border-purple-800">
+                USENIX Security 2025
+              </span>
+              <a href="https://arxiv.org/abs/2407.15847" target="_blank" class="text-xs text-purple-400 hover:underline">查看论文 ↗</a>
+            </div>
+            <h3 class="text-base font-bold text-white mt-2">
+              LLMmap: Fingerprinting For Large Language Models
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Dario Pasquini, Evgenios M. Kornaropoulos, Giuseppe Ateniese</p>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              <strong>论文核心结论：</strong>设计如同网络安全 <code>nmap</code> 一样的主动探测器。通过策略性地向集成了大模型的应用发送 3~8 个探针，分析模型在安全对齐、边界违规与特定格式遵从下的行为足迹，即便目标包裹了复杂 System Prompt，准确率仍超 95%。
+            </p>
+          </div>
+
+          <!-- Paper 3 -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">
+                NAACL / ICLR 2025
+              </span>
+              <span class="text-xs text-slate-500">Security Research</span>
+            </div>
+            <h3 class="text-base font-bold text-white mt-2">
+              LLMPrint: Behavioral Fingerprinting of Large Language Models via Prompt Injections
+            </h3>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              <strong>论文核心结论：</strong>利用“忽略所有提示词……”等覆写探针，击穿前端人设包装，强迫模型暴露底层预训练分词器偏好与内置 RLHF 反应。
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Mathematical Formulation Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mt-6 space-y-3">
+          <h3 class="text-sm font-bold text-white">📐 StatLLM 核心数理模型</h3>
+          <div class="text-xs text-slate-300 space-y-2 leading-relaxed font-mono">
+            <p>1. <strong>狄利克雷平滑条件概率 (Dirichlet-Smoothed Categorical Prob)</strong>:<br>
+            P(s | q, M) = (C_q(s) + α) / (Total_q + α * |S_q|), 其中 α = 0.5 (Jeffreys Prior)</p>
+            <p>2. <strong>联合对数似然 (Joint Log-Likelihood for n₂ answers)</strong>:<br>
+            log L(M | D) = ∑_{i=1}^{n₂} log P(s_i | q_i, M)</p>
+            <p>3. <strong>Log-Sum-Exp 归一化后验概率 (Posterior Prob)</strong>:<br>
+            P(M_k | D) = exp(log L(M_k) - max_j log L(M_j)) / ∑ exp(log L(M_l) - max_j log L(M_j))</p>
+            <p>4. <strong>Bootstrap 95% 置信区间 (Bootstrap Confidence Interval)</strong>:<br>
+            对 n₂ 个观测有放回重采样 B=800 次，取各模型后验概率向量的 2.5% 与 97.5% 分位数。</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500 bg-slate-950">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>StatLLM Open Source Project · 遵循 MIT 开源协议</div>
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/mcocdaa/StatLLM" target="_blank" class="hover:text-slate-400 transition">GitHub 仓库</a>
+        <span>·</span>
+        <span>Python 3.12+ · FastAPI · SQLite · Chart.js</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
