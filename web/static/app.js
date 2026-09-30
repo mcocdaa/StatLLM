@@ -8,7 +8,7 @@ let cardCounter = 0;
 let posteriorsChart = null;
 let currentClusterData = null;
 
-// Presets for quick evaluation (All Arrays!)
+// Presets for quick evaluation (Real API Empirical Arrays)
 const PRESETS = {
   grok: [
     { probe_id: "arr_int5", raw_text: "[27, 83, 5, 61, 44]" },
@@ -17,32 +17,16 @@ const PRESETS = {
     { probe_id: "arr_perm5", raw_text: "[4, 1, 5, 3, 2]" }
   ],
   gpt: [
-    { probe_id: "arr_int5", raw_text: "[7, 17, 37, 42, 73]" },
-    { probe_id: "arr_color5", raw_text: '["蓝", "红", "绿", "蓝", "紫"]' },
-    { probe_id: "arr_rps5", raw_text: '["石头", "剪刀", "石头", "石头", "布"]' },
-    { probe_id: "arr_letter5", raw_text: '["M", "R", "X", "A", "T"]' }
+    { probe_id: "arr_int5", raw_text: "[17, 64, 92, 8, 41]" },
+    { probe_id: "arr_color5", raw_text: '["蓝", "红", "绿", "黄", "紫"]' },
+    { probe_id: "arr_rps5", raw_text: '["石头", "剪刀", "布", "石头", "剪刀"]' },
+    { probe_id: "arr_letter5", raw_text: '["A", "B", "C", "D", "E"]' }
   ],
   deepseek: [
-    { probe_id: "arr_int5", raw_text: "[18, 55, 66, 88, 99]" },
-    { probe_id: "arr_color5", raw_text: '["红", "蓝", "黄", "红", "青"]' },
+    { probe_id: "arr_int5", raw_text: "[42, 17, 88, 5, 63]" },
+    { probe_id: "arr_color5", raw_text: '["红", "蓝", "紫", "绿", "黄"]' },
     { probe_id: "arr_rps5", raw_text: '["布", "石头", "布", "布", "石头"]' },
     { probe_id: "arr_perm5", raw_text: "[5, 3, 1, 4, 2]" }
-  ],
-  claude: [
-    { probe_id: "arr_int5", raw_text: "[14, 23, 47, 77, 89]" },
-    { probe_id: "arr_color5", raw_text: '["绿", "紫", "蓝", "绿", "黄"]' },
-    { probe_id: "arr_rps5", raw_text: '["剪刀", "布", "剪刀", "布", "石头"]' },
-    { probe_id: "arr_letter5", raw_text: '["S", "C", "L", "K", "H"]' }
-  ],
-  gemini: [
-    { probe_id: "arr_int5", raw_text: "[3, 12, 27, 64, 81]" },
-    { probe_id: "arr_color5", raw_text: '["黄", "青", "橙", "黄", "绿"]' },
-    { probe_id: "arr_letter5", raw_text: '["G", "M", "O", "B", "L"]' }
-  ],
-  qwen: [
-    { probe_id: "arr_int5", raw_text: "[8, 16, 28, 68, 88]" },
-    { probe_id: "arr_color5", raw_text: '["青", "红", "橙", "青", "蓝"]' },
-    { probe_id: "arr_letter5", raw_text: '["Q", "W", "E", "N", "A"]' }
   ]
 };
 

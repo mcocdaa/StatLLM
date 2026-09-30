@@ -13,7 +13,6 @@ from statllm.database import Database
 from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
 from statllm.probes import list_probes, get_probe
-from statllm.seed_data import seed_database
 
 
 class SubmissionItem(BaseModel):
@@ -42,15 +41,9 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     )
 
     db = Database(db_path)
-    # Check if database has any samples, if not seed it automatically
-    stats = db.get_stats()
-    if stats["total_samples"] == 0:
-        print("Database is empty. Automatically seeding baseline benchmark...")
-        seed_database(db, samples_per_probe=120)
-
     evaluator = LikelihoodEvaluator(db)
     cluster_projector = ClusterProjector(db)
-    cluster_projector.fit(n_points_per_model=30)
+    cluster_projector.fit(n_points_per_model=25)
 
     static_dir = os.path.join(os.path.dirname(__file__), "static")
     if os.path.exists(static_dir):
