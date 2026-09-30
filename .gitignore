@@ -39,6 +39,8 @@ htmlcov/
 
 # Local databases (except initial commit if desired)
 statllm.db-journal
+statllm.db-wal
+statllm.db-shm
 
 # OS files
 .DS_Store
