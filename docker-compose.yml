@@ -4,7 +4,7 @@ services:
     container_name: statllm-app
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8008:8000"
     volumes:
       - statllm-data:/app/data
     environment:

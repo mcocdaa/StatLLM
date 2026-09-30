@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Statistical Large Language Model Fingerprinting & Model Attribution Framework"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "mcocdaa", email = "mcocdaa@users.noreply.github.com"}
 ]
@@ -38,6 +38,9 @@ dev = [
 
 [project.scripts]
 statllm = "statllm.cli:main"
+
+[tool.setuptools]
+packages = ["statllm"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
