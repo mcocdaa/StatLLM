@@ -193,8 +193,14 @@ class LikelihoodEvaluator:
         # 5. Compute closed-world posterior probabilities via Log-Sum-Exp
         posteriors = self._log_likelihoods_to_posteriors(log_likelihoods)
 
-        # 6. Compute robust 95% Confidence Intervals for independent fitness
-        ci_fitness, ci_posteriors = self._compute_confidence_intervals(
+        # 6. Compute robust 68% and 95% Confidence Intervals & model statistics
+        (
+            ci_fit_95,
+            ci_fit_68,
+            ci_post_95,
+            ci_post_68,
+            model_stats
+        ) = self._compute_confidence_intervals(
             parsed, matrix, model_names, lam=lam
         )
 
@@ -207,13 +213,37 @@ class LikelihoodEvaluator:
 
         entropy = -sum(p * math.log2(p) for p in posteriors.values() if p > 1e-9)
 
+        # Build comprehensive summary statistics
+        summary_stats = {
+            "total_decisions": round(d_factor, 1),
+            "null_baseline_ll": round(null_ll, 2),
+            "sample_count": len(parsed),
+            "unique_probes": len(set(r["probe_id"] for r in parsed)),
+            "entropy": round(entropy, 4),
+            "margin": round(margin, 4)
+        }
+
+        # Enrich model_statistics with fitness, posterior, and LL
+        for m in model_names:
+            if m in model_stats:
+                model_stats[m]["fitness"] = independent_fitness.get(m, 0.0)
+                model_stats[m]["posterior"] = posteriors.get(m, 0.0)
+                model_stats[m]["log_likelihood"] = round(log_likelihoods.get(m, 0.0), 2)
+                model_stats[m]["ci_68"] = ci_fit_68.get(m, [0.0, 1.0])
+                model_stats[m]["ci_95"] = ci_fit_95.get(m, [0.0, 1.0])
+
         return {
             "parsed_submissions": parsed,
             "independent_fitness": independent_fitness,
             "posteriors": posteriors,
-            "confidence_intervals": ci_fitness,
-            "confidence_intervals_posteriors": ci_posteriors,
+            "confidence_intervals": ci_fit_95,              # 95% default for backward compat
+            "confidence_intervals_95": ci_fit_95,
+            "confidence_intervals_68": ci_fit_68,
+            "confidence_intervals_posteriors": ci_post_95,
+            "confidence_intervals_posteriors_68": ci_post_68,
             "log_likelihoods": log_likelihoods,
+            "model_statistics": model_stats,
+            "summary_statistics": summary_stats,
             "top_model": top_model,
             "top_fitness": round(top_fit, 4),
             "top_probability": round(posteriors.get(top_model, 0.0), 4),
@@ -300,8 +330,11 @@ class LikelihoodEvaluator:
                     "null_ll": math.log(1.0 / 120.0)
                 })
 
-        ci_fit = {}
-        ci_post = {}
+        ci_fit_95 = {}
+        ci_fit_68 = {}
+        ci_post_95 = {}
+        ci_post_68 = {}
+        model_stats = {}
         
         for m in model_names:
             diffs = []
@@ -331,8 +364,11 @@ class LikelihoodEvaluator:
             weights = np.array(weights, dtype=np.float64)
             W = np.sum(weights)
             if W <= 0:
-                ci_fit[m] = [0.0, 1.0]
-                ci_post[m] = [0.0, 1.0]
+                ci_fit_95[m] = [0.0, 1.0]
+                ci_fit_68[m] = [0.0, 1.0]
+                ci_post_95[m] = [0.0, 1.0]
+                ci_post_68[m] = [0.0, 1.0]
+                model_stats[m] = {"standard_error": 0.0, "mean_delta_ll": 0.0, "delta_ll": 0.0, "ref_samples": 0, "df": 0}
                 continue
             
             mean_d = np.sum(diffs * weights) / W
@@ -343,15 +379,32 @@ class LikelihoodEvaluator:
             
             se = math.sqrt(var_d / W + ref_var)
             df = max(2, int(round(W - 1)))
-            t_crit = 1.96 + 2.5 / df
             
-            low_d = mean_d - t_crit * se
-            high_d = mean_d + t_crit * se
+            # 95% Confidence Interval (2 sigma, tail bounds)
+            t_crit_95 = 1.96 + 2.5 / df
+            low_d_95 = mean_d - t_crit_95 * se
+            high_d_95 = mean_d + t_crit_95 * se
+            fit_low_95 = 1.0 / (1.0 + math.exp(-2.5 * low_d_95))
+            fit_high_95 = 1.0 / (1.0 + math.exp(-2.5 * high_d_95))
             
-            fit_low = 1.0 / (1.0 + math.exp(-2.5 * low_d))
-            fit_high = 1.0 / (1.0 + math.exp(-2.5 * high_d))
+            # 68% Confidence Interval (1 sigma, core central mass)
+            t_crit_68 = 1.00 + 0.8 / df
+            low_d_68 = mean_d - t_crit_68 * se
+            high_d_68 = mean_d + t_crit_68 * se
+            fit_low_68 = 1.0 / (1.0 + math.exp(-2.5 * low_d_68))
+            fit_high_68 = 1.0 / (1.0 + math.exp(-2.5 * high_d_68))
             
-            ci_fit[m] = [round(float(fit_low), 4), round(float(fit_high), 4)]
-            ci_post[m] = [round(max(0.0, float(fit_low * 0.9)), 4), round(min(1.0, float(fit_high * 1.05)), 4)]
+            ci_fit_95[m] = [round(float(fit_low_95), 4), round(float(fit_high_95), 4)]
+            ci_fit_68[m] = [round(float(fit_low_68), 4), round(float(fit_high_68), 4)]
+            ci_post_95[m] = [round(max(0.0, float(fit_low_95 * 0.9)), 4), round(min(1.0, float(fit_high_95 * 1.05)), 4)]
+            ci_post_68[m] = [round(max(0.0, float(fit_low_68 * 0.95)), 4), round(min(1.0, float(fit_high_68 * 1.02)), 4)]
 
-        return ci_fit, ci_post
+            model_stats[m] = {
+                "standard_error": round(float(se), 4),
+                "mean_delta_ll": round(float(mean_d), 4),
+                "delta_ll": round(float(mean_d * W), 2),
+                "ref_samples": int(round(avg_tot)),
+                "df": df
+            }
+
+        return ci_fit_95, ci_fit_68, ci_post_95, ci_post_68, model_stats
