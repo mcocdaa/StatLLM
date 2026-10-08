@@ -45,3 +45,7 @@ statllm.db-shm
 # OS files
 .DS_Store
 Thumbs.db
+
+# Test artifacts
+screenshots/
+scratch/

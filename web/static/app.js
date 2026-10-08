@@ -8,6 +8,24 @@ let MODELS_DATA = [];
 let rowCounter = 0;
 let currentClusterData = null;
 let currentLang = "zh";
+let cachedStats = null;
+let cachedEvaluationData = null;
+
+// Token display mapping for strict language purity (e.g. discrete colors & RPS in EN)
+const TOKEN_DISPLAY = {
+  en: {
+    "红": "Red", "橙": "Orange", "黄": "Yellow", "绿": "Green",
+    "青": "Cyan", "蓝": "Blue", "紫": "Purple",
+    "石头": "Rock", "剪刀": "Scissors", "布": "Paper"
+  }
+};
+
+function formatDisplayToken(tok) {
+  if (currentLang === "en" && TOKEN_DISPLAY.en[tok]) {
+    return TOKEN_DISPLAY.en[tok];
+  }
+  return tok;
+}
 
 // Sun & Moon SVGs (Clean, professional, NO emojis)
 const SUN_SVG = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
@@ -22,34 +40,36 @@ const PROBE_I18N = {
     en_prompt: "Please generate a JSON array containing 5 random integers between 1 and 100, formatted as [12, 45, 78, 3, 99]. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_color5: {
-    zh_title: "Q2: 5种常见颜色数组",
-    en_title: "Q2: 5 Common Colors Array",
-    zh_prompt: "请生成一个包含5种常见颜色的JSON数组，例如[\"红\", \"蓝\", \"绿\", \"黄\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please generate a JSON array containing 5 common color names, formatted as [\"red\", \"blue\", \"green\", \"yellow\", \"purple\"]. Output only the JSON array, with no other text or markdown codeblocks."
+    zh_title: "Q2: 5个离散颜色序列数组",
+    en_title: "Q2: 5 Discrete Colors Array",
+    zh_prompt: "在[红, 橙, 黄, 绿, 青, 蓝, 紫]中随机挑选5次，组成JSON数组，例如[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly choose 5 times from [Red, Orange, Yellow, Green, Cyan, Blue, Purple] to form a JSON array, e.g. [\"Red\", \"Blue\", \"Green\", \"Red\", \"Purple\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_rps5: {
-    zh_title: "Q3: 5轮剪刀石头布判定数组",
+    zh_title: "Q3: 5局石头剪刀布出拳序列",
     en_title: "Q3: 5-Round Rock-Paper-Scissors Array",
-    zh_prompt: "请模拟5轮石头剪刀布游戏，生成包含5个出拳结果的JSON数组，元素仅限\"石头\"、\"剪刀\"、\"布\"，格式如[\"石头\", \"剪刀\", \"布\", \"布\", \"石头\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate 5 rounds of Rock-Paper-Scissors and output a JSON array of 5 moves, formatted as [\"rock\", \"scissors\", \"paper\", \"rock\", \"scissors\"]. Output only the JSON array, with no other text or markdown codeblocks."
+    zh_prompt: "进行5次完全独立的石头剪刀布随机选择，输出一个JSON数组，例如[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate 5 independent rounds of Rock-Paper-Scissors and output a JSON array of 5 moves from [\"Rock\", \"Scissors\", \"Paper\"], e.g. [\"Rock\", \"Scissors\", \"Paper\", \"Rock\", \"Scissors\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_letter5: {
-    zh_title: "Q4: 5个不重复大写字母数组",
-    en_title: "Q4: 5 Unique Uppercase Letters Array",
-    zh_prompt: "请生成一个包含5个不重复英文字母大写的JSON数组，格式如[\"A\", \"B\", \"C\", \"D\", \"E\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please generate a JSON array containing 5 unique uppercase English letters, formatted as [\"A\", \"D\", \"K\", \"M\", \"Z\"]. Output only the JSON array, with no other text or markdown codeblocks."
+    zh_title: "Q4: 5个随机大写英文字母数组",
+    en_title: "Q4: 5 Random Uppercase Letters Array",
+    zh_prompt: "请生成一个包含5个随机大写英文字母（A-Z）的JSON数组，例如[\"M\", \"X\", \"R\", \"A\", \"K\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please generate a JSON array of 5 random uppercase English letters (A-Z), formatted as [\"M\", \"X\", \"R\", \"A\", \"K\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_perm5: {
-    zh_title: "Q5: 1~5随机全排列数组",
-    en_title: "Q5: Random Permutation of 1 to 5",
-    zh_prompt: "请生成一个包含数字1到5随机全排列的JSON数组，每个数字必须出现且仅出现一次，格式如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please generate a random permutation of integers from 1 to 5 as a JSON array, formatted as [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
+    zh_title: "Q5: [1,2,3,4,5] 随机置乱排列",
+    en_title: "Q5: [1,2,3,4,5] Random Permutation Array",
+    zh_prompt: "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
   }
 };
 
 // UI Localization Dictionary (Strictly pure language per entry - NO MIXING)
 const I18N = {
   zh: {
+    doc_title: "StatLLM - 大模型统计指纹与黑盒归因平台",
+    brand_subtitle: "统计指纹归因",
     nav_lab: "模型鉴定",
     nav_theory: "统计原理",
     nav_db: "底库基准",
@@ -57,6 +77,10 @@ const I18N = {
     theme_dark: "暗色",
     theme_light: "亮色",
     lang_btn_text: "EN",
+    title_lang_toggle: "切换为英文",
+    title_theme_toggle: "切换暗色/亮色主题",
+    title_reset_btn: "重置为初始状态",
+    title_lambda_help: "查看 Jelinek-Mercer 位置插值数学原理",
     
     hero_badge: "大模型统计指纹黑盒归因",
     hero_title: "根据回答精准鉴定大模型底座",
@@ -95,9 +119,15 @@ const I18N = {
     forest_boot: "Bootstrap B=800",
     forest_col_model: "候选模型与独立吻合度",
     forest_col_ci: "95% 独立置信区间",
+    forest_tooltip_fit: "独立吻合度",
+    forest_tooltip_post: "归一化排他后验",
+    forest_tooltip_ci: "95% 独立置信区间",
     pca_title: "二维降维分布图",
-    pca_desc: "散点为各模型经验特征分布云团；★ 星标为当前测试样本的投影位置。",
+    pca_desc: "散点为各模型经验特征分布云团；★ 星标为当前测试样本。点击或悬浮图例可单选高亮对比。",
     pca_user_point: "★ 当前测试样本",
+    pca_legend_all: "全部显示",
+    pca_coord_label: "坐标: ",
+    pca_samples_label: "样本数: ",
     parsed_title: "输入解析明细",
     parsed_desc: "提取的标准离散 Token 列表与合规性状态：",
     th_probe: "题目",
@@ -137,6 +167,7 @@ const I18N = {
     tr_first: "首词偏好 (Pos 0)",
     tr_freq: "高频数字模式",
     tr_dedup: "去重遵从率",
+    tr_dedup_deepseek: "局部重复",
     tr_seq: "典型序列示例",
 
     db_title: "实测底库与 Token 消耗透明追踪",
@@ -145,6 +176,7 @@ const I18N = {
     db_stat_tokens: "累计 Token 消耗",
     db_stat_calls: "真实 API 调用轮次",
     db_stat_pos: "位置频次特征索引",
+    db_pos_unit: "条",
     db_table_title: "分模型样本与 Token 消耗",
     th_model: "模型",
     th_samples: "样本数",
@@ -175,13 +207,19 @@ const I18N = {
     alert_eval_err: "评测错误: "
   },
   en: {
+    doc_title: "StatLLM - LLM Statistical Fingerprinting & Attribution Engine",
+    brand_subtitle: "Statistical Attribution",
     nav_lab: "Identification Lab",
     nav_theory: "Methodology",
     nav_db: "Benchmark Database",
     db_badge_suffix: "Real API Samples",
     theme_dark: "Dark",
     theme_light: "Light",
-    lang_btn_text: "中文",
+    lang_btn_text: "ZH",
+    title_lang_toggle: "Switch to Chinese",
+    title_theme_toggle: "Toggle Dark / Light Theme",
+    title_reset_btn: "Reset to default",
+    title_lambda_help: "View Jelinek-Mercer mathematical formulation",
     
     hero_badge: "BLACK-BOX ATTRIBUTION PIPELINE",
     hero_title: "Attribution of Foundation LLMs via Statistical Probes",
@@ -220,9 +258,15 @@ const I18N = {
     forest_boot: "Bootstrap B=800",
     forest_col_model: "Candidate Model & Independent Fit",
     forest_col_ci: "95% Independent CI",
+    forest_tooltip_fit: "Independent Fitness",
+    forest_tooltip_post: "Normalized Posterior",
+    forest_tooltip_ci: "95% Independent CI",
     pca_title: "2D PCA Cluster Projection",
-    pca_desc: "Scatter clouds show empirical model distributions; ★ star indicates current test sample projection.",
+    pca_desc: "Scatter clouds depict empirical distributions; ★ star marks test sample. Click/hover legend to isolate models.",
     pca_user_point: "★ Current Test Sample",
+    pca_legend_all: "Show All",
+    pca_coord_label: "Coord: ",
+    pca_samples_label: "Samples: ",
     parsed_title: "Parsed Input Records",
     parsed_desc: "Extracted discrete tokens and JSON compliance status:",
     th_probe: "Probe",
@@ -262,6 +306,7 @@ const I18N = {
     tr_first: "First Token Preference (Pos 0)",
     tr_freq: "High-frequency Patterns",
     tr_dedup: "Deduplication Compliance",
+    tr_dedup_deepseek: "Local Duplicates",
     tr_seq: "Representative Sequence",
 
     db_title: "Benchmark Database & Token Consumption Tracker",
@@ -270,6 +315,7 @@ const I18N = {
     db_stat_tokens: "Cumulative Tokens",
     db_stat_calls: "Recorded API Calls",
     db_stat_pos: "Positional Token Indices",
+    db_pos_unit: "items",
     db_table_title: "Model Breakdown & Token Consumption",
     th_model: "Model",
     th_samples: "Samples",
@@ -350,6 +396,7 @@ function toggleLanguage() {
 
 function applyLanguage(lang) {
   document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+  document.title = t("doc_title");
 
   // Translate all marked DOM elements
   document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -367,17 +414,41 @@ function applyLanguage(lang) {
   // Language button text (shows the OTHER language to switch to)
   const langBtnText = document.getElementById("lang-toggle-text");
   if (langBtnText) {
-    langBtnText.textContent = lang === "zh" ? "EN" : "中";
+    langBtnText.textContent = lang === "zh" ? "EN" : "ZH";
+  }
+  const langToggleBtn = document.getElementById("lang-toggle-btn");
+  if (langToggleBtn) {
+    langToggleBtn.title = t("title_lang_toggle");
   }
 
-  // Update theme button text
+  // Update theme button text & tooltip
   const isDark = document.documentElement.classList.contains("dark");
   const themeText = document.getElementById("theme-toggle-text");
   if (themeText) {
     themeText.textContent = t(isDark ? "theme_dark" : "theme_light");
   }
+  const themeToggleBtn = document.getElementById("theme-toggle-btn");
+  if (themeToggleBtn) {
+    themeToggleBtn.title = t("title_theme_toggle");
+  }
 
-  // Update rows probe dropdown options and prompts
+  // Update reset and lambda button tooltips
+  const resetBtn = document.getElementById("reset-submissions-btn");
+  if (resetBtn) resetBtn.title = t("title_reset_btn");
+  const lambdaHelpBtn = document.getElementById("lambda-help-btn");
+  if (lambdaHelpBtn) lambdaHelpBtn.title = t("title_lambda_help");
+
+  // Update cached header stats and database tab units
+  if (cachedStats) {
+    updateHeaderStats(cachedStats);
+  }
+  const posEl = document.getElementById("db-pos-tokens");
+  if (posEl) {
+    const posCount = (cachedStats && cachedStats.positional_token_count) || 345;
+    posEl.innerText = `${posCount} ${t("db_pos_unit")}`;
+  }
+
+  // Update rows probe dropdown options, prompts, placeholders, and tooltips
   document.querySelectorAll(".submission-row").forEach(row => {
     const select = row.querySelector(".row-probe-select");
     const currentProbeId = select ? select.value : "arr_int5";
@@ -404,7 +475,28 @@ function applyLanguage(lang) {
     if (txtArea) {
       txtArea.placeholder = t("output_placeholder");
     }
+    const copyBtn = row.querySelector("button[onclick='copyRowPrompt(this)']");
+    if (copyBtn) copyBtn.title = t("prompt_copy_title");
+    const dupBtn = row.querySelector("button[onclick='duplicateRow(this)']");
+    if (dupBtn) {
+      dupBtn.title = t("action_resample_tip");
+      const span = dupBtn.querySelector("span");
+      if (span) span.textContent = t("action_resample");
+    }
+    const delBtn = row.querySelector("button[onclick='deleteRow(this)']");
+    if (delBtn) {
+      delBtn.title = t("action_delete_tip");
+      const span = delBtn.querySelector("span");
+      if (span) span.textContent = t("action_delete");
+    }
   });
+
+  // Re-render evaluation results if active, else re-render cluster canvas
+  if (cachedEvaluationData) {
+    renderEvaluationResults(cachedEvaluationData);
+  } else if (currentClusterData) {
+    renderClusterCanvas(currentClusterData);
+  }
 
   // Re-render math
   renderMath();
@@ -519,9 +611,14 @@ async function loadInitialData() {
     PROBES_DATA = await probesRes.json();
     MODELS_DATA = await modelsRes.json();
     const stats = await statsRes.json();
+    cachedStats = stats;
     currentClusterData = await clusterRes.json();
 
     updateHeaderStats(stats);
+    const posCount = stats.positional_token_count || 345;
+    const posEl = document.getElementById("db-pos-tokens");
+    if (posEl) posEl.innerText = `${posCount} ${t("db_pos_unit")}`;
+
     renderClusterCanvas(currentClusterData);
   } catch (err) {
     console.error("Failed to load initial data", err);
@@ -531,7 +628,7 @@ async function loadInitialData() {
 function updateHeaderStats(stats) {
   const badge = document.getElementById("header-db-stats");
   if (badge) {
-    const count = stats.official_samples || stats.total_samples || 240;
+    const count = stats.official_samples || stats.total_samples || 600;
     badge.textContent = `${count} ${t("db_badge_suffix")}`;
   }
 }
@@ -738,9 +835,13 @@ async function executeEvaluation() {
  * Render Evaluation Results & Forest Plot
  */
 function renderEvaluationResults(data) {
+  cachedEvaluationData = data;
   const evalRes = data.evaluation;
   const clusterData = data.cluster_data;
   currentClusterData = clusterData;
+
+  const legendContainer = document.getElementById("pca-legend-container");
+  if (legendContainer) legendContainer.innerHTML = "";
 
   const resultsArea = document.getElementById("results-area");
   resultsArea.classList.remove("hidden");
@@ -762,12 +863,15 @@ function renderEvaluationResults(data) {
   tbody.innerHTML = "";
   evalRes.parsed_submissions.forEach(rec => {
     const tr = document.createElement("tr");
-    const tokenBadges = rec.parsed_tokens.map(t => 
-      `<span class="px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/70 mr-1.5 font-bold">${t}</span>`
+    const tokenBadges = rec.parsed_tokens.map(tok => 
+      `<span class="px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/70 mr-1.5 font-bold">${formatDisplayToken(tok)}</span>`
     ).join("");
 
+    const probeItem = PROBE_I18N[rec.probe_id];
+    const probeTitle = probeItem ? (currentLang === "en" ? probeItem.en_title : probeItem.zh_title) : rec.probe_id;
+
     tr.innerHTML = `
-      <td class="p-3 font-mono text-slate-800 dark:text-slate-300 font-semibold">${rec.probe_id}</td>
+      <td class="p-3 font-mono text-slate-800 dark:text-slate-300 font-semibold" title="${probeTitle}">${rec.probe_id}</td>
       <td class="p-3">${tokenBadges}</td>
       <td class="p-3">${rec.strictly_complied ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">${t("comp_json")}</span>` : `<span class="text-amber-600 dark:text-amber-400">${t("comp_codeblock")}</span>`}</td>
     `;
@@ -818,7 +922,9 @@ function renderForestPlot(fitnessScores, confidenceIntervals, logLikelihoods, po
     const centerPct = Math.min(100, Math.max(0, prob * 100));
     const ll = logLikelihoods && logLikelihoods[model] !== undefined ? logLikelihoods[model].toFixed(2) : "-";
     const normP = posteriors[model] !== undefined ? (posteriors[model] * 100).toFixed(1) : null;
-    const tooltipText = normP !== null ? `${model}: 独立吻合度 ${probPct}% (95% CI: [${ciLowPct.toFixed(1)}%, ${ciHighPct.toFixed(1)}%]) | 归一化排他后验: ${normP}% | LL: ${ll}` : `${model}: ${probPct}% | LL: ${ll}`;
+    const tooltipText = normP !== null 
+      ? `${model}: ${t("forest_tooltip_fit")} ${probPct}% (${t("forest_tooltip_ci")}: [${ciLowPct.toFixed(1)}%, ${ciHighPct.toFixed(1)}%]) | ${t("forest_tooltip_post")}: ${normP}% | LL: ${ll}` 
+      : `${model}: ${probPct}% | LL: ${ll}`;
 
     html += `
       <div class="bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/90 rounded-lg p-4 grid grid-cols-12 gap-4 items-center hover:border-slate-300 dark:hover:border-slate-700 transition shadow-2xs">
@@ -870,9 +976,51 @@ function renderForestPlot(fitnessScores, confidenceIntervals, logLikelihoods, po
 }
 
 /**
- * 2D PCA Cluster Canvas with Adaptive Scaling & Statistical Confidence Region (范围与点解耦)
+ * Draw True Five-Pointed Star on Canvas
  */
-function renderClusterCanvas(clusterData) {
+function drawStar(ctx, cx, cy, spikes = 5, outerRadius = 9.5, innerRadius = 4.8, fillStyle = "#f59e0b", strokeStyle = "#ffffff", lineWidth = 2.0) {
+  let rot = (Math.PI / 2) * 3;
+  let x = cx;
+  let y = cy;
+  const step = Math.PI / spikes;
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerRadius);
+  for (let i = 0; i < spikes; i++) {
+    x = cx + Math.cos(rot) * outerRadius;
+    y = cy + Math.sin(rot) * outerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+
+    x = cx + Math.cos(rot) * innerRadius;
+    y = cy + Math.sin(rot) * innerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+  }
+  ctx.lineTo(cx, cy - outerRadius);
+  ctx.closePath();
+
+  if (fillStyle) {
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+  }
+  if (strokeStyle) {
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+  }
+}
+
+// 2D PCA Interactive Highlight State
+let pcaHighlightedModel = null;
+let pcaLockedModel = null;
+let pcaInteractiveElements = [];
+let pcaListenersSetup = false;
+
+/**
+ * 2D PCA Cluster Canvas with Adaptive Scaling, Confidence Regions, Interactive Legend & Highlights
+ */
+function renderClusterCanvas(clusterData, overrideHighlight = undefined) {
   if (!clusterData || !clusterData.clusters) return;
   const canvas = document.getElementById("cluster-canvas");
   if (!canvas) return;
@@ -887,6 +1035,9 @@ function renderClusterCanvas(clusterData) {
   ctx.scale(dpr, dpr);
   const w = rect.width;
   const h = rect.height;
+
+  // Active highlighted model (null if all active)
+  const activeModel = overrideHighlight !== undefined ? overrideHighlight : (pcaHighlightedModel || pcaLockedModel);
 
   // Background
   ctx.fillStyle = isDark ? "#090d16" : "#f8fafc";
@@ -987,9 +1138,14 @@ function renderClusterCanvas(clusterData) {
     };
   }
 
+  pcaInteractiveElements = [];
+
   // 2. Pass 1: Draw Confidence Region (范围)
   clusterData.clusters.forEach(c => {
-    const color = c.color || "#0284c7";
+    const isSelected = activeModel === c.model_name;
+    const isMuted = activeModel !== null && !isSelected;
+    const baseColor = c.color || "#0284c7";
+
     const ell = computeConfidenceEllipse(c.points);
     if (ell) {
       const [csx, csy] = toScreen(ell.mx, ell.my);
@@ -1000,17 +1156,35 @@ function renderClusterCanvas(clusterData) {
       ctx.translate(csx, csy);
       ctx.rotate(-ell.angle);
 
-      // Semi-transparent shaded territory
-      ctx.fillStyle = color + "1a"; // ~10% opacity
-      ctx.beginPath();
-      ctx.ellipse(0, 0, sRx, sRy, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Delicate dashed contour
-      ctx.strokeStyle = color + "66"; // ~40% opacity
-      ctx.lineWidth = 1.2;
-      ctx.setLineDash([4, 4]);
-      ctx.stroke();
+      if (isMuted) {
+        ctx.fillStyle = isDark ? "rgba(100, 116, 139, 0.04)" : "rgba(203, 213, 225, 0.15)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sRx, sRy, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = isDark ? "rgba(71, 85, 105, 0.15)" : "rgba(203, 213, 225, 0.35)";
+        ctx.lineWidth = 1.0;
+        ctx.setLineDash([3, 4]);
+        ctx.stroke();
+      } else if (isSelected) {
+        ctx.fillStyle = baseColor + "38"; // ~22% opacity
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sRx, sRy, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = baseColor;
+        ctx.lineWidth = 2.0;
+        ctx.setLineDash([]);
+        ctx.stroke();
+      } else {
+        // Normal all-active state
+        ctx.fillStyle = baseColor + "18"; // ~10% opacity
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sRx, sRy, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = baseColor + "66"; // ~40% opacity
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+      }
 
       ctx.restore();
     }
@@ -1018,86 +1192,316 @@ function renderClusterCanvas(clusterData) {
 
   // 3. Pass 2: Draw Individual Scatter Points (点)
   clusterData.clusters.forEach(c => {
-    const color = c.color || "#0284c7";
+    const isSelected = activeModel === c.model_name;
+    const isMuted = activeModel !== null && !isSelected;
+    const baseColor = c.color || "#0284c7";
 
-    // Small crisp discrete sample dots
-    ctx.fillStyle = color + "aa";
-    c.points.forEach(p => {
-      const [sx, sy] = toScreen(p[0], p[1]);
-      ctx.beginPath();
-      ctx.arc(sx, sy, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-    });
+    if (isMuted) {
+      ctx.fillStyle = isDark ? "rgba(100, 116, 139, 0.25)" : "rgba(203, 213, 225, 0.5)";
+      c.points.forEach(p => {
+        const [sx, sy] = toScreen(p[0], p[1]);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    } else if (isSelected) {
+      ctx.fillStyle = baseColor + "ff";
+      c.points.forEach(p => {
+        const [sx, sy] = toScreen(p[0], p[1]);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    } else {
+      ctx.fillStyle = baseColor + "aa";
+      c.points.forEach(p => {
+        const [sx, sy] = toScreen(p[0], p[1]);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
 
     // Centroid Anchor Point
     const [cx, cy] = toScreen(c.center[0], c.center[1]);
-    ctx.beginPath();
-    ctx.arc(cx, cy, 4.5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = isDark ? "#ffffff" : "#0f172a";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    pcaInteractiveElements.push({
+      type: "model",
+      name: c.model_name,
+      color: baseColor,
+      sx: cx,
+      sy: cy,
+      x: c.center[0],
+      y: c.center[1],
+      points_len: (c.points || []).length
+    });
 
-    // Model Label Badge (Positioned smartly outward)
-    ctx.font = "bold 12px Inter, sans-serif";
-    const textWidth = ctx.measureText(c.model_name).width;
-    
-    let offsetX = 10;
-    let offsetY = -8;
-    if (cx > w * 0.5) offsetX = 10;
-    else offsetX = -textWidth - 14;
-    if (cy > h * 0.5) offsetY = 14;
-    else offsetY = -10;
+    if (isMuted) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3.0, 0, Math.PI * 2);
+      ctx.fillStyle = isDark ? "rgba(71, 85, 105, 0.4)" : "rgba(203, 213, 225, 0.7)";
+      ctx.fill();
+    } else if (isSelected) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6.0, 0, Math.PI * 2);
+      ctx.fillStyle = baseColor;
+      ctx.fill();
+      ctx.strokeStyle = isDark ? "#ffffff" : "#0f172a";
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
 
-    const labelX = cx + offsetX;
-    const labelY = cy + offsetY;
+      // Show floating label badge ONLY for highlighted/selected model to keep canvas clean!
+      ctx.font = "bold 12px Inter, sans-serif";
+      const textWidth = ctx.measureText(c.model_name).width;
+      const offsetX = cx > w * 0.5 ? 12 : -textWidth - 16;
+      const offsetY = cy > h * 0.5 ? 16 : -10;
+      const labelX = cx + offsetX;
+      const labelY = cy + offsetY;
 
-    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.9)";
-    ctx.fillRect(labelX - 4, labelY - 12, textWidth + 8, 16);
-    ctx.strokeStyle = isDark ? "rgba(51, 65, 85, 0.6)" : "rgba(203, 213, 225, 0.9)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(labelX - 4, labelY - 12, textWidth + 8, 16);
+      ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.92)" : "rgba(255, 255, 255, 0.96)";
+      ctx.fillRect(labelX - 4, labelY - 13, textWidth + 8, 18);
+      ctx.strokeStyle = baseColor;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(labelX - 4, labelY - 13, textWidth + 8, 18);
 
-    ctx.fillStyle = isDark ? "#f1f5f9" : "#0f172a";
-    ctx.fillText(c.model_name, labelX, labelY);
+      ctx.fillStyle = isDark ? "#f8fafc" : "#0f172a";
+      ctx.fillText(c.model_name, labelX, labelY);
+    } else {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4.2, 0, Math.PI * 2);
+      ctx.fillStyle = baseColor;
+      ctx.fill();
+      ctx.strokeStyle = isDark ? "#ffffff" : "#0f172a";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
   });
 
-  // 4. Pass 3: Draw User Test Sample Point (★)
+  // 4. Pass 3: Draw User Test Sample Point (★ True Star on the TOPMOST layer)
   if (clusterData.user_point) {
     const [ux, uy] = toScreen(clusterData.user_point[0], clusterData.user_point[1]);
+    pcaInteractiveElements.push({
+      type: "user",
+      name: t("pca_user_point"),
+      color: "#f59e0b",
+      sx: ux,
+      sy: uy,
+      x: clusterData.user_point[0],
+      y: clusterData.user_point[1]
+    });
 
-    // Outer subtle pulse ring
-    ctx.fillStyle = "rgba(245, 158, 11, 0.18)";
+    // Outer gentle glowing pulse aura ring
+    ctx.fillStyle = "rgba(245, 158, 11, 0.22)";
     ctx.beginPath();
-    ctx.arc(ux, uy, 12, 0, Math.PI * 2);
+    ctx.arc(ux, uy, 16, 0, Math.PI * 2);
     ctx.fill();
 
-    // Central crisp golden star target
-    ctx.fillStyle = "#f59e0b";
-    ctx.strokeStyle = isDark ? "#ffffff" : "#0f172a";
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.arc(ux, uy, 5.0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    // Central crisp golden 5-pointed STAR
+    drawStar(
+      ctx,
+      ux,
+      uy,
+      5,
+      9.5,   // outer radius
+      4.5,   // inner radius
+      "#f59e0b",
+      isDark ? "#ffffff" : "#0f172a",
+      2.0
+    );
 
-    // Target callout pill tag
+    // Callout pill tag (ALWAYS on top)
     ctx.font = "bold 12px Inter, sans-serif";
     const userText = t("pca_user_point");
     const uWidth = ctx.measureText(userText).width;
-    const uX = Math.max(10, Math.min(w - uWidth - 20, ux - uWidth / 2));
-    const uY = uy > 40 ? uy - 16 : uy + 26;
+    const uX = Math.max(10, Math.min(w - uWidth - 22, ux - uWidth / 2));
+    const uY = uy > 42 ? uy - 18 : uy + 28;
 
-    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)";
-    ctx.fillRect(uX - 5, uY - 12, uWidth + 10, 16);
+    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.98)";
+    ctx.fillRect(uX - 6, uY - 13, uWidth + 12, 18);
     ctx.strokeStyle = "#f59e0b";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(uX - 5, uY - 12, uWidth + 10, 16);
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(uX - 6, uY - 13, uWidth + 12, 18);
 
     ctx.fillStyle = isDark ? "#fbbf24" : "#b45309";
     ctx.fillText(userText, uX, uY);
   }
+
+  // 5. Update Interactive Legend Bar
+  renderClusterLegend(clusterData, activeModel);
+
+  // 6. Setup Mouse Listeners (Once)
+  setupPcaCanvasListeners(canvas, clusterData);
+}
+
+/**
+ * Render Interactive Legend Chips above PCA Canvas
+ */
+function renderClusterLegend(clusterData, activeModel) {
+  const container = document.getElementById("pca-legend-container");
+  if (!container) return;
+
+  const isAllActive = activeModel === null;
+
+  // Build chips if not already built
+  if (container.children.length === 0) {
+    let html = `
+      <button type="button" class="pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border shadow-2xs" data-model="__ALL__">
+        <span class="w-2 h-2 rounded-full chip-dot"></span>
+        <span>${t("pca_legend_all")}</span>
+      </button>
+    `;
+
+    clusterData.clusters.forEach(c => {
+      const color = c.color || "#0284c7";
+      html += `
+        <button type="button" class="pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-medium transition flex items-center gap-1.5 cursor-pointer border shadow-2xs" data-model="${c.model_name}" data-color="${color}">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs" style="background-color: ${color};"></span>
+          <span class="truncate max-w-[130px]">${c.model_name}</span>
+        </button>
+      `;
+    });
+
+    if (clusterData.user_point) {
+      html += `
+        <button type="button" class="pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border border-amber-500/60 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400" data-model="__USER__">
+          <span>${t("pca_user_point")}</span>
+        </button>
+      `;
+    }
+
+    container.innerHTML = html;
+
+    container.querySelectorAll(".pca-legend-chip").forEach(chip => {
+      const mName = chip.getAttribute("data-model");
+
+      chip.addEventListener("mouseenter", () => {
+        if (mName === "__ALL__") {
+          renderClusterCanvas(clusterData, null);
+        } else {
+          renderClusterCanvas(clusterData, mName);
+        }
+      });
+
+      chip.addEventListener("mouseleave", () => {
+        renderClusterCanvas(clusterData, pcaLockedModel);
+      });
+
+      chip.addEventListener("click", () => {
+        if (mName === "__ALL__") {
+          pcaLockedModel = null;
+        } else {
+          pcaLockedModel = (pcaLockedModel === mName ? null : mName);
+        }
+        renderClusterCanvas(clusterData, pcaLockedModel);
+      });
+    });
+  }
+
+  // Update styles of existing chips based on activeModel
+  container.querySelectorAll(".pca-legend-chip").forEach(chip => {
+    const mName = chip.getAttribute("data-model");
+    const color = chip.getAttribute("data-color") || "#0284c7";
+
+    if (mName === "__ALL__") {
+      const dot = chip.querySelector(".chip-dot");
+      if (isAllActive) {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border bg-slate-800 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs";
+        if (dot) dot.className = "w-2 h-2 rounded-full chip-dot bg-sky-400";
+      } else {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-medium transition flex items-center gap-1.5 cursor-pointer border bg-slate-100 text-slate-600 dark:bg-slate-800/80 dark:text-slate-400 border-slate-200 dark:border-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-2xs";
+        if (dot) dot.className = "w-2 h-2 rounded-full chip-dot bg-slate-400";
+      }
+    } else if (mName === "__USER__") {
+      const isUserSelected = activeModel === "__USER__";
+      if (isUserSelected) {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border border-amber-500 ring-2 ring-amber-500/30 bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 shadow-xs";
+      } else {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border border-amber-500/60 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400";
+      }
+    } else {
+      const isSelected = activeModel === mName;
+      const isMuted = activeModel !== null && !isSelected;
+
+      if (isSelected) {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border border-sky-500 shadow-xs ring-2 ring-sky-500/20";
+        chip.style.backgroundColor = `${color}1a`;
+        chip.style.borderColor = color;
+        chip.style.color = color;
+      } else if (isMuted) {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-medium transition flex items-center gap-1.5 cursor-pointer border opacity-35 hover:opacity-100 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-500 shadow-2xs";
+        chip.style.backgroundColor = "";
+        chip.style.borderColor = "";
+        chip.style.color = "";
+      } else {
+        chip.className = "pca-legend-chip px-2.5 py-1 rounded-md text-xs font-mono font-medium transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs";
+        chip.style.backgroundColor = "";
+        chip.style.borderColor = "";
+        chip.style.color = "";
+      }
+    }
+  });
+}
+
+/**
+ * Setup Mouse Hover / Crosshair Listeners on PCA Canvas
+ */
+function setupPcaCanvasListeners(canvas, clusterData) {
+  if (pcaListenersSetup) return;
+  pcaListenersSetup = true;
+
+  const tooltip = document.getElementById("pca-tooltip");
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!currentClusterData) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    let nearest = null;
+    let minDist = 26;
+
+    for (const el of pcaInteractiveElements) {
+      const dist = Math.hypot(el.sx - mx, el.sy - my);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = el;
+      }
+    }
+
+    if (nearest) {
+      if (tooltip) {
+        tooltip.classList.remove("hidden");
+        const tipX = Math.min(rect.width - 160, Math.max(10, mx + 14));
+        const tipY = my > 50 ? my - 45 : my + 18;
+        tooltip.style.left = `${tipX}px`;
+        tooltip.style.top = `${tipY}px`;
+
+        if (nearest.type === "user") {
+          tooltip.className = "absolute pointer-events-none px-3 py-1.5 rounded-lg text-xs font-mono shadow-xl border z-30 transition-all duration-75 bg-amber-50 dark:bg-slate-900 border-amber-500 text-amber-700 dark:text-amber-400";
+          tooltip.innerHTML = `<span class="font-bold">★ ${t("pca_user_point")}</span><div class="text-[11px] text-slate-500 dark:text-slate-400">${t("pca_coord_label")}(${nearest.x.toFixed(3)}, ${nearest.y.toFixed(3)})</div>`;
+        } else {
+          tooltip.className = "absolute pointer-events-none px-3 py-1.5 rounded-lg text-xs font-mono shadow-xl border z-30 transition-all duration-75 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200";
+          tooltip.innerHTML = `
+            <div class="flex items-center gap-1.5 font-bold">
+              <span class="w-2.5 h-2.5 rounded-full" style="background:${nearest.color}"></span>
+              <span>${nearest.name}</span>
+            </div>
+            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              ${t("pca_coord_label")}(${nearest.x.toFixed(3)}, ${nearest.y.toFixed(3)}) | ${t("pca_samples_label")}${nearest.points_len}
+            </div>
+          `;
+        }
+      }
+      renderClusterCanvas(currentClusterData, nearest.name);
+    } else {
+      if (tooltip) tooltip.classList.add("hidden");
+      renderClusterCanvas(currentClusterData, pcaLockedModel);
+    }
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    if (tooltip) tooltip.classList.add("hidden");
+    renderClusterCanvas(currentClusterData, pcaLockedModel);
+  });
 }
 
 /**
@@ -1111,10 +1515,15 @@ async function refreshDbStats() {
     ]);
     const stats = await statsRes.json();
     const tokenUsage = await tokenRes.json();
+    cachedStats = stats;
+    updateHeaderStats(stats);
 
     document.getElementById("db-total-samples").innerText = stats.total_samples;
     document.getElementById("db-total-tokens").innerText = (stats.token_usage?.grand_total_tokens || tokenUsage.overall?.grand_total_tokens || 96967).toLocaleString();
     document.getElementById("db-api-calls").innerText = stats.token_usage?.recorded_api_calls || 240;
+    const posCount = stats.positional_token_count || 345;
+    const posEl = document.getElementById("db-pos-tokens");
+    if (posEl) posEl.innerText = `${posCount} ${t("db_pos_unit")}`;
     
     const tbody = document.getElementById("db-model-table-body");
     tbody.innerHTML = "";

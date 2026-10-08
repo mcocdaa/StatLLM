@@ -126,6 +126,10 @@ class ColorArrayProbe(ArrayProbe):
     Measures: Transition sequence probabilities, repeat suppression.
     """
     COLORS = ["红", "橙", "黄", "绿", "青", "蓝", "紫"]
+    COLOR_MAP = {
+        "红": "红", "橙": "橙", "黄": "黄", "绿": "绿", "青": "青", "蓝": "蓝", "紫": "紫",
+        "red": "红", "orange": "橙", "yellow": "黄", "green": "绿", "cyan": "青", "blue": "蓝", "purple": "紫"
+    }
 
     def __init__(self):
         super().__init__(
@@ -154,9 +158,9 @@ class ColorArrayProbe(ArrayProbe):
 
         tokens = []
         for item in arr:
-            s = str(item).strip().replace("色", "")
-            if s in self.COLORS:
-                tokens.append(s)
+            s = str(item).strip().lower().replace("色", "")
+            if s in self.COLOR_MAP:
+                tokens.append(self.COLOR_MAP[s])
             else:
                 tokens.append("INVALID")
 
@@ -181,6 +185,10 @@ class RPSArrayProbe(ArrayProbe):
     Measures: Multi-turn game-theoretic sequence priors and Markov cycle tendencies.
     """
     CHOICES = ["石头", "剪刀", "布"]
+    CHOICE_MAP = {
+        "石头": "石头", "剪刀": "剪刀", "布": "布",
+        "rock": "石头", "scissors": "剪刀", "scissor": "剪刀", "paper": "布"
+    }
 
     def __init__(self):
         super().__init__(
@@ -209,9 +217,9 @@ class RPSArrayProbe(ArrayProbe):
 
         tokens = []
         for item in arr:
-            s = str(item).strip()
-            if s in self.CHOICES:
-                tokens.append(s)
+            s = str(item).strip().lower()
+            if s in self.CHOICE_MAP:
+                tokens.append(self.CHOICE_MAP[s])
             else:
                 tokens.append("INVALID")
 

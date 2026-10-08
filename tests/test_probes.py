@@ -41,6 +41,11 @@ def test_arr_color5_parsing():
     assert res["parsed_tokens"] == ["黄", "青", "红", "紫", "橙"]
     assert res["traits"]["has_duplicates"] is False
 
+    # English input support
+    res_en = p.parse('["yellow", "cyan", "red", "purple", "orange"]')
+    assert res_en["is_valid"] is True
+    assert res_en["parsed_tokens"] == ["黄", "青", "红", "紫", "橙"]
+
 
 def test_arr_rps5_parsing():
     p = get_probe("arr_rps5")
@@ -50,6 +55,11 @@ def test_arr_rps5_parsing():
     assert res["is_valid"] is True
     assert res["parsed_tokens"] == ["布", "剪刀", "石头", "布", "剪刀"]
     assert res["traits"]["has_duplicates"] is True
+
+    # English input support
+    res_en = p.parse('["paper", "scissors", "rock", "paper", "scissors"]')
+    assert res_en["is_valid"] is True
+    assert res_en["parsed_tokens"] == ["布", "剪刀", "石头", "布", "剪刀"]
 
 
 def test_arr_letter5_parsing():
