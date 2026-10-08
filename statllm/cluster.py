@@ -2,12 +2,14 @@
 StatLLM Dimension Reduction & Clustering Visualizer for Array Probes.
 """
 
+from collections import defaultdict
+import json
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from sklearn.decomposition import PCA
-from typing import Dict, Any, List, Tuple, Optional
 
-from statllm.probes import PROBES
 from statllm.database import Database
+from statllm.probes import PROBES
 
 
 class ClusterProjector:
@@ -15,121 +17,131 @@ class ClusterProjector:
         self.db = db
         self.pca: Optional[PCA] = None
         self.feature_keys: List[Tuple[str, str]] = []
+        self.probe_slices: Dict[str, Tuple[int, int]] = {}
         self.model_centers_2d: Dict[str, List[float]] = {}
         self.model_clouds_2d: Dict[str, List[List[float]]] = {}
         self.is_fitted = False
 
-    def _build_feature_vocabulary(self) -> List[Tuple[str, str]]:
-        feature_keys = []
+    def _build_feature_vocabulary(self) -> None:
+        self.feature_keys = []
+        self.probe_slices = {}
+        cur_idx = 0
         for pid, probe in PROBES.items():
+            st = cur_idx
             if probe.allowed_elements:
                 for val in probe.allowed_elements:
-                    feature_keys.append((pid, val))
+                    self.feature_keys.append((pid, val))
+                    cur_idx += 1
             # Include behavioral trait markers
-            feature_keys.append((pid, "trait:has_dup_True"))
-            feature_keys.append((pid, "trait:has_dup_False"))
-            feature_keys.append((pid, "INVALID"))
-        return feature_keys
+            self.feature_keys.append((pid, "trait:has_dup_True"))
+            cur_idx += 1
+            self.feature_keys.append((pid, "trait:has_dup_False"))
+            cur_idx += 1
+            self.feature_keys.append((pid, "INVALID"))
+            cur_idx += 1
+            self.probe_slices[pid] = (st, cur_idx)
+
+    def _vectorize_probe_profile(
+        self,
+        counts_by_probe: Dict[str, Tuple[Dict[str, float], float]]
+    ) -> np.ndarray:
+        """
+        Builds a normalized multi-probe fingerprint vector.
+        Each probe's probability distribution is normalized independently
+        so every probe carries equal weight, avoiding dominance by probes with larger vocabularies.
+        """
+        d = len(self.feature_keys)
+        vec = np.zeros(d, dtype=np.float64)
+        for pid, (st, ed) in self.probe_slices.items():
+            sub_vec = np.zeros(ed - st, dtype=np.float64)
+            c_dict, tot = counts_by_probe.get(pid, ({}, 0.0))
+            v_size = PROBES[pid].element_vocab_size if pid in PROBES else 10
+            for i, idx in enumerate(range(st, ed)):
+                key = self.feature_keys[idx]
+                val = key[1]
+                c = c_dict.get(val, 0.0)
+                sub_vec[i] = (c + 0.5) / (tot + 0.5 * v_size)
+            sub_norm = np.linalg.norm(sub_vec)
+            if sub_norm > 0:
+                vec[st:ed] = sub_vec / sub_norm
+        norm = np.linalg.norm(vec)
+        return vec / norm if norm > 0 else vec
 
     def fit(self, n_points_per_model: Optional[int] = None):
-        self.feature_keys = self._build_feature_vocabulary()
-        d = len(self.feature_keys)
-        key_to_idx = {k: i for i, k in enumerate(self.feature_keys)}
-
-        models = self.db.list_models()
-        model_names = [m["name"] for m in models] if models else []
-        all_samples = self.db.get_all_samples()
-
-        # If we have real empirical samples in the database and n_points_per_model is not explicitly forcing synthetic:
-        if len(all_samples) >= 10 and n_points_per_model is None:
-            X = []
-            sample_model_names = []
-            for s in all_samples:
-                if not s.get("is_valid", 1):
-                    continue
-                vec = np.zeros(d, dtype=np.float64)
-                pid = s["probe_id"]
-                try:
-                    import json
-                    tokens = json.loads(s["parsed_value"])
-                except Exception:
-                    tokens = []
-                for tok in tokens:
-                    idx = key_to_idx.get((pid, tok))
-                    if idx is not None:
-                        vec[idx] += 1.0
-                has_dup = len(tokens) != len(set(tokens))
-                dup_key = (pid, f"trait:has_dup_{has_dup}")
-                if dup_key in key_to_idx:
-                    vec[key_to_idx[dup_key]] += 0.5
-                norm = np.linalg.norm(vec)
-                if norm > 0:
-                    vec = vec / norm
-                X.append(vec)
-                sample_model_names.append(s["model_name"])
-
-            X = np.array(X)
-            self.pca = PCA(n_components=2, random_state=2026)
-            projected = self.pca.fit_transform(X)
-
-            self.model_clouds_2d = {m: [] for m in model_names}
-            for name, pt in zip(sample_model_names, projected):
-                if name in self.model_clouds_2d:
-                    self.model_clouds_2d[name].append([round(float(pt[0]), 3), round(float(pt[1]), 3)])
-
-            self.model_centers_2d = {}
-            for name, pts in self.model_clouds_2d.items():
-                if pts:
-                    center = np.mean(pts, axis=0)
-                    self.model_centers_2d[name] = [round(float(center[0]), 3), round(float(center[1]), 3)]
-                else:
-                    self.model_centers_2d[name] = [0.0, 0.0]
-
-            self.is_fitted = True
-            self._cached_base_clusters = self._build_clusters_payload()
-            return
-
-        # Fallback for synthetic / sparse test environments
+        self._build_feature_vocabulary()
         matrix = self.db.get_all_model_probe_counts()
-        if not model_names:
-            model_names = list(matrix.keys())
+        models = self.db.list_models()
+        model_names = [m["name"] for m in models] if models else list(matrix.keys())
 
         if len(model_names) < 2:
             return
 
-        all_points = []
-        self.model_clouds_2d = {}
-        self.model_centers_2d = {}
-        pts_count = n_points_per_model if n_points_per_model is not None else 40
+        all_samples = self.db.get_all_samples()
+        pts_count = n_points_per_model if n_points_per_model is not None else 35
+
+        # Check if we have empirical samples to bootstrap from
+        model_probe_samples = defaultdict(lambda: defaultdict(list))
+        for s in all_samples:
+            if s.get("is_valid", 1):
+                model_probe_samples[s["model_name"]][s["probe_id"]].append(s)
+
+        has_empirical_samples = any(len(p_map) > 0 for p_map in model_probe_samples.values())
 
         rng = np.random.default_rng(2026)
+        all_fit_vecs = []
 
-        for m in model_names:
-            m_data = matrix.get(m, {})
-            base_vec = np.zeros(d, dtype=np.float64)
-            for i, (pid, val) in enumerate(self.feature_keys):
-                counts_dict, tot = m_data.get(pid, ({}, 0.0))
-                c = counts_dict.get(val, 0.0)
-                v_size = PROBES[pid].element_vocab_size if pid in PROBES else 10
-                base_vec[i] = (c + 0.5) / (tot + 0.5 * v_size)
+        if has_empirical_samples:
+            for m in model_names:
+                base_vec = self._vectorize_probe_profile(matrix.get(m, {}))
+                all_fit_vecs.append(base_vec)
 
-            for _ in range(pts_count):
-                noise = rng.normal(0, 0.03, size=d)
-                sample_vec = np.clip(base_vec + noise, 0.001, 1.0)
-                sample_vec = sample_vec / (np.linalg.norm(sample_vec) + 1e-9)
-                all_points.append(sample_vec)
+                p_samples_dict = model_probe_samples[m]
+                for _ in range(pts_count):
+                    b_cnts = {}
+                    for pid in self.probe_slices.keys():
+                        s_list = p_samples_dict.get(pid, [])
+                        if not s_list:
+                            continue
+                        resamp = rng.choice(s_list, size=len(s_list), replace=True)
+                        cnt = defaultdict(float)
+                        for s in resamp:
+                            try:
+                                toks = json.loads(s["parsed_value"])
+                            except Exception:
+                                toks = []
+                            for tok in toks:
+                                cnt[tok] += 1.0
+                            has_dup = len(toks) != len(set(toks))
+                            cnt[f"trait:has_dup_{has_dup}"] += 0.5
+                        b_cnts[pid] = (cnt, sum(cnt.values()))
+                    all_fit_vecs.append(self._vectorize_probe_profile(b_cnts))
+        else:
+            # Synthetic Dirichlet jitter fallback for minimal test fixtures
+            for m in model_names:
+                base_vec = self._vectorize_probe_profile(matrix.get(m, {}))
+                all_fit_vecs.append(base_vec)
+                d = len(self.feature_keys)
+                for _ in range(pts_count):
+                    noise = rng.normal(0, 0.03, size=d)
+                    sample_vec = np.clip(base_vec + noise, 0.001, 1.0)
+                    norm = np.linalg.norm(sample_vec)
+                    all_fit_vecs.append(sample_vec / norm if norm > 0 else sample_vec)
 
-        all_points = np.array(all_points)
+        all_fit_vecs = np.array(all_fit_vecs)
         self.pca = PCA(n_components=2, random_state=2026)
-        projected = self.pca.fit_transform(all_points)
+        self.pca.fit(all_fit_vecs)
 
-        idx = 0
-        for m in model_names:
-            pts = projected[idx : idx + pts_count]
-            idx += pts_count
-            self.model_clouds_2d[m] = [[round(float(p[0]), 3), round(float(p[1]), 3)] for p in pts]
-            center = np.mean(pts, axis=0)
+        # Compute distinct cluster centroids and 2D scatter clouds
+        self.model_centers_2d = {}
+        self.model_clouds_2d = {}
+
+        block_size = pts_count + 1
+        for i, m in enumerate(model_names):
+            block = self.pca.transform(all_fit_vecs[i * block_size : (i + 1) * block_size])
+            center = block[0]  # Base empirical model profile
+            cloud = block[1:]  # Variation cloud
             self.model_centers_2d[m] = [round(float(center[0]), 3), round(float(center[1]), 3)]
+            self.model_clouds_2d[m] = [[round(float(p[0]), 3), round(float(p[1]), 3)] for p in cloud]
 
         self.is_fitted = True
         self._cached_base_clusters = self._build_clusters_payload()
@@ -144,6 +156,7 @@ class ClusterProjector:
                 "display_name": meta.get("display_name", m_name),
                 "color": meta.get("color", "#3b82f6"),
                 "center": self.model_centers_2d.get(m_name, [0.0, 0.0]),
+                "sample_count": self.db.get_sample_count(m_name),
                 "points": points
             })
         return clusters
@@ -154,25 +167,21 @@ class ClusterProjector:
             if not self.is_fitted or self.pca is None:
                 return None
 
-        d = len(self.feature_keys)
-        user_vec = np.zeros(d, dtype=np.float64)
-
-        user_counts = {}
+        user_counts = defaultdict(lambda: (defaultdict(float), 0.0))
         for s in parsed_submissions:
-            pid = s["probe_id"]
-            for tok in s.get("parsed_tokens", []):
-                key = (pid, tok)
-                user_counts[key] = user_counts.get(key, 0) + 1
+            pid = s.get("probe_id")
+            if not pid or pid not in self.probe_slices:
+                continue
+            cnt, tot = user_counts[pid]
+            toks = s.get("parsed_tokens", [])
+            for tok in toks:
+                cnt[tok] += 1.0
             traits = s.get("traits", {})
             if "has_duplicates" in traits:
-                key = (pid, f"trait:has_dup_{traits['has_duplicates']}")
-                user_counts[key] = user_counts.get(key, 0) + 1
+                cnt[f"trait:has_dup_{traits['has_duplicates']}"] += 0.5
+            user_counts[pid] = (cnt, tot + len(toks))
 
-        for i, key in enumerate(self.feature_keys):
-            c = user_counts.get(key, 0)
-            user_vec[i] = c + 0.1
-
-        user_vec = user_vec / (np.linalg.norm(user_vec) + 1e-9)
+        user_vec = self._vectorize_probe_profile(user_counts)
         pt_2d = self.pca.transform(user_vec.reshape(1, -1))[0]
         return [round(float(pt_2d[0]), 3), round(float(pt_2d[1]), 3)]
 

@@ -1377,7 +1377,7 @@ function renderClusterCanvas(clusterData, overrideHighlight = undefined) {
       sy: cy,
       x: c.center[0],
       y: c.center[1],
-      points_len: (c.points || []).length
+      points_len: c.sample_count || (c.points || []).length
     });
 
     if (isMuted) {
