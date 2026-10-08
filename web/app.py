@@ -47,7 +47,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     db = Database(db_path)
     evaluator = LikelihoodEvaluator(db, positional_lambda=0.5)
     cluster_projector = ClusterProjector(db)
-    cluster_projector.fit(n_points_per_model=25)
+    cluster_projector.fit()
 
     static_dir = os.path.join(os.path.dirname(__file__), "static")
     if os.path.exists(static_dir):
@@ -170,7 +170,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
                 raise HTTPException(status_code=400, detail="Uploaded file is empty.")
             res = import_archive_bundle(db, content, mode=mode)
             # Re-fit cluster projector with new data
-            cluster_projector.fit(n_points_per_model=25)
+            cluster_projector.fit()
             return res
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))

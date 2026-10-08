@@ -116,19 +116,20 @@ const I18N = {
     stat_margin_label: "吻合度优势: ",
     stat_entropy_label: "不确定性: ",
     forest_title: "各模型独立吻合度与置信区间",
-    forest_boot: "双层区间: 68% (1σ) / 95% (2σ)",
+    forest_boot: "双层区间: 68% / 95%",
     forest_col_model: "候选模型与独立吻合度",
-    forest_col_ci: "68% 核心区间 / 95% 全幅区间",
+    forest_col_ci: "95% 置信区间",
     forest_tooltip_fit: "独立吻合度",
     forest_tooltip_post: "归一化排他后验",
-    forest_tooltip_ci: "95% 独立置信区间",
-    ci_legend_68: "68% 核心区间 (1σ)",
-    ci_legend_95: "95% 全幅区间 (2σ)",
+    forest_tooltip_ci: "95% 置信区间",
+    ci_legend_68: "68% 核心区间",
+    ci_legend_95: "95% 置信区间",
+    ci_point_tip: "中心估计点",
     stat_details_toggle: "查看统计量明细与方差分解 (SE, ΔLL, N_ref)",
     th_stat_model: "候选模型",
     th_stat_fitness: "独立吻合度",
-    th_stat_ci68: "68% 核心区间 (1σ)",
-    th_stat_ci95: "95% 全幅区间 (2σ)",
+    th_stat_ci68: "68% 核心区间",
+    th_stat_ci95: "95% 置信区间",
     th_stat_ll: "累计似然 ΣlnP",
     th_stat_delta_ll: "净对数增益 ΔLL",
     th_stat_se: "标准误 SE",
@@ -266,19 +267,20 @@ const I18N = {
     stat_margin_label: "Fit Margin: ",
     stat_entropy_label: "Entropy: ",
     forest_title: "Candidate Model Fitness & Confidence Intervals",
-    forest_boot: "Dual CI: 68% (1σ) / 95% (2σ)",
+    forest_boot: "Dual CI: 68% / 95%",
     forest_col_model: "Candidate Model & Independent Fit",
-    forest_col_ci: "68% Core CI / 95% Full CI",
+    forest_col_ci: "95% Confidence Interval",
     forest_tooltip_fit: "Independent Fitness",
     forest_tooltip_post: "Normalized Posterior",
-    forest_tooltip_ci: "95% Independent CI",
-    ci_legend_68: "68% Core CI (1σ)",
-    ci_legend_95: "95% Full CI (2σ)",
+    forest_tooltip_ci: "95% Confidence Interval",
+    ci_legend_68: "68% Core Interval",
+    ci_legend_95: "95% Confidence Interval",
+    ci_point_tip: "Point Estimate",
     stat_details_toggle: "Statistical Diagnostics & Variance Decomposition (SE, ΔLL, N_ref)",
     th_stat_model: "Candidate Model",
     th_stat_fitness: "Fitness",
-    th_stat_ci68: "68% Core CI (1σ)",
-    th_stat_ci95: "95% Full CI (2σ)",
+    th_stat_ci68: "68% Core CI",
+    th_stat_ci95: "95% Confidence CI",
     th_stat_ll: "Log-Likelihood ΣlnP",
     th_stat_delta_ll: "Net Log Gain ΔLL",
     th_stat_se: "Std Error (SE)",
@@ -942,14 +944,14 @@ function renderForestPlot(
     <div class="px-4 py-2.5 grid grid-cols-12 gap-4 text-xs text-slate-500 dark:text-slate-400 font-mono border-b border-slate-200 dark:border-slate-800/80 items-center">
       <div class="col-span-12 sm:col-span-5 font-semibold flex items-center justify-between">
         <span>${t("forest_col_model")}</span>
-        <div class="flex items-center gap-2 text-[11px] font-normal">
-          <span class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
-            <span class="w-2.5 h-1.5 rounded-xs bg-sky-500/40 border border-sky-500 inline-block"></span>
-            <span>68% (1σ)</span>
+        <div class="flex items-center gap-2.5 text-[11px] font-normal">
+          <span class="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+            <span class="w-3 h-2 rounded-xs bg-sky-500/40 border border-sky-500 inline-block"></span>
+            <span>${t("ci_legend_68")}</span>
           </span>
-          <span class="inline-flex items-center gap-1 text-slate-400">
-            <span class="w-2.5 h-0.5 bg-slate-400 inline-block"></span>
-            <span>95% (2σ)</span>
+          <span class="inline-flex items-center gap-1.5 text-slate-400">
+            <span class="w-3 h-0.5 bg-slate-400 inline-block"></span>
+            <span>${t("ci_legend_95")}</span>
           </span>
         </div>
       </div>
@@ -970,13 +972,13 @@ function renderForestPlot(
     const color = modelColorMap[model] || "#0284c7";
     const probPct = (prob * 100).toFixed(1);
     
-    // 95% Confidence Interval (2 sigma, full outer bounds)
+    // 95% Confidence Interval (full outer bounds)
     const ci95 = confidenceIntervals[model] || [prob, prob];
     const ci95LowPct = Math.max(0, ci95[0] * 100);
     const ci95HighPct = Math.min(100, ci95[1] * 100);
     const ci95WidthPct = Math.max(0.6, ci95HighPct - ci95LowPct);
 
-    // 68% Confidence Interval (1 sigma, core central probability mass)
+    // 68% Confidence Interval (core central probability mass)
     const ci68 = ci68Map[model] || [prob, prob];
     const ci68LowPct = Math.max(0, ci68[0] * 100);
     const ci68HighPct = Math.min(100, ci68[1] * 100);
@@ -994,28 +996,24 @@ function renderForestPlot(
 
     html += `
       <div class="bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/90 rounded-lg p-3.5 sm:p-4 grid grid-cols-12 gap-3 sm:gap-4 items-center hover:border-slate-300 dark:hover:border-slate-700 transition shadow-2xs">
-        <!-- Model Info Column -->
+        <!-- Model Info Column: Only display model name, point estimate, and 95% CI -->
         <div class="col-span-12 sm:col-span-5 flex items-center justify-between gap-2 min-w-0">
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs" style="background-color: ${color}"></span>
             <span class="font-bold text-slate-900 dark:text-white text-sm truncate" title="${model}">${model}</span>
           </div>
-          <div class="flex items-center gap-1.5 font-mono shrink-0">
+          <div class="flex items-center gap-2 font-mono shrink-0">
             <span class="text-sm font-bold text-sky-600 dark:text-sky-400">${probPct}%</span>
-            <!-- 68% Core Interval Badge (1-sigma) -->
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800/70 px-2 py-0.5 rounded shadow-2xs" title="${t("ci_legend_68")}">
-              [${ci68LowPct.toFixed(1)}% ~ ${ci68HighPct.toFixed(1)}%]
-            </span>
-            <!-- 95% Tail Whisker Interval Badge (2-sigma) -->
-            <span class="text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800 hidden md:inline" title="${t("ci_legend_95")}">
-              95%: [${ci95LowPct.toFixed(1)}% ~ ${ci95HighPct.toFixed(1)}%]
+            <!-- Clean single 95% interval pill badge with hover explanation -->
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 shadow-2xs cursor-help" title="${t("ci_legend_95")}: [${ci95LowPct.toFixed(1)}% ~ ${ci95HighPct.toFixed(1)}%] (${t("ci_legend_68")}: [${ci68LowPct.toFixed(1)}% ~ ${ci68HighPct.toFixed(1)}%])">
+              [${ci95LowPct.toFixed(1)}% ~ ${ci95HighPct.toFixed(1)}%]
             </span>
           </div>
         </div>
 
         <!-- Statistical Error Bar Coordinate Strip (0% to 100%) -->
         <div class="col-span-12 sm:col-span-7">
-          <div class="relative w-full h-9 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 rounded-md flex items-center px-1 group cursor-help" title="${tooltipText}">
+          <div class="relative w-full h-9 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 rounded-md flex items-center px-1 group cursor-default" title="${tooltipText}">
             <!-- Vertical Grid Reference Lines at 0%, 25%, 50%, 75%, 100% -->
             <div class="absolute inset-0 flex justify-between pointer-events-none opacity-25">
               <div class="border-r border-slate-400 dark:border-slate-600 h-full w-0"></div>
@@ -1025,20 +1023,20 @@ function renderForestPlot(
               <div class="border-r border-slate-400 dark:border-slate-600 h-full w-0"></div>
             </div>
 
-            <!-- 95% Confidence Interval Whisker Line (Thin Whisker, 2-sigma) -->
-            <div class="absolute h-0.5 rounded-full pointer-events-none" style="left: ${ci95LowPct}%; width: ${ci95WidthPct}%; background-color: ${color}; opacity: 0.7;"></div>
+            <!-- 95% Confidence Interval Whisker Line (Thin Whisker) -->
+            <div class="absolute h-1 rounded-full cursor-help hover:h-1.5 transition-all z-0" style="left: ${ci95LowPct}%; width: ${ci95WidthPct}%; background-color: ${color}; opacity: 0.7;" title="${t("ci_legend_95")}: [${ci95LowPct.toFixed(1)}% ~ ${ci95HighPct.toFixed(1)}%]"></div>
 
             <!-- Left Whisker End Cap -->
-            <div class="absolute w-0.5 h-3.5 pointer-events-none" style="left: ${ci95LowPct}%; background-color: ${color}; top: 50%; transform: translateY(-50%); opacity: 0.85;"></div>
+            <div class="absolute w-1 h-3.5 rounded-xs cursor-help hover:w-1.5 transition-all z-0" style="left: ${ci95LowPct}%; background-color: ${color}; top: 50%; transform: translateY(-50%); opacity: 0.85;" title="${t("ci_legend_95")}: [${ci95LowPct.toFixed(1)}% ~ ${ci95HighPct.toFixed(1)}%]"></div>
 
             <!-- Right Whisker End Cap -->
-            <div class="absolute w-0.5 h-3.5 pointer-events-none" style="left: ${ci95HighPct}%; background-color: ${color}; top: 50%; transform: translateY(-50%); opacity: 0.85;"></div>
+            <div class="absolute w-1 h-3.5 rounded-xs cursor-help hover:w-1.5 transition-all z-0" style="left: ${ci95HighPct}%; background-color: ${color}; top: 50%; transform: translateY(-50%); opacity: 0.85;" title="${t("ci_legend_95")}: [${ci95LowPct.toFixed(1)}% ~ ${ci95HighPct.toFixed(1)}%]"></div>
 
-            <!-- 68% Core Confidence Interval Pill Band (Thick Band, 1-sigma) -->
-            <div class="absolute h-3 rounded-full pointer-events-none transition-all shadow-2xs" style="left: ${ci68LowPct}%; width: ${ci68WidthPct}%; background-color: ${color}; opacity: 0.38; border: 1px solid ${color}90;"></div>
+            <!-- 68% Core Confidence Interval Pill Band (Thick Band) -->
+            <div class="absolute h-3.5 rounded-full cursor-help transition-all shadow-2xs hover:h-4.5 hover:opacity-60 z-10" style="left: ${ci68LowPct}%; width: ${ci68WidthPct}%; background-color: ${color}; opacity: 0.38; border: 1.5px solid ${color}90;" title="${t("ci_legend_68")}: [${ci68LowPct.toFixed(1)}% ~ ${ci68HighPct.toFixed(1)}%]"></div>
 
             <!-- Point Estimate Marker (Center Circle) -->
-            <div class="absolute w-4 h-4 rounded-full border-2 border-white dark:border-slate-950 shadow-md z-10 transition-transform group-hover:scale-125" style="left: ${centerPct}%; background-color: ${color}; top: 50%; transform: translate(-50%, -50%);"></div>
+            <div class="absolute w-4 h-4 rounded-full border-2 border-white dark:border-slate-950 shadow-md z-20 cursor-help transition-transform hover:scale-135" style="left: ${centerPct}%; background-color: ${color}; top: 50%; transform: translate(-50%, -50%);" title="${t("ci_point_tip")}: ${probPct}% (LL: ${ll})"></div>
           </div>
         </div>
       </div>
@@ -1624,7 +1622,7 @@ function setupPcaCanvasListeners(canvas, clusterData) {
 
         if (nearest.type === "user") {
           tooltip.className = "absolute pointer-events-none px-3 py-1.5 rounded-lg text-xs font-mono shadow-xl border z-30 transition-all duration-75 bg-amber-50 dark:bg-slate-900 border-amber-500 text-amber-700 dark:text-amber-400";
-          tooltip.innerHTML = `<span class="font-bold">★ ${t("pca_user_point")}</span><div class="text-[11px] text-slate-500 dark:text-slate-400">${t("pca_coord_label")}(${nearest.x.toFixed(3)}, ${nearest.y.toFixed(3)})</div>`;
+          tooltip.innerHTML = `<span class="font-bold">${t("pca_user_point")}</span><div class="text-[11px] text-slate-500 dark:text-slate-400">${t("pca_coord_label")}(${nearest.x.toFixed(3)}, ${nearest.y.toFixed(3)})</div>`;
         } else {
           tooltip.className = "absolute pointer-events-none px-3 py-1.5 rounded-lg text-xs font-mono shadow-xl border z-30 transition-all duration-75 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200";
           tooltip.innerHTML = `
