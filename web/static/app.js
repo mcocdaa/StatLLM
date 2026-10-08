@@ -508,7 +508,7 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
   const rowId = `sub-row-${rowCounter}`;
   const row = document.createElement("div");
   row.id = rowId;
-  row.className = "submission-row w-full bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 sm:p-5 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-5 items-start transition";
+  row.className = "submission-row w-full bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 sm:p-5 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch transition";
 
   let optionsHtml = "";
   let selectedPrompt = "";
@@ -530,9 +530,9 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
 
   row.innerHTML = `
     <!-- Left Column: Probe Selector & Prompt Box with Minimal Copy SVG -->
-    <div class="lg:col-span-5 space-y-2.5">
+    <div class="lg:col-span-5 flex flex-col justify-between min-h-0">
       <div>
-        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2 h-6">
           <span class="w-2 h-2 rounded-full bg-sky-500"></span>
           <span>${t("probe_label")}</span>
         </label>
@@ -541,7 +541,7 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
         </select>
       </div>
 
-      <div class="relative p-3.5 rounded-lg bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/90 group">
+      <div class="relative mt-2.5 p-3.5 rounded-lg bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/90 group flex-1 min-h-[76px] flex flex-col justify-center">
         <p class="row-prompt-text text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed font-mono select-all pr-8 break-words whitespace-pre-wrap">${selectedPrompt}</p>
         <button type="button" onclick="copyRowPrompt(this)" title="${t("prompt_copy_title")}" class="absolute top-2.5 right-2.5 p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 transition cursor-pointer">
           <svg class="w-4 h-4 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
@@ -551,31 +551,29 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
     </div>
 
     <!-- Right Column: Answer Input & Duplicate (+) / Delete SVG Actions -->
-    <div class="lg:col-span-7 flex flex-col justify-between h-full">
-      <div>
-        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-          <span class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>${t("output_label")}</span>
-          </span>
-          <span class="text-xs font-normal text-slate-400">${t("output_tip")}</span>
-        </label>
+    <div class="lg:col-span-7 flex flex-col justify-between min-h-0">
+      <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between h-6">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>${t("output_label")}</span>
+        </span>
+        <span class="text-xs font-normal text-slate-400">${t("output_tip")}</span>
+      </label>
+      
+      <div class="flex flex-col sm:flex-row gap-2.5 items-stretch mt-1.5 flex-1 min-h-0">
+        <div class="w-full flex-1 flex flex-col min-h-0">
+          <textarea class="row-raw-text w-full h-full flex-1 min-h-[120px] bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-3.5 text-sm text-slate-900 dark:text-slate-100 font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition resize-none" placeholder="${t("output_placeholder")}">${rawText}</textarea>
+        </div>
         
-        <div class="flex flex-col sm:flex-row gap-2.5 items-start mt-1.5">
-          <div class="w-full flex-1">
-            <textarea class="row-raw-text w-full h-32 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-3.5 text-sm text-slate-900 dark:text-slate-100 font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition resize-y" placeholder="${t("output_placeholder")}">${rawText}</textarea>
-          </div>
-          
-          <div class="flex sm:flex-col gap-1.5 shrink-0 self-end sm:self-start">
-            <button type="button" onclick="duplicateRow(this)" title="${t("action_resample_tip")}" class="px-3 py-2.5 sm:p-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 text-sky-600 dark:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-400 transition flex items-center gap-1.5 justify-center cursor-pointer shadow-2xs">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              <span class="sm:hidden text-xs font-semibold">${t("action_resample")}</span>
-            </button>
-            <button type="button" onclick="deleteRow(this)" title="${t("action_delete_tip")}" class="px-3 py-2.5 sm:p-2.5 rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-slate-950 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-800 transition flex items-center gap-1.5 justify-center cursor-pointer shadow-2xs">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              <span class="sm:hidden text-xs font-semibold">${t("action_delete")}</span>
-            </button>
-          </div>
+        <div class="flex sm:flex-col gap-1.5 shrink-0 self-end sm:self-start">
+          <button type="button" onclick="duplicateRow(this)" title="${t("action_resample_tip")}" class="px-3 py-2.5 sm:p-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 text-sky-600 dark:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-400 transition flex items-center gap-1.5 justify-center cursor-pointer shadow-2xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="sm:hidden text-xs font-semibold">${t("action_resample")}</span>
+          </button>
+          <button type="button" onclick="deleteRow(this)" title="${t("action_delete_tip")}" class="px-3 py-2.5 sm:p-2.5 rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-slate-950 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-800 transition flex items-center gap-1.5 justify-center cursor-pointer shadow-2xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            <span class="sm:hidden text-xs font-semibold">${t("action_delete")}</span>
+          </button>
         </div>
       </div>
     </div>
