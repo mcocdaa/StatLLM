@@ -115,7 +115,7 @@ const I18N = {
     verdict_title: "判定结果",
     stat_margin_label: "吻合度优势: ",
     stat_entropy_label: "不确定性: ",
-    forest_title: "各模型独立吻合度与 95% 置信区间 (非归一化绝对拟合)",
+    forest_title: "各模型独立吻合度与 95% 置信区间",
     forest_boot: "Bootstrap B=800",
     forest_col_model: "候选模型与独立吻合度",
     forest_col_ci: "95% 独立置信区间",
@@ -254,7 +254,7 @@ const I18N = {
     verdict_title: "Verdict",
     stat_margin_label: "Fit Margin: ",
     stat_entropy_label: "Entropy: ",
-    forest_title: "Model-Independent Fitness & 95% Confidence Intervals (Unnormalized)",
+    forest_title: "Model-Independent Fitness & 95% Confidence Intervals",
     forest_boot: "Bootstrap B=800",
     forest_col_model: "Candidate Model & Independent Fit",
     forest_col_ci: "95% Independent CI",
@@ -901,11 +901,11 @@ function renderForestPlot(fitnessScores, confidenceIntervals, logLikelihoods, po
       </div>
       <div class="col-span-12 sm:col-span-7 relative">
         <div class="flex justify-between w-full text-xs px-1">
-          <span>0.0 (0%)</span>
-          <span>0.25</span>
-          <span>0.50</span>
-          <span>0.75</span>
-          <span>1.0 (100%)</span>
+          <span>0%</span>
+          <span>25%</span>
+          <span>50%</span>
+          <span>75%</span>
+          <span>100%</span>
         </div>
       </div>
     </div>
