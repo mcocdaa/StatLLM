@@ -674,6 +674,8 @@ function resetSubmissions() {
   if (!container) return;
   container.innerHTML = "";
   addSubmissionRow("arr_int5", "");
+  const consentEl = document.getElementById("consent-checkbox");
+  if (consentEl) consentEl.checked = false;
 }
 
 /**
@@ -699,7 +701,7 @@ async function executeEvaluation() {
   const lambdaSlider = document.getElementById("lambda-slider");
   const posLambda = lambdaSlider ? parseFloat(lambdaSlider.value) : 0.50;
   const consentEl = document.getElementById("consent-checkbox");
-  const consent = consentEl ? consentEl.checked : true;
+  const consent = consentEl ? consentEl.checked : false;
 
   const runBtn = document.getElementById("run-eval-btn");
   const spinner = document.getElementById("run-btn-spinner");
