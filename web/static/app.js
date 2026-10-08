@@ -864,7 +864,7 @@ function renderForestPlot(posteriors, confidenceIntervals, logLikelihoods) {
 }
 
 /**
- * 2D PCA Cluster Canvas (Theme Adaptive)
+ * 2D PCA Cluster Canvas with Adaptive Scaling & Statistical Confidence Region (范围与点解耦)
  */
 function renderClusterCanvas(clusterData) {
   if (!clusterData || !clusterData.clusters) return;
@@ -902,15 +902,21 @@ function renderClusterCanvas(clusterData) {
     ctx.stroke();
   }
 
-  // Calculate domain bounds
-  let minX = -1.5, maxX = 1.5, minY = -1.5, maxY = 1.5;
+  // 1. True Adaptive Bounding Box
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
   clusterData.clusters.forEach(c => {
-    c.points.forEach(p => {
+    (c.points || []).forEach(p => {
       minX = Math.min(minX, p[0]);
       maxX = Math.max(maxX, p[0]);
       minY = Math.min(minY, p[1]);
       maxY = Math.max(maxY, p[1]);
     });
+    if (c.center) {
+      minX = Math.min(minX, c.center[0]);
+      maxX = Math.max(maxX, c.center[0]);
+      minY = Math.min(minY, c.center[1]);
+      maxY = Math.max(maxY, c.center[1]);
+    }
   });
 
   if (clusterData.user_point) {
@@ -920,80 +926,164 @@ function renderClusterCanvas(clusterData) {
     maxY = Math.max(maxY, clusterData.user_point[1]);
   }
 
-  const padX = (maxX - minX) * 0.15;
-  const padY = (maxY - minY) * 0.15;
+  if (!isFinite(minX) || !isFinite(maxX) || minX === maxX) {
+    minX = -0.5; maxX = 0.5; minY = -0.5; maxY = 0.5;
+  }
+
+  // Generous padding so ellipses and labels never clip
+  const spanX = Math.max(maxX - minX, 0.1);
+  const spanY = Math.max(maxY - minY, 0.1);
+  const padX = spanX * 0.28;
+  const padY = spanY * 0.28;
   minX -= padX; maxX += padX;
   minY -= padY; maxY += padY;
 
   function toScreen(x, y) {
-    const sx = ((x - minX) / (maxX - minX)) * (w - 60) + 30;
-    const sy = h - (((y - minY) / (maxY - minY)) * (h - 60) + 30);
+    const sx = ((x - minX) / (maxX - minX)) * (w - 70) + 35;
+    const sy = h - (((y - minY) / (maxY - minY)) * (h - 70) + 35);
     return [sx, sy];
   }
 
-  // Draw model clusters
+  const scaleX = (w - 70) / (maxX - minX);
+  const scaleY = (h - 70) / (maxY - minY);
+
+  // Helper: compute covariance confidence ellipse
+  function computeConfidenceEllipse(points) {
+    if (!points || points.length < 3) return null;
+    const n = points.length;
+    let mx = 0, my = 0;
+    for (const p of points) { mx += p[0]; my += p[1]; }
+    mx /= n; my /= n;
+
+    let sxx = 0, syy = 0, sxy = 0;
+    for (const p of points) {
+      const dx = p[0] - mx;
+      const dy = p[1] - my;
+      sxx += dx * dx;
+      syy += dy * dy;
+      sxy += dx * dy;
+    }
+    sxx /= n; syy /= n; sxy /= n;
+
+    const trace = sxx + syy;
+    const det = sxx * syy - sxy * sxy;
+    const disc = Math.sqrt(Math.max(0, (trace * trace) / 4 - det));
+    const l1 = Math.max(0.00001, trace / 2 + disc);
+    const l2 = Math.max(0.00001, trace / 2 - disc);
+    const angle = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+
+    const scale = 2.45; // ~95% confidence coverage
+    return {
+      mx, my,
+      rx: Math.sqrt(l1) * scale,
+      ry: Math.sqrt(l2) * scale,
+      angle: angle
+    };
+  }
+
+  // 2. Pass 1: Draw Confidence Region (范围)
+  clusterData.clusters.forEach(c => {
+    const color = c.color || "#0284c7";
+    const ell = computeConfidenceEllipse(c.points);
+    if (ell) {
+      const [csx, csy] = toScreen(ell.mx, ell.my);
+      const sRx = Math.max(14, ell.rx * scaleX);
+      const sRy = Math.max(14, ell.ry * scaleY);
+
+      ctx.save();
+      ctx.translate(csx, csy);
+      ctx.rotate(-ell.angle);
+
+      // Semi-transparent shaded territory
+      ctx.fillStyle = color + "1a"; // ~10% opacity
+      ctx.beginPath();
+      ctx.ellipse(0, 0, sRx, sRy, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Delicate dashed contour
+      ctx.strokeStyle = color + "66"; // ~40% opacity
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+  });
+
+  // 3. Pass 2: Draw Individual Scatter Points (点)
   clusterData.clusters.forEach(c => {
     const color = c.color || "#0284c7";
 
-    // Cluster scatter points
-    ctx.fillStyle = color + "44";
+    // Small crisp discrete sample dots
+    ctx.fillStyle = color + "aa";
     c.points.forEach(p => {
       const [sx, sy] = toScreen(p[0], p[1]);
       ctx.beginPath();
-      ctx.arc(sx, sy, 3.5, 0, Math.PI * 2);
+      ctx.arc(sx, sy, 2.2, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    // Cluster centroid marker
+    // Centroid Anchor Point
     const [cx, cy] = toScreen(c.center[0], c.center[1]);
-    ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(cx, cy, 6.5, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
     ctx.fill();
     ctx.strokeStyle = isDark ? "#ffffff" : "#0f172a";
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Text background badge for model label
+    // Model Label Badge (Positioned smartly outward)
     ctx.font = "bold 12px Inter, sans-serif";
     const textWidth = ctx.measureText(c.model_name).width;
-    const labelX = cx + 10;
-    const labelY = c.model_name.includes("GPT") ? cy - 8 : (c.model_name.includes("Grok") ? cy + 14 : cy + 4);
     
-    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.8)" : "rgba(255, 255, 255, 0.88)";
-    ctx.fillRect(labelX - 3, labelY - 12, textWidth + 6, 16);
-    ctx.strokeStyle = isDark ? "rgba(51, 65, 85, 0.5)" : "rgba(203, 213, 225, 0.9)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(labelX - 3, labelY - 12, textWidth + 6, 16);
+    let offsetX = 10;
+    let offsetY = -8;
+    if (cx > w * 0.5) offsetX = 10;
+    else offsetX = -textWidth - 14;
+    if (cy > h * 0.5) offsetY = 14;
+    else offsetY = -10;
 
-    ctx.fillStyle = isDark ? "#e2e8f0" : "#1e293b";
+    const labelX = cx + offsetX;
+    const labelY = cy + offsetY;
+
+    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.9)";
+    ctx.fillRect(labelX - 4, labelY - 12, textWidth + 8, 16);
+    ctx.strokeStyle = isDark ? "rgba(51, 65, 85, 0.6)" : "rgba(203, 213, 225, 0.9)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(labelX - 4, labelY - 12, textWidth + 8, 16);
+
+    ctx.fillStyle = isDark ? "#f1f5f9" : "#0f172a";
     ctx.fillText(c.model_name, labelX, labelY);
   });
 
-  // Draw user test sample star
+  // 4. Pass 3: Draw User Test Sample Point (★)
   if (clusterData.user_point) {
     const [ux, uy] = toScreen(clusterData.user_point[0], clusterData.user_point[1]);
 
-    ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
+    // Outer subtle pulse ring
+    ctx.fillStyle = "rgba(245, 158, 11, 0.18)";
     ctx.beginPath();
-    ctx.arc(ux, uy, 18, 0, Math.PI * 2);
+    ctx.arc(ux, uy, 12, 0, Math.PI * 2);
     ctx.fill();
 
+    // Central crisp golden star target
     ctx.fillStyle = "#f59e0b";
     ctx.strokeStyle = isDark ? "#ffffff" : "#0f172a";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.arc(ux, uy, 8, 0, Math.PI * 2);
+    ctx.arc(ux, uy, 5.0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
+    // Target callout pill tag
     ctx.font = "bold 12px Inter, sans-serif";
     const userText = t("pca_user_point");
     const uWidth = ctx.measureText(userText).width;
-    const uX = ux - uWidth / 2;
-    const uY = uy - 16;
+    const uX = Math.max(10, Math.min(w - uWidth - 20, ux - uWidth / 2));
+    const uY = uy > 40 ? uy - 16 : uy + 26;
 
-    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.95)";
+    ctx.fillStyle = isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)";
     ctx.fillRect(uX - 5, uY - 12, uWidth + 10, 16);
     ctx.strokeStyle = "#f59e0b";
     ctx.lineWidth = 1.5;
