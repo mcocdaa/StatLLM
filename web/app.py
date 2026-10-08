@@ -3,8 +3,9 @@ StatLLM Web API Application.
 """
 
 import os
+from datetime import datetime
 from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
@@ -13,6 +14,8 @@ from statllm.database import Database
 from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
 from statllm.probes import list_probes, get_probe
+from statllm.archive import export_archive_bundle, import_archive_bundle
+
 
 
 class SubmissionItem(BaseModel):
@@ -141,6 +144,38 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
             "weight": req.weight,
             "updated_stats": db.get_stats()
         }
+
+    @app.get("/api/archive/export")
+    def export_archive():
+        try:
+            ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            zip_bytes = export_archive_bundle(db)
+            filename = f"statllm_archive_{ts}.zip"
+            return Response(
+                content=zip_bytes,
+                media_type="application/zip",
+                headers={
+                    "Content-Disposition": f"attachment; filename={filename}",
+                    "Access-Control-Expose-Headers": "Content-Disposition"
+                }
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to export archive: {str(e)}")
+
+    @app.post("/api/archive/import")
+    async def import_archive(request: Request, mode: str = "merge"):
+        try:
+            content = await request.body()
+            if not content:
+                raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+            res = import_archive_bundle(db, content, mode=mode)
+            # Re-fit cluster projector with new data
+            cluster_projector.fit(n_points_per_model=25)
+            return res
+        except ValueError as ve:
+            raise HTTPException(status_code=400, detail=str(ve))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
 
     return app
 

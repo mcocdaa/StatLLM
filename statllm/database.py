@@ -445,3 +445,18 @@ class Database:
                 "by_model": by_model,
                 "by_perturbation": by_perturbation
             }
+
+    def get_all_samples(self) -> List[Dict[str, Any]]:
+        """Returns all sample records ordered by ID."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM samples ORDER BY id ASC")
+            return [dict(r) for r in cursor.fetchall()]
+
+    def clear_all_data(self):
+        """Wipes samples and token_counts tables while preserving schema."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM samples")
+            cursor.execute("DELETE FROM token_counts")
+            conn.commit()

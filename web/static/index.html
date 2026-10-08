@@ -474,6 +474,33 @@
         </div>
       </div>
 
+      <!-- Archive & Rapid Migration Card -->
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200" data-i18n="db_archive_title">
+              全量底库归档与热迁移 (ZIP Bundle)
+            </h3>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl" data-i18n="db_archive_desc">
+            支持一键导出自包含 ZIP 压缩包（包含 manifest 描述、JSONL 样本流与 SQLite 二进制快照），可直接在其他环境或新服务器上一键导入恢复。
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <button onclick="exportArchiveZip()" id="btn-export-archive" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition cursor-pointer shadow-2xs group">
+            <svg class="w-4 h-4 text-sky-600 dark:text-sky-400 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span data-i18n="db_btn_export">导出归档包 (ZIP)</span>
+          </button>
+          
+          <button onclick="openImportModal()" id="btn-import-archive" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold bg-sky-600 hover:bg-sky-500 text-white transition cursor-pointer shadow-2xs group">
+            <svg class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <span data-i18n="db_btn_import">导入归档包 (ZIP)</span>
+          </button>
+          <input type="file" id="archive-file-input" accept=".zip" class="hidden" onchange="onArchiveFileSelected(this)">
+        </div>
+      </div>
+
       <!-- Models Breakdown Table -->
       <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-xs">
         <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 uppercase tracking-wider" data-i18n="db_table_title">分模型样本与 Token 消耗</h3>
@@ -498,6 +525,36 @@
     </div>
 
   </main>
+
+  <!-- Import Confirmation Modal -->
+  <div id="import-modal" style="display: none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <span data-i18n="modal_import_title">导入底库归档 ZIP</span>
+        </h3>
+        <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none cursor-pointer">&times;</button>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="modal_import_desc">
+        请选择导入策略：增量合并会保留现有样本并跳过重复项；全量覆盖会重置当前库为压缩包内的数据快照。
+      </p>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300" data-i18n="modal_import_mode_label">导入策略：</label>
+        <select id="import-mode-select" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 font-medium">
+          <option value="merge" data-i18n="modal_import_opt_merge">增量合并 (保留现有，去重导入)</option>
+          <option value="replace" data-i18n="modal_import_opt_replace">全量覆盖 (重置底库为新快照)</option>
+        </select>
+      </div>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="closeImportModal()" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" data-i18n="modal_cancel">取消</button>
+        <button onclick="document.getElementById('archive-file-input').click()" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-sky-600 hover:bg-sky-500 text-white transition cursor-pointer" data-i18n="modal_choose_file">选择 ZIP 文件</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Footer -->
   <footer class="border-t border-slate-200 dark:border-slate-800/80 py-5 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-950 transition-colors duration-200">

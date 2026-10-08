@@ -152,6 +152,23 @@ const I18N = {
     th_comp_tok: "生成 Token",
     th_total_tok: "总 Token",
 
+    db_archive_title: "全量底库归档与热迁移 (ZIP Bundle)",
+    db_archive_desc: "支持一键导出自包含 ZIP 压缩包（包含 manifest 描述、JSONL 样本流与 SQLite 二进制快照），可直接在其他环境或新服务器上一键导入恢复。",
+    db_btn_export: "导出归档包 (ZIP)",
+    db_btn_import: "导入归档包 (ZIP)",
+    modal_import_title: "导入底库归档 ZIP",
+    modal_import_desc: "请选择导入策略：增量合并会保留现有样本并跳过重复项；全量覆盖会重置当前库为压缩包内的数据快照。",
+    modal_import_mode_label: "导入策略：",
+    modal_import_opt_merge: "增量合并 (保留现有，去重导入)",
+    modal_import_opt_replace: "全量覆盖 (重置底库为新快照)",
+    modal_cancel: "取消",
+    modal_choose_file: "选择 ZIP 文件",
+    toast_exporting: "正在生成 ZIP 归档包...",
+    toast_importing: "正在解析并导入归档包...",
+    toast_import_success: "成功导入 {n} 条样本 (跳过 {skip} 条重复项)！",
+    toast_import_fail: "导入失败: ",
+    toast_export_fail: "导出失败: ",
+
     footer_license: "StatLLM 开源项目 · 遵循 MIT 开源协议",
     footer_repo: "GitHub 仓库",
     alert_no_input: "请在回答框内填入至少一个探针的回答！",
@@ -259,6 +276,23 @@ const I18N = {
     th_prompt_tok: "Prompt Tokens",
     th_comp_tok: "Completion Tokens",
     th_total_tok: "Total Tokens",
+
+    db_archive_title: "Database Archive & Rapid Migration (ZIP Bundle)",
+    db_archive_desc: "Export a self-contained ZIP archive bundle (including manifest, JSONL sample streams, and SQLite binary snapshot) for instant 1-click restore across machines.",
+    db_btn_export: "Export Archive (ZIP)",
+    db_btn_import: "Import Archive (ZIP)",
+    modal_import_title: "Import Database Archive ZIP",
+    modal_import_desc: "Select import strategy: Merge appends new samples and skips duplicates; Replace resets the database to the archive snapshot.",
+    modal_import_mode_label: "Import Strategy:",
+    modal_import_opt_merge: "Incremental Merge (Keep existing, skip duplicates)",
+    modal_import_opt_replace: "Full Replace (Reset database to snapshot)",
+    modal_cancel: "Cancel",
+    modal_choose_file: "Select ZIP File",
+    toast_exporting: "Generating ZIP archive...",
+    toast_importing: "Parsing and importing archive bundle...",
+    toast_import_success: "Successfully imported {n} samples (skipped {skip} duplicates)!",
+    toast_import_fail: "Import failed: ",
+    toast_export_fail: "Export failed: ",
 
     footer_license: "StatLLM Open Source Project · Under MIT License",
     footer_repo: "GitHub Repository",
@@ -450,6 +484,11 @@ function setupTabs() {
     
     setTimeout(renderMath, 50);
   };
+
+  const hash = window.location.hash.replace("#", "");
+  if (hash && ["tab-lab", "tab-theory", "tab-db"].includes(hash)) {
+    window.switchToTab(hash);
+  }
 }
 
 function renderMath() {
@@ -998,3 +1037,114 @@ async function refreshDbStats() {
     console.error("Failed to refresh db stats", err);
   }
 }
+
+/**
+ * Archive Export & Import System
+ */
+async function exportArchiveZip() {
+  const btn = document.getElementById("btn-export-archive");
+  const origText = btn ? btn.innerHTML : "";
+  showToast(t("toast_exporting"), "info");
+
+  try {
+    if (btn) btn.classList.add("opacity-60", "pointer-events-none");
+    const response = await fetch("/api/archive/export");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const disposition = response.headers.get("Content-Disposition");
+    let filename = `statllm_archive_${new Date().toISOString().slice(0, 10)}.zip`;
+    if (disposition && disposition.includes("filename=")) {
+      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      if (match && match[1]) filename = match[1].replace(/['"]/g, '');
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (err) {
+    showToast(t("toast_export_fail") + err.message, "error");
+  } finally {
+    if (btn) {
+      btn.classList.remove("opacity-60", "pointer-events-none");
+      btn.innerHTML = origText;
+    }
+  }
+}
+
+function openImportModal() {
+  const modal = document.getElementById("import-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeImportModal() {
+  const modal = document.getElementById("import-modal");
+  if (modal) modal.style.display = "none";
+  const input = document.getElementById("archive-file-input");
+  if (input) input.value = "";
+}
+
+async function onArchiveFileSelected(inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+
+  const mode = document.getElementById("import-mode-select")?.value || "merge";
+  closeImportModal();
+  showToast(t("toast_importing"), "info");
+
+  try {
+    const res = await fetch(`/api/archive/import?mode=${encodeURIComponent(mode)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/zip" },
+      body: file
+    });
+    const data = await res.json();
+    if (!res.ok || data.status !== "success") {
+      throw new Error(data.detail || "Import error");
+    }
+
+    const successMsg = t("toast_import_success")
+      .replace("{n}", data.imported_samples)
+      .replace("{skip}", data.skipped_duplicates || 0);
+    showToast(successMsg, "success");
+
+    // Refresh database statistics and headers
+    await refreshDbStats();
+    updateHeaderStats({ total_samples: data.total_samples });
+  } catch (err) {
+    showToast(t("toast_import_fail") + err.message, "error");
+  } finally {
+    inputEl.value = "";
+  }
+}
+
+function showToast(msg, type = "info") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  const bg = type === "error" 
+    ? "bg-rose-600 text-white" 
+    : type === "success" 
+      ? "bg-emerald-600 text-white" 
+      : "bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900";
+
+  toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition transform translate-y-2 opacity-0 duration-200 ${bg}`;
+  toast.textContent = msg;
+
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.remove("translate-y-2", "opacity-0");
+  });
+
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "translate-y-2");
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
