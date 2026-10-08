@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});}"></script>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 20h18'/><path d='M3 19.5c3 0 4.8-.8 6.5-6.5C10.6 9 11.2 4 12 4s1.4 5 2.5 9C16.2 18.7 18 19.5 21 19.5'/><path d='M12 4v16' stroke-dasharray='2 2' stroke-width='1.5'/></svg>">
   <link rel="stylesheet" href="/static/style.css">
   <script>
     tailwind.config = {
@@ -34,8 +35,12 @@
       <!-- Brand & Project Title -->
       <div class="flex items-center space-x-3">
         <a href="#" onclick="switchToTab('tab-lab')" class="flex items-center space-x-2.5 group">
-          <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 font-bold text-base shadow-xs">
-            ∑
+          <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 shadow-xs group-hover:border-sky-400 group-hover:scale-105 transition">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 20h18" />
+              <path d="M3 19.5c3 0 4.8-.8 6.5-6.5C10.6 9 11.2 4 12 4s1.4 5 2.5 9C16.2 18.7 18 19.5 21 19.5" />
+              <path d="M12 4v16" stroke-dasharray="2 2" stroke-width="1.5" class="opacity-60" />
+            </svg>
           </div>
           <div>
             <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-300 transition">StatLLM</span>
@@ -91,9 +96,6 @@
       
       <!-- Academic Header Banner -->
       <div class="border-b border-slate-200 dark:border-slate-800/80 pb-6">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono font-semibold bg-sky-50 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/80 mb-3">
-          <span data-i18n="hero_badge">大模型统计指纹黑盒归因</span>
-        </div>
         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3" data-i18n="hero_title">
           根据回答精准鉴定大模型底座
         </h1>
