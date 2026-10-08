@@ -180,7 +180,7 @@ def main():
     print(f"Registered {len(MODELS_CONFIG)} models in database.")
 
     # 2. Parallel collection (1 worker per model)
-    samples_per_probe = 4
+    samples_per_probe = 8
     total_expected = len(MODELS_CONFIG) * len(PROBES) * samples_per_probe
     print(f"Beginning concurrent collection: {len(MODELS_CONFIG)} models x {len(PROBES)} probes x {samples_per_probe} runs = {total_expected} total calls.")
 
@@ -217,7 +217,12 @@ def main():
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(all_records, f, ensure_ascii=False, indent=2)
 
-    print(f"Successfully inserted {len(all_records)} samples into statllm.db and saved to {out_json}")
+    # Checkpoint WAL so docker container sees changes immediately
+    import sqlite3
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+
+    print(f"Successfully inserted {len(all_records)} samples into statllm.db, checkpointed WAL, and saved to {out_json}")
 
 
 if __name__ == "__main__":

@@ -19,17 +19,21 @@ from statllm.database import Database
 
 
 class LikelihoodEvaluator:
-    def __init__(self, db: Database, alpha: float = 0.5, positional_lambda: float = 0.5):
+    def __init__(self, db: Database, alpha: float = 0.12, positional_lambda: float = 0.5):
         """
         db: Database instance
-        alpha: Dirichlet / Jeffreys prior pseudo-count (default 0.5)
+        alpha: Background prior smoothing weight (default 0.12).
+               Uses scale-invariant Jelinek-Mercer background interpolation:
+               P(token | probe, model) = (1 - alpha) * (c / total) + alpha * (1 / vocab_size)
+               This ensures models with smaller sample sizes are not artificially biased
+               over models with larger sample sizes.
         positional_lambda: Jelinek-Mercer interpolation weight for position-specific distribution.
                            Range: [0.0, 1.0]. Default: 0.5.
                            0.0 = pure global bag-of-tokens (unordered).
                            1.0 = pure position-specific distribution.
         """
         self.db = db
-        self.alpha = alpha
+        self.alpha = max(0.01, min(0.5, float(alpha)))
         self.positional_lambda = max(0.0, min(1.0, float(positional_lambda)))
 
     def get_token_prob(
@@ -40,11 +44,17 @@ class LikelihoodEvaluator:
         vocab_size: int
     ) -> float:
         """
-        Calculates smoothed conditional probability:
-        P(token | probe, model) = (Count(token) + alpha) / (Total + alpha * vocab_size)
+        Calculates scale-invariant Jelinek-Mercer smoothed conditional probability:
+        P(token | probe, model) = (1 - alpha) * (c / total_weight) + alpha * (1 / vocab_size)
         """
+        v_size = max(1, vocab_size)
+        bg_prob = 1.0 / v_size
+        if total_weight <= 0.0:
+            return bg_prob
+
         c = counts_dict.get(val, 0.0)
-        return (c + self.alpha) / (total_weight + self.alpha * vocab_size)
+        rel_freq = c / total_weight
+        return (1.0 - self.alpha) * rel_freq + self.alpha * bg_prob
 
     def get_interpolated_token_prob(
         self,
@@ -61,13 +71,15 @@ class LikelihoodEvaluator:
         P(token | pos, probe, model) = (1 - lam) * P_global(token) + lam * P_pos(token | pos)
         """
         p_global = self.get_token_prob(counts_dict, total_weight, val, vocab_size)
-        if lam <= 0.0 or expected_len <= 0:
+        if lam <= 0.0 or expected_len <= 0 or total_weight <= 0.0:
             return p_global
 
+        v_size = max(1, vocab_size)
+        bg_prob = 1.0 / v_size
         pos_tok = f"pos:{pos_idx}:{val}"
         c_pos = counts_dict.get(pos_tok, 0.0)
-        pos_tot = total_weight / max(1.0, float(expected_len))
-        p_pos = (c_pos + self.alpha) / (pos_tot + self.alpha * vocab_size)
+        rel_pos_freq = c_pos / total_weight
+        p_pos = (1.0 - self.alpha) * rel_pos_freq + self.alpha * bg_prob
 
         if lam >= 1.0:
             return p_pos
@@ -153,28 +165,58 @@ class LikelihoodEvaluator:
 
             log_likelihoods[m] = ll
 
-        # 4. Compute posterior probabilities via Log-Sum-Exp
+        # 4. Compute independent fitness (open-world calibrated confidence against null baseline)
+        total_decisions = 0.0
+        null_ll = 0.0
+        for rec in parsed:
+            n_tok = len(rec["parsed_tokens"])
+            v_size = max(1, rec["element_vocab_size"])
+            null_ll += n_tok * math.log(1.0 / v_size)
+            total_decisions += n_tok
+            if "has_duplicates" in rec["traits"]:
+                null_ll += 0.5 * math.log(0.5)
+                total_decisions += 0.5
+            if "is_sorted" in rec["traits"]:
+                null_ll += 0.5 * math.log(0.5)
+                total_decisions += 0.5
+            if "canonical_perm" in rec["traits"] and rec["traits"]["canonical_perm"] != "INVALID":
+                null_ll += 0.8 * math.log(1.0 / 120.0)
+                total_decisions += 0.8
+
+        d_factor = max(1.0, total_decisions)
+        independent_fitness = {}
+        for m, ll in log_likelihoods.items():
+            mean_diff = (ll - null_ll) / d_factor
+            fit = 1.0 / (1.0 + math.exp(-2.5 * mean_diff))
+            independent_fitness[m] = round(fit, 4)
+
+        # 5. Compute closed-world posterior probabilities via Log-Sum-Exp
         posteriors = self._log_likelihoods_to_posteriors(log_likelihoods)
 
-        # 5. Bootstrap 95% Confidence Intervals
-        ci = self._compute_bootstrap_ci(parsed, matrix, model_names, lam=lam, n_boot=n_boot)
+        # 6. Bootstrap 95% Confidence Intervals for both independent fitness and posteriors
+        ci_fitness, ci_posteriors = self._compute_bootstrap_ci(
+            parsed, matrix, model_names, null_ll=null_ll, d_factor=d_factor, lam=lam, n_boot=n_boot
+        )
 
-        # 6. Diagnostics
-        sorted_models = sorted(posteriors.items(), key=lambda x: x[1], reverse=True)
-        top_model = sorted_models[0][0]
-        top_prob = sorted_models[0][1]
-        second_prob = sorted_models[1][1] if len(sorted_models) > 1 else 0.0
-        margin = top_prob - second_prob
+        # 7. Diagnostics (Ranked by Independent Fitness)
+        sorted_by_fit = sorted(independent_fitness.items(), key=lambda x: x[1], reverse=True)
+        top_model = sorted_by_fit[0][0]
+        top_fit = sorted_by_fit[0][1]
+        second_fit = sorted_by_fit[1][1] if len(sorted_by_fit) > 1 else 0.0
+        margin = top_fit - second_fit
 
         entropy = -sum(p * math.log2(p) for p in posteriors.values() if p > 1e-9)
 
         return {
             "parsed_submissions": parsed,
+            "independent_fitness": independent_fitness,
             "posteriors": posteriors,
-            "confidence_intervals": ci,
+            "confidence_intervals": ci_fitness,
+            "confidence_intervals_posteriors": ci_posteriors,
             "log_likelihoods": log_likelihoods,
             "top_model": top_model,
-            "top_probability": round(top_prob, 4),
+            "top_fitness": round(top_fit, 4),
+            "top_probability": round(posteriors.get(top_model, 0.0), 4),
             "margin": round(margin, 4),
             "entropy": round(entropy, 4),
             "positional_lambda": round(lam, 3),
@@ -195,10 +237,13 @@ class LikelihoodEvaluator:
         parsed_records: List[Dict[str, Any]],
         matrix: Dict[str, Dict[str, Tuple[Dict[str, float], float]]],
         model_names: List[str],
+        null_ll: float = 0.0,
+        d_factor: float = 1.0,
         lam: float = 0.5,
         n_boot: int = 800
-    ) -> Dict[str, List[float]]:
+    ) -> Tuple[Dict[str, List[float]], Dict[str, List[float]]]:
         n = len(parsed_records)
+        boot_fitness = defaultdict(list)
         boot_posteriors = defaultdict(list)
 
         sample_lls = np.zeros((n, len(model_names)), dtype=np.float64)
@@ -232,17 +277,25 @@ class LikelihoodEvaluator:
         
         for b in range(n_boot):
             boot_ll = sample_lls[indices[b]].sum(axis=0)
+            
+            # 1. Independent fitness bootstrap
+            for j, m in enumerate(model_names):
+                mean_diff = (boot_ll[j] - null_ll) / d_factor
+                fit_val = 1.0 / (1.0 + math.exp(-2.5 * mean_diff))
+                boot_fitness[m].append(fit_val)
+
+            # 2. Normalized posterior bootstrap
             max_ll = np.max(boot_ll)
             exp_ll = np.exp(boot_ll - max_ll)
             boot_p = exp_ll / np.sum(exp_ll)
-            
             for j, m in enumerate(model_names):
                 boot_posteriors[m].append(boot_p[j])
 
-        ci = {}
+        ci_fit = {}
+        ci_post = {}
         for m in model_names:
-            arr = boot_posteriors[m]
-            lower = float(np.percentile(arr, 2.5))
-            upper = float(np.percentile(arr, 97.5))
-            ci[m] = [round(lower, 4), round(upper, 4)]
-        return ci
+            arr_f = boot_fitness[m]
+            ci_fit[m] = [round(float(np.percentile(arr_f, 2.5)), 4), round(float(np.percentile(arr_f, 97.5)), 4)]
+            arr_p = boot_posteriors[m]
+            ci_post[m] = [round(float(np.percentile(arr_p, 2.5)), 4), round(float(np.percentile(arr_p, 97.5)), 4)]
+        return ci_fit, ci_post

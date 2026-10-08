@@ -2,402 +2,978 @@
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_int5",
-    "raw_text": "[68, 17, 69, 73, 25]",
+    "raw_text": "[59, 48, 71, 95, 16]",
     "parsed_tokens": [
-      "68",
-      "17",
+      "59",
+      "48",
+      "71",
+      "95",
+      "16"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "59"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_int5",
+    "raw_text": "[69, 19, 98, 29, 65]",
+    "parsed_tokens": [
       "69",
-      "73",
-      "25"
+      "19",
+      "98",
+      "29",
+      "65"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "69"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_int5",
-    "raw_text": "[1, 25, 10, 39, 61]",
+    "raw_text": "[17, 23, 91, 39, 50]",
     "parsed_tokens": [
-      "1",
-      "25",
-      "10",
+      "17",
+      "23",
+      "91",
       "39",
-      "61"
+      "50"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_int5",
-    "raw_text": "[55, 65, 18, 100, 72]",
-    "parsed_tokens": [
-      "55",
-      "65",
-      "18",
-      "100",
-      "72"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_int5",
-    "raw_text": "[26, 7, 64, 9, 96]",
+    "raw_text": "[27, 84, 15, 62, 41]",
     "parsed_tokens": [
-      "26",
-      "7",
-      "64",
-      "9",
-      "96"
+      "27",
+      "84",
+      "15",
+      "62",
+      "41"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "27"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_int5",
+    "raw_text": "[97, 79, 65, 87, 37]",
+    "parsed_tokens": [
+      "97",
+      "79",
+      "65",
+      "87",
+      "37"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "97"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_int5",
+    "raw_text": "[87, 1, 71, 49, 94]",
+    "parsed_tokens": [
+      "87",
+      "1",
+      "71",
+      "49",
+      "94"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "87"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_int5",
+    "raw_text": "[93, 9, 62, 78, 65]",
+    "parsed_tokens": [
+      "93",
+      "9",
+      "62",
+      "78",
+      "65"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "93"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_int5",
+    "raw_text": "[12, 45, 78, 3, 99]\n\nWait — 让我生成真正随机的数值：\n[35, 15, 30, 68, 79]",
+    "parsed_tokens": [
+      "12",
+      "45",
+      "78",
+      "3",
+      "99"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "12"
+    },
+    "is_valid": true,
+    "strictly_complied": false,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 29,
+    "total_tokens": 94
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_color5",
-    "raw_text": "[\"黄\", \"黄\", \"青\", \"蓝\", \"绿\"]",
+    "raw_text": "[\"紫\",\"橙\",\"蓝\",\"绿\",\"红\"]",
     "parsed_tokens": [
-      "黄",
-      "黄",
-      "青",
+      "紫",
+      "橙",
       "蓝",
-      "绿"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"红\", \"青\", \"绿\", \"红\", \"紫\"]",
-    "parsed_tokens": [
-      "红",
-      "青",
       "绿",
-      "红",
-      "紫"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"红\", \"橙\", \"绿\", \"紫\", \"蓝\"]",
-    "parsed_tokens": [
-      "红",
-      "橙",
-      "绿",
-      "紫",
-      "蓝"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"紫\", \"绿\", \"橙\", \"青\", \"红\"]",
-    "parsed_tokens": [
-      "紫",
-      "绿",
-      "橙",
-      "青",
       "红"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "紫"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 11,
+    "total_tokens": 83
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"绿\", \"蓝\", \"蓝\", \"青\", \"橙\"]",
+    "parsed_tokens": [
+      "绿",
+      "蓝",
+      "蓝",
+      "青",
+      "橙"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "绿"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"紫\", \"红\", \"绿\", \"黄\"]",
+    "parsed_tokens": [
+      "橙",
+      "紫",
+      "红",
+      "绿",
+      "黄"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"绿\", \"红\", \"紫\", \"蓝\", \"黄\"]",
+    "parsed_tokens": [
+      "绿",
+      "红",
+      "紫",
+      "蓝",
+      "黄"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "绿"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"紫\", \"黄\", \"青\", \"青\", \"蓝\"]",
+    "parsed_tokens": [
+      "紫",
+      "黄",
+      "青",
+      "青",
+      "蓝"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "紫"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"紫\", \"黄\", \"橙\", \"红\", \"红\"]",
+    "parsed_tokens": [
+      "紫",
+      "黄",
+      "橙",
+      "红",
+      "红"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "紫"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"蓝\", \"红\", \"橙\", \"橙\", \"红\"]",
+    "parsed_tokens": [
+      "蓝",
+      "红",
+      "橙",
+      "橙",
+      "红"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "蓝"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"紫\", \"橙\", \"绿\", \"橙\"]",
+    "parsed_tokens": [
+      "橙",
+      "紫",
+      "橙",
+      "绿",
+      "橙"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"剪刀\", \"石头\", \"石头\", \"石头\", \"石头\"]",
+    "raw_text": "[\"剪刀\", \"剪刀\", \"石头\", \"石头\", \"布\"]",
     "parsed_tokens": [
+      "剪刀",
       "剪刀",
       "石头",
       "石头",
-      "石头",
-      "石头"
+      "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 19,
-    "total_tokens": 99,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"布\", \"石头\", \"石头\", \"石头\", \"石头\"]",
-    "parsed_tokens": [
-      "布",
-      "石头",
-      "石头",
-      "石头",
-      "石头"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 17,
-    "total_tokens": 97,
-    "temperature": 0.85
+    "total_tokens": 97
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"石头\", \"石头\", \"布\", \"布\", \"石头\"]",
+    "raw_text": "[\"石头\", \"剪刀\", \"石头\", \"石头\", \"布\"]",
     "parsed_tokens": [
       "石头",
+      "剪刀",
       "石头",
-      "布",
-      "布",
-      "石头"
+      "石头",
+      "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "completion_tokens": 17,
+    "total_tokens": 97
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"石头\", \"剪刀\", \"石头\", \"布\", \"布\"]",
+    "raw_text": "[\"石头\", \"石头\", \"剪刀\", \"布\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "石头",
+      "剪刀",
+      "布",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"剪刀\", \"剪刀\", \"剪刀\", \"剪刀\"]",
+    "parsed_tokens": [
+      "布",
+      "剪刀",
+      "剪刀",
+      "剪刀",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"剪刀\", \"石头\", \"剪刀\"]",
     "parsed_tokens": [
       "石头",
       "剪刀",
+      "剪刀",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 19,
+    "total_tokens": 99
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"布\", \"剪刀\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "布",
+      "剪刀",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"石头\", \"布\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
       "石头",
       "布",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "completion_tokens": 15,
+    "total_tokens": 95
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"剪刀\", \"石头\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "剪刀",
+      "石头",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"Q\", \"L\", \"Z\", \"B\", \"T\"]",
+    "raw_text": "[\"K\", \"R\", \"H\", \"C\", \"T\"]",
     "parsed_tokens": [
+      "K",
+      "R",
+      "H",
+      "C",
+      "T"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "K"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"T\", \"B\", \"L\", \"Z\"]",
+    "parsed_tokens": [
+      "Q",
+      "T",
+      "B",
+      "L",
+      "Z"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"R\", \"T\", \"L\", \"U\", \"V\"]",
+    "parsed_tokens": [
+      "R",
+      "T",
+      "L",
+      "U",
+      "V"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "R"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"H\", \"G\", \"K\", \"B\", \"I\"]",
+    "parsed_tokens": [
+      "H",
+      "G",
+      "K",
+      "B",
+      "I"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "H"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"E\", \"H\", \"X\", \"I\", \"P\"]",
+    "parsed_tokens": [
+      "E",
+      "H",
+      "X",
+      "I",
+      "P"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "E"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"O\", \"F\", \"L\", \"P\", \"F\"]",
+    "parsed_tokens": [
+      "O",
+      "F",
+      "L",
+      "P",
+      "F"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "O"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"H\", \"N\", \"N\", \"E\", \"T\"]",
+    "parsed_tokens": [
+      "H",
+      "N",
+      "N",
+      "E",
+      "T"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "H"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"T\", \"Q\", \"L\", \"Z\", \"B\"]",
+    "parsed_tokens": [
+      "T",
       "Q",
       "L",
       "Z",
-      "B",
-      "T"
+      "B"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "T"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_letter5",
-    "raw_text": "[\"N\", \"Q\", \"A\", \"B\", \"S\"]",
-    "parsed_tokens": [
-      "N",
-      "Q",
-      "A",
-      "B",
-      "S"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 50,
-    "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_letter5",
-    "raw_text": "[\"V\", \"J\", \"I\", \"S\", \"H\"]",
-    "parsed_tokens": [
-      "V",
-      "J",
-      "I",
-      "S",
-      "H"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 50,
-    "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Qwen-3.8-Max",
-    "probe_id": "arr_letter5",
-    "raw_text": "[\"U\", \"T\", \"K\", \"L\", \"G\"]",
-    "parsed_tokens": [
-      "U",
-      "T",
-      "K",
-      "L",
-      "G"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 50,
-    "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_perm5",
-    "raw_text": "[2, 3, 1, 4, 5]",
+    "raw_text": "[3, 2, 5, 4, 1]",
     "parsed_tokens": [
-      "2",
       "3",
-      "1",
+      "2",
+      "5",
       "4",
-      "5"
+      "1"
     ],
+    "traits": {
+      "canonical_perm": "3,2,5,4,1",
+      "fixed_points": 2,
+      "first_token": "3"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_perm5",
-    "raw_text": "[4, 2, 5, 1, 3]",
+    "raw_text": "[3,4,5,2,1]",
     "parsed_tokens": [
+      "3",
       "4",
+      "5",
       "2",
+      "1"
+    ],
+    "traits": {
+      "canonical_perm": "3,4,5,2,1",
+      "fixed_points": 0,
+      "first_token": "3"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 3,
+    "total_tokens": 69
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_perm5",
+    "raw_text": "[2, 4, 5, 1, 3]",
+    "parsed_tokens": [
+      "2",
+      "4",
       "5",
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "2,4,5,1,3",
+      "fixed_points": 0,
+      "first_token": "2"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_perm5",
-    "raw_text": "[5, 3, 1, 4, 2]",
+    "raw_text": "[4, 1, 2, 5, 3]",
     "parsed_tokens": [
-      "5",
-      "3",
-      "1",
       "4",
-      "2"
+      "1",
+      "2",
+      "5",
+      "3"
     ],
+    "traits": {
+      "canonical_perm": "4,1,2,5,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Qwen-3.8-Max",
     "probe_id": "arr_perm5",
-    "raw_text": "[4, 1, 3, 5, 2]",
+    "raw_text": "[5, 3, 4, 2, 1]",
     "parsed_tokens": [
-      "4",
-      "1",
-      "3",
       "5",
-      "2"
+      "3",
+      "4",
+      "2",
+      "1"
     ],
+    "traits": {
+      "canonical_perm": "5,3,4,2,1",
+      "fixed_points": 0,
+      "first_token": "5"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_perm5",
+    "raw_text": "[1, 2, 5, 3, 4]",
+    "parsed_tokens": [
+      "1",
+      "2",
+      "5",
+      "3",
+      "4"
+    ],
+    "traits": {
+      "canonical_perm": "1,2,5,3,4",
+      "fixed_points": 2,
+      "first_token": "1"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_perm5",
+    "raw_text": "[3,1,2,5,4]",
+    "parsed_tokens": [
+      "3",
+      "1",
+      "2",
+      "5",
+      "4"
+    ],
+    "traits": {
+      "canonical_perm": "3,1,2,5,4",
+      "fixed_points": 0,
+      "first_token": "3"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 3,
+    "total_tokens": 69
+  },
+  {
+    "model_name": "Qwen-3.8-Max",
+    "probe_id": "arr_perm5",
+    "raw_text": "[1, 4, 3, 5, 2]",
+    "parsed_tokens": [
+      "1",
+      "4",
+      "3",
+      "5",
+      "2"
+    ],
+    "traits": {
+      "canonical_perm": "1,4,3,5,2",
+      "fixed_points": 2,
+      "first_token": "1"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "MiniMax-M3",
@@ -410,54 +986,44 @@
       "29",
       "65"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_int5",
-    "raw_text": "[47, 12, 85, 23, 67]",
+    "raw_text": "[47, 23, 89, 12, 56]",
     "parsed_tokens": [
       "47",
-      "12",
-      "85",
       "23",
-      "67"
+      "89",
+      "12",
+      "56"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "MiniMax-M3",
-    "probe_id": "arr_int5",
-    "raw_text": "[47, 12, 88, 3, 64]",
-    "parsed_tokens": [
-      "47",
-      "12",
-      "88",
-      "3",
-      "64"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "MiniMax-M3",
@@ -470,114 +1036,408 @@
       "5",
       "61"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "MiniMax-M3",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"绿\", \"蓝\", \"橙\", \"红\", \"紫\"]",
+    "probe_id": "arr_int5",
+    "raw_text": "[47, 12, 83, 29, 64]",
     "parsed_tokens": [
-      "绿",
-      "蓝",
-      "橙",
-      "红",
-      "紫"
+      "47",
+      "12",
+      "83",
+      "29",
+      "64"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
   },
   {
     "model_name": "MiniMax-M3",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"红\", \"蓝\", \"绿\", \"橙\", \"紫\"]",
+    "probe_id": "arr_int5",
+    "raw_text": "[47, 23, 81, 56, 12]",
     "parsed_tokens": [
-      "红",
-      "蓝",
-      "绿",
-      "橙",
-      "紫"
+      "47",
+      "23",
+      "81",
+      "56",
+      "12"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 12, 85, 4, 63]",
+    "parsed_tokens": [
+      "37",
+      "12",
+      "85",
+      "4",
+      "63"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_int5",
+    "raw_text": "[47, 82, 15, 68, 91]",
+    "parsed_tokens": [
+      "47",
+      "82",
+      "15",
+      "68",
+      "91"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_int5",
+    "raw_text": "[47, 82, 15, 63, 91]",
+    "parsed_tokens": [
+      "47",
+      "82",
+      "15",
+      "63",
+      "91"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "47"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_color5",
-    "raw_text": "[\"青\", \"紫\", \"红\", \"蓝\", \"橙\"]",
+    "raw_text": "[\"青\", \"紫\", \"红\", \"橙\", \"绿\"]",
     "parsed_tokens": [
       "青",
       "紫",
       "红",
-      "蓝",
-      "橙"
+      "橙",
+      "绿"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_color5",
-    "raw_text": "[\"红\", \"蓝\", \"绿\", \"青\", \"紫\"]",
+    "raw_text": "[\"红\", \"青\", \"黄\", \"蓝\", \"紫\"]",
     "parsed_tokens": [
       "红",
-      "蓝",
-      "绿",
       "青",
+      "黄",
+      "蓝",
       "紫"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "红"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"绿\", \"蓝\", \"橙\", \"紫\", \"红\"]",
+    "parsed_tokens": [
+      "绿",
+      "蓝",
+      "橙",
+      "紫",
+      "红"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "绿"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"红\", \"青\", \"紫\", \"橙\", \"绿\"]",
+    "parsed_tokens": [
+      "红",
+      "青",
+      "紫",
+      "橙",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "红"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"红\", \"紫\", \"绿\", \"蓝\", \"橙\"]",
+    "parsed_tokens": [
+      "红",
+      "紫",
+      "绿",
+      "蓝",
+      "橙"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "红"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"红\", \"青\", \"黄\", \"紫\", \"橙\"]",
+    "parsed_tokens": [
+      "红",
+      "青",
+      "黄",
+      "紫",
+      "橙"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "红"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"黄\", \"蓝\", \"红\", \"紫\", \"绿\"]",
+    "parsed_tokens": [
+      "黄",
+      "蓝",
+      "红",
+      "紫",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "黄"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"绿\", \"蓝\", \"红\", \"橙\", \"紫\"]",
+    "parsed_tokens": [
+      "绿",
+      "蓝",
+      "红",
+      "橙",
+      "紫"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "绿"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"布\", \"石头\", \"剪刀\", \"石头\", \"布\"]",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"布\"]",
     "parsed_tokens": [
-      "布",
       "石头",
+      "布",
       "剪刀",
       "石头",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"布\", \"石头\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"石头\", \"布\", \"剪刀\", \"石头\"]",
+    "parsed_tokens": [
+      "布",
+      "石头",
+      "布",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
   },
   {
     "model_name": "MiniMax-M3",
@@ -590,34 +1450,18 @@
       "剪刀",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "MiniMax-M3",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"布\", \"石头\", \"石头\", \"剪刀\", \"石头\"]",
-    "parsed_tokens": [
-      "布",
-      "石头",
-      "石头",
-      "剪刀",
-      "石头"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 17,
-    "total_tokens": 97,
-    "temperature": 0.85
+    "total_tokens": 96
   },
   {
     "model_name": "MiniMax-M3",
@@ -630,94 +1474,307 @@
       "石头",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
+      "剪刀",
+      "石头",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
+      "剪刀",
+      "石头",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"布\", \"石头\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"F\", \"W\", \"B\", \"L\", \"T\"]",
+    "raw_text": "[\"Q\", \"F\", \"B\", \"L\", \"T\"]",
     "parsed_tokens": [
+      "Q",
       "F",
-      "W",
       "B",
       "L",
       "T"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"H\", \"Q\", \"B\", \"T\", \"L\"]",
+    "raw_text": "[\"K\", \"F\", \"T\", \"B\", \"W\"]",
+    "parsed_tokens": [
+      "K",
+      "F",
+      "T",
+      "B",
+      "W"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "K"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"H\", \"T\", \"B\", \"Q\", \"L\"]",
     "parsed_tokens": [
       "H",
-      "Q",
-      "B",
       "T",
+      "B",
+      "Q",
       "L"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "H"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"B\", \"F\", \"J\", \"Q\", \"T\"]",
+    "raw_text": "[\"F\", \"J\", \"T\", \"B\", \"Q\"]",
     "parsed_tokens": [
-      "B",
       "F",
       "J",
-      "Q",
-      "T"
+      "T",
+      "B",
+      "Q"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "F"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"H\", \"W\", \"B\", \"Q\", \"T\"]",
+    "raw_text": "[\"G\", \"T\", \"B\", \"W\", \"P\"]",
     "parsed_tokens": [
-      "H",
-      "W",
+      "G",
+      "T",
       "B",
-      "Q",
-      "T"
+      "W",
+      "P"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "G"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"G\", \"T\", \"B\", \"W\", \"Q\"]",
+    "parsed_tokens": [
+      "G",
+      "T",
+      "B",
+      "W",
+      "Q"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "G"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"H\", \"Q\", \"T\", \"B\", \"F\"]",
+    "parsed_tokens": [
+      "H",
+      "Q",
+      "T",
+      "B",
+      "F"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "H"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"F\", \"B\", \"J\", \"T\"]",
+    "parsed_tokens": [
+      "Q",
+      "F",
+      "B",
+      "J",
+      "T"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "MiniMax-M3",
@@ -730,34 +1787,144 @@
       "4",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "2,5,1,4,3",
+      "fixed_points": 1,
+      "first_token": "2"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "MiniMax-M3",
     "probe_id": "arr_perm5",
-    "raw_text": "[5, 2, 4, 1, 3]",
+    "raw_text": "[2, 5, 1, 4, 3]",
     "parsed_tokens": [
-      "5",
       "2",
-      "4",
+      "5",
       "1",
+      "4",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "2,5,1,4,3",
+      "fixed_points": 1,
+      "first_token": "2"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_perm5",
+    "raw_text": "[2, 5, 1, 4, 3]",
+    "parsed_tokens": [
+      "2",
+      "5",
+      "1",
+      "4",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "2,5,1,4,3",
+      "fixed_points": 1,
+      "first_token": "2"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_perm5",
+    "raw_text": "[2, 5, 1, 4, 3]",
+    "parsed_tokens": [
+      "2",
+      "5",
+      "1",
+      "4",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "2,5,1,4,3",
+      "fixed_points": 1,
+      "first_token": "2"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "MiniMax-M3",
+    "probe_id": "arr_perm5",
+    "raw_text": "[3, 5, 1, 4, 2]",
+    "parsed_tokens": [
+      "3",
+      "5",
+      "1",
+      "4",
+      "2"
+    ],
+    "traits": {
+      "canonical_perm": "3,5,1,4,2",
+      "fixed_points": 1,
+      "first_token": "3"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "MiniMax-M3",
@@ -770,114 +1937,243 @@
       "2",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,2,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "MiniMax-M3",
-    "probe_id": "arr_perm5",
-    "raw_text": "[2, 5, 1, 4, 3]",
-    "parsed_tokens": [
-      "2",
-      "5",
-      "1",
-      "4",
-      "3"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 66,
-    "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "GPT-6-Luna",
     "probe_id": "arr_int5",
-    "raw_text": "[17, 64, 92, 38, 5]",
+    "raw_text": "[17, 64, 8, 92, 35]",
     "parsed_tokens": [
       "17",
       "64",
+      "8",
       "92",
-      "38",
-      "5"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_int5",
-    "raw_text": "[17, 62, 8, 94, 35]",
-    "parsed_tokens": [
-      "17",
-      "62",
-      "8",
-      "94",
       "35"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "GPT-6-Luna",
     "probe_id": "arr_int5",
-    "raw_text": "[17, 62, 8, 94, 35]",
-    "parsed_tokens": [
-      "17",
-      "62",
-      "8",
-      "94",
-      "35"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_int5",
-    "raw_text": "[17, 64, 92, 5, 38]",
+    "raw_text": "[17, 64, 8, 92, 35]",
     "parsed_tokens": [
       "17",
       "64",
+      "8",
       "92",
-      "5",
-      "38"
+      "35"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_int5",
+    "raw_text": "[17, 64, 8, 92, 35]",
+    "parsed_tokens": [
+      "17",
+      "64",
+      "8",
+      "92",
+      "35"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_int5",
+    "raw_text": "[17, 64, 3, 82, 45]",
+    "parsed_tokens": [
+      "17",
+      "64",
+      "3",
+      "82",
+      "45"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_int5",
+    "raw_text": "[17, 64, 9, 82, 35]",
+    "parsed_tokens": [
+      "17",
+      "64",
+      "9",
+      "82",
+      "35"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_int5",
+    "raw_text": "[17, 64, 8, 92, 35]",
+    "parsed_tokens": [
+      "17",
+      "64",
+      "8",
+      "92",
+      "35"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_int5",
+    "raw_text": "[17, 64, 9, 82, 36]",
+    "parsed_tokens": [
+      "17",
+      "64",
+      "9",
+      "82",
+      "36"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_int5",
+    "raw_text": "[17, 64, 3, 89, 42]",
+    "parsed_tokens": [
+      "17",
+      "64",
+      "3",
+      "89",
+      "42"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "17"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"紫\", \"橙\", \"蓝\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
+      "紫",
+      "橙",
+      "蓝"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "GPT-6-Luna",
@@ -890,14 +2186,18 @@
       "黄",
       "蓝"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
   },
   {
     "model_name": "GPT-6-Luna",
@@ -910,14 +2210,114 @@
       "黄",
       "蓝"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"紫\", \"黄\", \"蓝\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
+      "紫",
+      "黄",
+      "蓝"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"紫\", \"黄\", \"蓝\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
+      "紫",
+      "黄",
+      "蓝"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"紫\", \"橙\", \"蓝\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
+      "紫",
+      "橙",
+      "蓝"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"紫\", \"黄\", \"蓝\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
+      "紫",
+      "黄",
+      "蓝"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "GPT-6-Luna",
@@ -930,54 +2330,186 @@
       "黄",
       "蓝"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 11,
-    "total_tokens": 83,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"青\",\"红\",\"紫\",\"黄\",\"蓝\"]",
-    "parsed_tokens": [
-      "青",
-      "红",
-      "紫",
-      "黄",
-      "蓝"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 11,
-    "total_tokens": 83,
-    "temperature": 0.85
+    "total_tokens": 83
   },
   {
     "model_name": "GPT-6-Luna",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"剪刀\",\"石头\",\"布\",\"石头\",\"剪刀\"]",
+    "raw_text": "[\"布\", \"石头\", \"剪刀\", \"布\", \"剪刀\"]",
     "parsed_tokens": [
-      "剪刀",
-      "石头",
       "布",
       "石头",
+      "剪刀",
+      "布",
       "剪刀"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
+      "剪刀",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"石头\", \"剪刀\", \"布\", \"石头\"]",
+    "parsed_tokens": [
+      "布",
+      "石头",
+      "剪刀",
+      "布",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"石头\", \"布\", \"剪刀\", \"石头\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "石头",
+      "布",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\",\"剪刀\",\"布\",\"石头\",\"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"石头\", \"布\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "石头",
+      "布",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\",\"石头\",\"布\",\"剪刀\",\"石头\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "石头",
+      "布",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
   },
   {
     "model_name": "GPT-6-Luna",
@@ -990,74 +2522,18 @@
       "剪刀",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"剪刀\", \"石头\", \"布\", \"布\", \"剪刀\"]",
-    "parsed_tokens": [
-      "剪刀",
-      "石头",
-      "布",
-      "布",
-      "剪刀"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"剪刀\"]",
-    "parsed_tokens": [
-      "石头",
-      "布",
-      "剪刀",
-      "石头",
-      "剪刀"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 17,
-    "total_tokens": 97,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_letter5",
-    "raw_text": "[\"Q\",\"B\",\"N\",\"W\",\"F\"]",
-    "parsed_tokens": [
-      "Q",
-      "B",
-      "N",
-      "W",
-      "F"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 50,
-    "completion_tokens": 6,
-    "total_tokens": 56,
-    "temperature": 0.85
+    "total_tokens": 96
   },
   {
     "model_name": "GPT-6-Luna",
@@ -1070,74 +2546,211 @@
       "Y",
       "F"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 6,
-    "total_tokens": 56,
-    "temperature": 0.85
+    "total_tokens": 56
   },
   {
     "model_name": "GPT-6-Luna",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"Q\",\"L\",\"B\",\"V\",\"N\"]",
-    "parsed_tokens": [
-      "Q",
-      "L",
-      "B",
-      "V",
-      "N"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 50,
-    "completion_tokens": 6,
-    "total_tokens": 56,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "GPT-6-Luna",
-    "probe_id": "arr_letter5",
-    "raw_text": "[\"Q\",\"B\",\"N\",\"T\",\"F\"]",
+    "raw_text": "[\"Q\",\"B\",\"N\",\"Z\",\"F\"]",
     "parsed_tokens": [
       "Q",
       "B",
       "N",
-      "T",
+      "Z",
       "F"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 6,
-    "total_tokens": 56,
-    "temperature": 0.85
+    "total_tokens": 56
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\",\"B\",\"N\",\"W\",\"F\"]",
+    "parsed_tokens": [
+      "Q",
+      "B",
+      "N",
+      "W",
+      "F"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 6,
+    "total_tokens": 56
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"B\",\"Q\",\"L\",\"W\",\"F\"]",
+    "parsed_tokens": [
+      "B",
+      "Q",
+      "L",
+      "W",
+      "F"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "B"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 6,
+    "total_tokens": 56
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\",\"B\",\"N\",\"Y\",\"F\"]",
+    "parsed_tokens": [
+      "Q",
+      "B",
+      "N",
+      "Y",
+      "F"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 6,
+    "total_tokens": 56
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\",\"B\",\"T\",\"H\",\"N\"]",
+    "parsed_tokens": [
+      "Q",
+      "B",
+      "T",
+      "H",
+      "N"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 6,
+    "total_tokens": 56
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\",\"B\",\"T\",\"N\",\"F\"]",
+    "parsed_tokens": [
+      "Q",
+      "B",
+      "T",
+      "N",
+      "F"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 6,
+    "total_tokens": 56
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"B\", \"N\", \"W\", \"C\"]",
+    "parsed_tokens": [
+      "Q",
+      "B",
+      "N",
+      "W",
+      "C"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
   },
   {
     "model_name": "GPT-6-Luna",
     "probe_id": "arr_perm5",
-    "raw_text": "[3, 1, 5, 2, 4]",
+    "raw_text": "[4, 1, 5, 2, 3]",
     "parsed_tokens": [
-      "3",
+      "4",
       "1",
       "5",
       "2",
-      "4"
+      "3"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,2,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "GPT-6-Luna",
@@ -1150,14 +2763,44 @@
       "3",
       "2"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,3,2",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 1, 5, 2, 3]",
+    "parsed_tokens": [
+      "4",
+      "1",
+      "5",
+      "2",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,1,5,2,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "GPT-6-Luna",
@@ -1170,14 +2813,69 @@
       "3",
       "2"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,3,2",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 1, 5, 2, 3]",
+    "parsed_tokens": [
+      "4",
+      "1",
+      "5",
+      "2",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,1,5,2,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 1, 5, 2, 3]",
+    "parsed_tokens": [
+      "4",
+      "1",
+      "5",
+      "2",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,1,5,2,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "GPT-6-Luna",
@@ -1190,54 +2888,44 @@
       "3",
       "2"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,3,2",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
-    "model_name": "Claude-Sonnet-5.5",
-    "probe_id": "arr_int5",
-    "raw_text": "[37, 82, 14, 59, 96]",
+    "model_name": "GPT-6-Luna",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 1, 5, 3, 2]",
     "parsed_tokens": [
-      "37",
-      "82",
-      "14",
-      "59",
-      "96"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Claude-Sonnet-5.5",
-    "probe_id": "arr_int5",
-    "raw_text": "[37, 82, 5, 61, 94]",
-    "parsed_tokens": [
-      "37",
-      "82",
+      "4",
+      "1",
       "5",
-      "61",
-      "94"
+      "3",
+      "2"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,3,2",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1250,74 +2938,194 @@
       "64",
       "9"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
     "probe_id": "arr_int5",
-    "raw_text": "[27, 64, 8, 91, 43]",
+    "raw_text": "[37, 82, 15, 64, 9]",
     "parsed_tokens": [
-      "27",
+      "37",
+      "82",
+      "15",
       "64",
-      "8",
-      "91",
-      "43"
+      "9"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"橙\", \"紫\", \"青\", \"黄\", \"青\"]",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 82, 15, 64, 9]",
     "parsed_tokens": [
-      "橙",
-      "紫",
-      "青",
-      "黄",
-      "青"
+      "37",
+      "82",
+      "15",
+      "64",
+      "9"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"黄\", \"紫\", \"青\", \"橙\", \"青\"]",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 82, 15, 64, 9]",
     "parsed_tokens": [
-      "黄",
-      "紫",
-      "青",
-      "橙",
-      "青"
+      "37",
+      "82",
+      "15",
+      "64",
+      "9"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 82, 14, 59, 96]",
+    "parsed_tokens": [
+      "37",
+      "82",
+      "14",
+      "59",
+      "96"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 82, 14, 65, matched]\n\nWait, that's invalid. Correct output:\n\n[37, 82, 14, 65, 91]",
+    "parsed_tokens": [
+      "37",
+      "82",
+      "14",
+      "65",
+      "INVALID"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
+    "is_valid": false,
+    "strictly_complied": false,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 25,
+    "total_tokens": 90
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 82, 14, 59, 91]",
+    "parsed_tokens": [
+      "37",
+      "82",
+      "14",
+      "59",
+      "91"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_int5",
+    "raw_text": "[37, 82, 14, 65, 91]",
+    "parsed_tokens": [
+      "37",
+      "82",
+      "14",
+      "65",
+      "91"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "37"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1330,14 +3138,90 @@
       "黄",
       "青"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"青\", \"紫\", \"黄\", \"青\"]",
+    "parsed_tokens": [
+      "橙",
+      "青",
+      "紫",
+      "黄",
+      "青"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"黄\", \"紫\", \"橙\", \"青\", \"绿\"]",
+    "parsed_tokens": [
+      "黄",
+      "紫",
+      "橙",
+      "青",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "黄"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"黄\", \"紫\", \"橙\", \"青\", \"绿\"]",
+    "parsed_tokens": [
+      "黄",
+      "紫",
+      "橙",
+      "青",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "黄"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1350,14 +3234,90 @@
       "黄",
       "青"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"紫\", \"青\", \"黄\", \"青\"]",
+    "parsed_tokens": [
+      "橙",
+      "紫",
+      "青",
+      "黄",
+      "青"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"青\", \"紫\", \"黄\", \"青\"]",
+    "parsed_tokens": [
+      "橙",
+      "青",
+      "紫",
+      "黄",
+      "青"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"青\", \"紫\", \"黄\", \"青\"]",
+    "parsed_tokens": [
+      "橙",
+      "青",
+      "紫",
+      "黄",
+      "青"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1370,14 +3330,18 @@
       "剪刀",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1390,14 +3354,18 @@
       "剪刀",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1410,14 +3378,18 @@
       "剪刀",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1430,54 +3402,138 @@
       "剪刀",
       "布"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"石头\", \"石头\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "布",
+      "石头",
+      "石头",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"石头\", \"石头\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "布",
+      "石头",
+      "石头",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"石头\", \"石头\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "布",
+      "石头",
+      "石头",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"石头\", \"石头\", \"剪刀\", \"布\"]",
+    "parsed_tokens": [
+      "布",
+      "石头",
+      "石头",
+      "剪刀",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
   },
   {
     "model_name": "Claude-Sonnet-5.5",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"Q\", \"D\", \"V\", \"H\", \"T\"]",
+    "raw_text": "[\"Q\", \"D\", \"W\", \"L\", \"T\"]",
     "parsed_tokens": [
       "Q",
       "D",
-      "V",
-      "H",
+      "W",
+      "L",
       "T"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Claude-Sonnet-5.5",
-    "probe_id": "arr_letter5",
-    "raw_text": "[\"Q\", \"D\", \"V\", \"H\", \"T\"]",
-    "parsed_tokens": [
-      "Q",
-      "D",
-      "V",
-      "H",
-      "T"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 50,
-    "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1490,14 +3546,18 @@
       "J",
       "T"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1510,14 +3570,138 @@
       "J",
       "T"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"D\", \"T\", \"H\", \"W\"]",
+    "parsed_tokens": [
+      "Q",
+      "D",
+      "T",
+      "H",
+      "W"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"D\", \"T\", \"H\", \"W\"]",
+    "parsed_tokens": [
+      "Q",
+      "D",
+      "T",
+      "H",
+      "W"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"D\", \"W\", \"J\", \"T\"]",
+    "parsed_tokens": [
+      "Q",
+      "D",
+      "W",
+      "J",
+      "T"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"D\", \"W\", \"J\", \"T\"]",
+    "parsed_tokens": [
+      "Q",
+      "D",
+      "W",
+      "J",
+      "T"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"D\", \"T\", \"J\", \"W\"]",
+    "parsed_tokens": [
+      "Q",
+      "D",
+      "T",
+      "J",
+      "W"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1530,14 +3714,19 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1550,14 +3739,19 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1570,14 +3764,19 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Claude-Sonnet-5.5",
@@ -1590,14 +3789,119 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Claude-Sonnet-5.5",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1610,14 +3914,44 @@
       "41",
       "67"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_int5",
+    "raw_text": "[14, 73, 28, 41, 67]",
+    "parsed_tokens": [
+      "14",
+      "73",
+      "28",
+      "41",
+      "67"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1630,14 +3964,19 @@
       "42",
       "91"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1650,14 +3989,19 @@
       "41",
       "67"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1670,94 +4014,310 @@
       "41",
       "67"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_int5",
+    "raw_text": "[14, 73, 28, 41, 67]",
+    "parsed_tokens": [
+      "14",
+      "73",
+      "28",
+      "41",
+      "67"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_int5",
+    "raw_text": "[14, 73, 28, 41, 85]",
+    "parsed_tokens": [
+      "14",
+      "73",
+      "28",
+      "41",
+      "85"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_int5",
+    "raw_text": "[14, 73, 28, 41, 67]",
+    "parsed_tokens": [
+      "14",
+      "73",
+      "28",
+      "41",
+      "67"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "14"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
   },
   {
     "model_name": "Llama-3.3-70B",
     "probe_id": "arr_color5",
-    "raw_text": "[\"绿\", \"紫\", \"红\", \"蓝\", \"黄\"]",
+    "raw_text": "[\"红\", \"黄\", \"青\", \"紫\", \"绿\"]",
     "parsed_tokens": [
-      "绿",
+      "红",
+      "黄",
+      "青",
       "紫",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "红"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"蓝\", \"绿\", \"橙\"]",
+    "parsed_tokens": [
+      "青",
       "红",
       "蓝",
-      "黄"
+      "绿",
+      "橙"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
   },
   {
     "model_name": "Llama-3.3-70B",
     "probe_id": "arr_color5",
-    "raw_text": "[\"青\", \"黄\", \"紫\", \"红\", \"蓝\"]",
+    "raw_text": "[\"青\", \"红\", \"黄\", \"蓝\", \"绿\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
+      "黄",
+      "蓝",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"红\", \"青\", \"绿\", \"黄\", \"紫\"]",
+    "parsed_tokens": [
+      "红",
+      "青",
+      "绿",
+      "黄",
+      "紫"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "红"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"黄\", \"红\", \"绿\", \"紫\"]",
     "parsed_tokens": [
       "青",
       "黄",
-      "紫",
       "红",
-      "蓝"
+      "绿",
+      "紫"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
   },
   {
     "model_name": "Llama-3.3-70B",
     "probe_id": "arr_color5",
-    "raw_text": "[\"黄\", \"绿\", \"红\", \"青\", \"蓝\"]",
+    "raw_text": "[\"青\", \"紫\", \"黄\", \"蓝\", \"绿\"]",
     "parsed_tokens": [
+      "青",
+      "紫",
+      "黄",
+      "蓝",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"青\", \"红\", \"黄\", \"绿\", \"紫\"]",
+    "parsed_tokens": [
+      "青",
+      "红",
       "黄",
       "绿",
-      "红",
-      "青",
-      "蓝"
+      "紫"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
   },
   {
     "model_name": "Llama-3.3-70B",
     "probe_id": "arr_color5",
-    "raw_text": "[\"黄\", \"青\", \"紫\", \"红\", \"蓝\"]",
+    "raw_text": "[\"青\", \"黄\", \"紫\", \"蓝\", \"红\"]",
     "parsed_tokens": [
-      "黄",
       "青",
+      "黄",
       "紫",
-      "红",
-      "蓝"
+      "蓝",
+      "红"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "青"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"布\", \"石头\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1770,34 +4330,18 @@
       "石头",
       "剪刀"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 17,
-    "total_tokens": 97,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Llama-3.3-70B",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"布\"]",
-    "parsed_tokens": [
-      "石头",
-      "布",
-      "剪刀",
-      "石头",
-      "布"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 97
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1810,34 +4354,138 @@
       "石头",
       "剪刀"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 17,
-    "total_tokens": 97,
-    "temperature": 0.85
+    "total_tokens": 97
   },
   {
     "model_name": "Llama-3.3-70B",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"布\"]",
+    "raw_text": "[\"石头\", \"剪刀\", \"布\", \"石头\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"布\", \"石头\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"布\", \"石头\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "布",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"剪刀\"]",
     "parsed_tokens": [
       "石头",
       "布",
       "剪刀",
       "石头",
-      "布"
+      "剪刀"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
+      "剪刀",
+      "石头",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1850,14 +4498,18 @@
       "E",
       "K"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1870,14 +4522,18 @@
       "E",
       "K"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1890,14 +4546,18 @@
       "E",
       "K"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1910,14 +4570,114 @@
       "E",
       "K"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"J\", \"A\", \"Z\", \"E\", \"K\"]",
+    "parsed_tokens": [
+      "J",
+      "A",
+      "Z",
+      "E",
+      "K"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"J\", \"A\", \"Z\", \"E\", \"K\"]",
+    "parsed_tokens": [
+      "J",
+      "A",
+      "Z",
+      "E",
+      "K"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"J\", \"A\", \"Z\", \"E\", \"K\"]",
+    "parsed_tokens": [
+      "J",
+      "A",
+      "Z",
+      "E",
+      "K"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"J\", \"A\", \"Z\", \"E\", \"K\"]",
+    "parsed_tokens": [
+      "J",
+      "A",
+      "Z",
+      "E",
+      "K"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "J"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1930,14 +4690,44 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1950,14 +4740,19 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1970,14 +4765,19 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Llama-3.3-70B",
@@ -1990,354 +4790,895 @@
       "1",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_perm5",
+    "raw_text": "[5, 2, 4, 1, 3]",
+    "parsed_tokens": [
+      "5",
+      "2",
+      "4",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_perm5",
+    "raw_text": "[5, 2, 4, 1, 3]",
+    "parsed_tokens": [
+      "5",
+      "2",
+      "4",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Llama-3.3-70B",
+    "probe_id": "arr_perm5",
+    "raw_text": "[5, 2, 4, 1, 3]",
+    "parsed_tokens": [
+      "5",
+      "2",
+      "4",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "5,2,4,1,3",
+      "fixed_points": 1,
+      "first_token": "5"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_int5",
-    "raw_text": "[34, 76, 12, 89, 5]",
+    "raw_text": "[67, 12, 98, 3, 56]",
     "parsed_tokens": [
-      "34",
-      "76",
+      "67",
       "12",
-      "89",
-      "5"
+      "98",
+      "3",
+      "56"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "67"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_int5",
-    "raw_text": "[73, 22, 59, 10, 87]",
+    "raw_text": "[73, 14, 52, 91, 6]",
     "parsed_tokens": [
       "73",
-      "22",
-      "59",
-      "10",
-      "87"
+      "14",
+      "52",
+      "91",
+      "6"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "73"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
-    "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "completion_tokens": 5,
+    "total_tokens": 70
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_int5",
-    "raw_text": "[23, 76, 4, 91, 58]",
+    "raw_text": "[72, 18, 59, 93, 2]",
+    "parsed_tokens": [
+      "72",
+      "18",
+      "59",
+      "93",
+      "2"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "72"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_int5",
+    "raw_text": "[67, 14, 91, 5, 32]",
+    "parsed_tokens": [
+      "67",
+      "14",
+      "91",
+      "5",
+      "32"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "67"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_int5",
+    "raw_text": "[67, 12, 93, 2, 55]",
+    "parsed_tokens": [
+      "67",
+      "12",
+      "93",
+      "2",
+      "55"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "67"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_int5",
+    "raw_text": "[87, 12, 5, 63, 21]",
+    "parsed_tokens": [
+      "87",
+      "12",
+      "5",
+      "63",
+      "21"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "87"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 5,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_int5",
+    "raw_text": "[67, 12, 95, 34, 81]",
+    "parsed_tokens": [
+      "67",
+      "12",
+      "95",
+      "34",
+      "81"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "67"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 65,
+    "completion_tokens": 6,
+    "total_tokens": 71
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_int5",
+    "raw_text": "[23, 76, 12, 54, 89]",
     "parsed_tokens": [
       "23",
       "76",
-      "4",
-      "91",
-      "58"
+      "12",
+      "54",
+      "89"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "is_sorted": false,
+      "first_token": "23"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 65,
-    "completion_tokens": 5,
-    "total_tokens": 70,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_int5",
-    "raw_text": "[75, 42, 19, 88, 63]",
-    "parsed_tokens": [
-      "75",
-      "42",
-      "19",
-      "88",
-      "63"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 65,
     "completion_tokens": 6,
-    "total_tokens": 71,
-    "temperature": 0.85
+    "total_tokens": 71
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_color5",
-    "raw_text": "[\"红\", \"青\", \"橙\", \"绿\", \"紫\"]",
+    "raw_text": "[\"蓝\", \"橙\", \"绿\", \"红\", \"青\"]",
     "parsed_tokens": [
-      "红",
-      "青",
-      "橙",
-      "绿",
-      "紫"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"绿\", \"红\", \"紫\", \"橙\", \"红\"]",
-    "parsed_tokens": [
-      "绿",
-      "红",
-      "紫",
-      "橙",
-      "红"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"红\", \"青\", \"橙\", \"绿\", \"紫\"]",
-    "parsed_tokens": [
-      "红",
-      "青",
-      "橙",
-      "绿",
-      "紫"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 72,
-    "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_color5",
-    "raw_text": "[\"紫\", \"橙\", \"绿\", \"红\", \"青\"]",
-    "parsed_tokens": [
-      "紫",
+      "蓝",
       "橙",
       "绿",
       "红",
       "青"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "蓝"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 72,
     "completion_tokens": 12,
-    "total_tokens": 84,
-    "temperature": 0.85
+    "total_tokens": 84
   },
   {
     "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"布\", \"剪刀\", \"石头\", \"布\", \"布\"]",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"黄\", \"绿\", \"红\", \"紫\"]",
     "parsed_tokens": [
-      "布",
-      "剪刀",
-      "石头",
-      "布",
-      "布"
+      "橙",
+      "黄",
+      "绿",
+      "红",
+      "紫"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "橙"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 15,
-    "total_tokens": 95,
-    "temperature": 0.85
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
   },
   {
     "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"布\", \"石头\", \"石头\", \"剪刀\", \"布\"]",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]",
     "parsed_tokens": [
-      "布",
-      "石头",
-      "石头",
-      "剪刀",
-      "布"
+      "红",
+      "蓝",
+      "绿",
+      "红",
+      "紫"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "红"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"蓝\", \"黄\", \"绿\", \"红\", \"红\"]",
+    "parsed_tokens": [
+      "蓝",
+      "黄",
+      "绿",
+      "红",
+      "红"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "蓝"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"橙\", \"黄\", \"红\", \"青\", \"绿\"]",
+    "parsed_tokens": [
+      "橙",
+      "黄",
+      "红",
+      "青",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "橙"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"绿\", \"红\", \"黄\", \"橙\", \"青\"]",
+    "parsed_tokens": [
+      "绿",
+      "红",
+      "黄",
+      "橙",
+      "青"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "绿"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"紫\", \"蓝\", \"橙\", \"绿\", \"红\"]",
+    "parsed_tokens": [
+      "紫",
+      "蓝",
+      "橙",
+      "绿",
+      "红"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "紫"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_color5",
+    "raw_text": "[\"黄\", \"红\", \"紫\", \"橙\", \"绿\"]",
+    "parsed_tokens": [
+      "黄",
+      "红",
+      "紫",
+      "橙",
+      "绿"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "黄"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 72,
+    "completion_tokens": 12,
+    "total_tokens": 84
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"布\", \"布\", \"剪刀\", \"石头\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
+      "布",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
     "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "total_tokens": 96
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_rps5",
-    "raw_text": "[\"剪刀\", \"石头\", \"剪刀\", \"布\", \"布\"]",
+    "raw_text": "[\"石头\", \"布\", \"剪刀\", \"石头\", \"布\"]",
+    "parsed_tokens": [
+      "石头",
+      "布",
+      "剪刀",
+      "石头",
+      "布"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"石头\", \"布\", \"剪刀\", \"石头\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "石头",
+      "布",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]",
+    "parsed_tokens": [
+      "石头",
+      "剪刀",
+      "石头",
+      "布",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "石头"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"石头\", \"布\", \"剪刀\", \"石头\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "石头",
+      "布",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"石头\", \"布\", \"布\", \"剪刀\"]",
+    "parsed_tokens": [
+      "剪刀",
+      "石头",
+      "布",
+      "布",
+      "剪刀"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 16,
+    "total_tokens": 96
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"布\", \"剪刀\", \"石头\", \"剪刀\", \"石头\"]",
+    "parsed_tokens": [
+      "布",
+      "剪刀",
+      "石头",
+      "剪刀",
+      "石头"
+    ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "布"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 80,
+    "completion_tokens": 17,
+    "total_tokens": 97
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_rps5",
+    "raw_text": "[\"剪刀\", \"石头\", \"剪刀\", \"布\", \"剪刀\"]",
     "parsed_tokens": [
       "剪刀",
       "石头",
       "剪刀",
       "布",
-      "布"
+      "剪刀"
     ],
+    "traits": {
+      "has_duplicates": true,
+      "first_token": "剪刀"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
-  },
-  {
-    "model_name": "Gemini-2.5-Flash",
-    "probe_id": "arr_rps5",
-    "raw_text": "[\"布\", \"石头\", \"剪刀\", \"石头\", \"布\"]",
-    "parsed_tokens": [
-      "布",
-      "石头",
-      "剪刀",
-      "石头",
-      "布"
-    ],
-    "is_valid": true,
-    "strictly_complied": true,
-    "source_type": "official",
-    "weight": 1.0,
-    "prompt_tokens": 80,
-    "completion_tokens": 16,
-    "total_tokens": 96,
-    "temperature": 0.85
+    "completion_tokens": 17,
+    "total_tokens": 97
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"L\", \"G\", \"V\", \"P\", \"S\"]",
+    "raw_text": "[\"W\", \"Q\", \"P\", \"H\", \"B\"]",
     "parsed_tokens": [
-      "L",
+      "W",
+      "Q",
+      "P",
+      "H",
+      "B"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "W"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Z\", \"J\", \"E\", \"W\", \"P\"]",
+    "parsed_tokens": [
+      "Z",
+      "J",
+      "E",
+      "W",
+      "P"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Z"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"S\", \"G\", \"H\", \"B\", \"W\"]",
+    "parsed_tokens": [
+      "S",
       "G",
-      "V",
+      "H",
+      "B",
+      "W"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "S"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Q\", \"P\", \"F\", \"Y\", \"U\"]",
+    "parsed_tokens": [
+      "Q",
+      "P",
+      "F",
+      "Y",
+      "U"
+    ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Q"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 50,
+    "completion_tokens": 7,
+    "total_tokens": 57
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_letter5",
+    "raw_text": "[\"Z\", \"J\", \"E\", \"P\", \"S\"]",
+    "parsed_tokens": [
+      "Z",
+      "J",
+      "E",
       "P",
       "S"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Z"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"P\", \"W\", \"F\", \"J\", \"Q\"]",
+    "raw_text": "[\"P\", \"L\", \"D\", \"W\", \"S\"]",
     "parsed_tokens": [
       "P",
+      "L",
+      "D",
       "W",
-      "F",
-      "J",
-      "Q"
+      "S"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "P"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"G\", \"F\", \"Y\", \"Q\", \"I\"]",
+    "raw_text": "[\"G\", \"F\", \"Y\", \"R\", \"C\"]",
     "parsed_tokens": [
       "G",
       "F",
       "Y",
-      "Q",
-      "I"
+      "R",
+      "C"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "G"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_letter5",
-    "raw_text": "[\"C\", \"F\", \"Y\", \"R\", \"W\"]",
+    "raw_text": "[\"Z\", \"J\", \"F\", \"Y\", \"Q\"]",
     "parsed_tokens": [
-      "C",
+      "Z",
+      "J",
       "F",
       "Y",
-      "R",
-      "W"
+      "Q"
     ],
+    "traits": {
+      "has_duplicates": false,
+      "first_token": "Z"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 50,
     "completion_tokens": 7,
-    "total_tokens": 57,
-    "temperature": 0.85
+    "total_tokens": 57
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_perm5",
-    "raw_text": "[4, 1, 5, 2, 3]",
+    "raw_text": "[3, 1, 5, 2, 4]",
     "parsed_tokens": [
-      "4",
+      "3",
       "1",
       "5",
       "2",
-      "3"
+      "4"
     ],
+    "traits": {
+      "canonical_perm": "3,1,5,2,4",
+      "fixed_points": 0,
+      "first_token": "3"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Gemini-2.5-Flash",
@@ -2350,53 +5691,168 @@
       "5",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "2,4,1,5,3",
+      "fixed_points": 0,
+      "first_token": "2"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_perm5",
-    "raw_text": "[2, 5, 1, 4, 3]",
+    "raw_text": "[4, 2, 5, 1, 3]",
     "parsed_tokens": [
+      "4",
       "2",
       "5",
       "1",
-      "4",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
   },
   {
     "model_name": "Gemini-2.5-Flash",
     "probe_id": "arr_perm5",
-    "raw_text": "[5, 2, 4, 1, 3]",
+    "raw_text": "[4, 1, 5, 2, 3]",
     "parsed_tokens": [
-      "5",
-      "2",
       "4",
       "1",
+      "5",
+      "2",
       "3"
     ],
+    "traits": {
+      "canonical_perm": "4,1,5,2,3",
+      "fixed_points": 0,
+      "first_token": "4"
+    },
     "is_valid": true,
     "strictly_complied": true,
     "source_type": "official",
     "weight": 1.0,
+    "temperature": 0.85,
     "prompt_tokens": 66,
     "completion_tokens": 4,
-    "total_tokens": 70,
-    "temperature": 0.85
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_perm5",
+    "raw_text": "[2, 4, 1, 5, 3]",
+    "parsed_tokens": [
+      "2",
+      "4",
+      "1",
+      "5",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "2,4,1,5,3",
+      "fixed_points": 0,
+      "first_token": "2"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
+  },
+  {
+    "model_name": "Gemini-2.5-Flash",
+    "probe_id": "arr_perm5",
+    "raw_text": "[4, 2, 5, 1, 3]",
+    "parsed_tokens": [
+      "4",
+      "2",
+      "5",
+      "1",
+      "3"
+    ],
+    "traits": {
+      "canonical_perm": "4,2,5,1,3",
+      "fixed_points": 1,
+      "first_token": "4"
+    },
+    "is_valid": true,
+    "strictly_complied": true,
+    "source_type": "official",
+    "weight": 1.0,
+    "temperature": 0.85,
+    "prompt_tokens": 66,
+    "completion_tokens": 4,
+    "total_tokens": 70
   }
 ]

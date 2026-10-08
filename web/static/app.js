@@ -89,12 +89,12 @@ const I18N = {
     eval_btn: "开始判定",
 
     verdict_title: "判定结果",
-    stat_margin_label: "胜出优势: ",
+    stat_margin_label: "吻合度优势: ",
     stat_entropy_label: "不确定性: ",
-    forest_title: "各模型后验概率与 95% Bootstrap 置信区间",
+    forest_title: "各模型独立吻合度与 95% 置信区间 (非归一化绝对拟合)",
     forest_boot: "Bootstrap B=800",
-    forest_col_model: "候选模型与后验点估计",
-    forest_col_ci: "95% 置信区间",
+    forest_col_model: "候选模型与独立吻合度",
+    forest_col_ci: "95% 独立置信区间",
     pca_title: "二维降维分布图",
     pca_desc: "散点为各模型经验特征分布云团；★ 星标为当前测试样本的投影位置。",
     pca_user_point: "★ 当前测试样本",
@@ -214,12 +214,12 @@ const I18N = {
     eval_btn: "Run Attribution",
 
     verdict_title: "Verdict",
-    stat_margin_label: "Margin: ",
+    stat_margin_label: "Fit Margin: ",
     stat_entropy_label: "Entropy: ",
-    forest_title: "Posterior Probabilities & 95% Bootstrap Confidence Intervals",
+    forest_title: "Model-Independent Fitness & 95% Confidence Intervals (Unnormalized)",
     forest_boot: "Bootstrap B=800",
-    forest_col_model: "Candidate Model & Point Estimate",
-    forest_col_ci: "95% Bootstrap CI",
+    forest_col_model: "Candidate Model & Independent Fit",
+    forest_col_ci: "95% Independent CI",
     pca_title: "2D PCA Cluster Projection",
     pca_desc: "Scatter clouds show empirical model distributions; ★ star indicates current test sample projection.",
     pca_user_point: "★ Current Test Sample",
@@ -747,13 +747,15 @@ function renderEvaluationResults(data) {
   resultsArea.scrollIntoView({ behavior: "smooth", block: "start" });
 
   document.getElementById("verdict-model-name").innerText = evalRes.top_model;
-  document.getElementById("verdict-prob-badge").innerText = `${(evalRes.top_probability * 100).toFixed(1)}%`;
+  const bestFit = evalRes.top_fitness !== undefined ? evalRes.top_fitness : evalRes.top_probability;
+  document.getElementById("verdict-prob-badge").innerText = `${(bestFit * 100).toFixed(1)}%`;
   document.getElementById("stat-margin").innerText = `+${(evalRes.margin * 100).toFixed(1)}%`;
   document.getElementById("stat-entropy").innerText = `${evalRes.entropy} bit`;
   document.getElementById("stat-n1").innerText = evalRes.unique_probes_tested;
   document.getElementById("stat-n2").innerText = evalRes.sample_count;
 
-  renderForestPlot(evalRes.posteriors, evalRes.confidence_intervals, evalRes.log_likelihoods);
+  const displayScores = evalRes.independent_fitness || evalRes.posteriors;
+  renderForestPlot(displayScores, evalRes.confidence_intervals, evalRes.log_likelihoods, evalRes.posteriors);
   renderClusterCanvas(clusterData);
 
   const tbody = document.getElementById("parsed-table-body");
@@ -777,14 +779,14 @@ function renderEvaluationResults(data) {
  * Forest Plot Error Bar Rows (Academic Statistical Box Plot)
  * Dual-theme & bilingual adaptive
  */
-function renderForestPlot(posteriors, confidenceIntervals, logLikelihoods) {
+function renderForestPlot(fitnessScores, confidenceIntervals, logLikelihoods, posteriors = {}) {
   const container = document.getElementById("forest-plot-container");
   if (!container) return;
 
   const modelColorMap = {};
   MODELS_DATA.forEach(m => { modelColorMap[m.name] = m.color; });
 
-  const sortedEntries = Object.entries(posteriors).sort((a, b) => b[1] - a[1]);
+  const sortedEntries = Object.entries(fitnessScores).sort((a, b) => b[1] - a[1]);
 
   let html = `
     <!-- Forest Plot Axis Scale Header -->
@@ -815,6 +817,8 @@ function renderForestPlot(posteriors, confidenceIntervals, logLikelihoods) {
     const ciWidthPct = Math.max(0.6, ciHighPct - ciLowPct);
     const centerPct = Math.min(100, Math.max(0, prob * 100));
     const ll = logLikelihoods && logLikelihoods[model] !== undefined ? logLikelihoods[model].toFixed(2) : "-";
+    const normP = posteriors[model] !== undefined ? (posteriors[model] * 100).toFixed(1) : null;
+    const tooltipText = normP !== null ? `${model}: 独立吻合度 ${probPct}% (95% CI: [${ciLowPct.toFixed(1)}%, ${ciHighPct.toFixed(1)}%]) | 归一化排他后验: ${normP}% | LL: ${ll}` : `${model}: ${probPct}% | LL: ${ll}`;
 
     html += `
       <div class="bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/90 rounded-lg p-4 grid grid-cols-12 gap-4 items-center hover:border-slate-300 dark:hover:border-slate-700 transition shadow-2xs">
@@ -834,7 +838,7 @@ function renderForestPlot(posteriors, confidenceIntervals, logLikelihoods) {
 
         <!-- Statistical Error Bar Coordinate Strip (0.0 to 1.0) -->
         <div class="col-span-12 sm:col-span-7">
-          <div class="relative w-full h-9 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 rounded-md flex items-center px-1 group" title="${model}: ${probPct}% (95% CI: [${ciLowPct.toFixed(1)}%, ${ciHighPct.toFixed(1)}%]) | LL: ${ll}">
+          <div class="relative w-full h-9 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 rounded-md flex items-center px-1 group" title="${tooltipText}">
             <!-- Vertical Grid Reference Lines at 25%, 50%, 75% -->
             <div class="absolute inset-0 flex justify-between pointer-events-none opacity-25">
               <div class="border-r border-slate-400 dark:border-slate-600 h-full w-0"></div>
