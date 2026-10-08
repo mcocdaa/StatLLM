@@ -35,7 +35,7 @@ class ArrayProbe:
 
 
 def _extract_json_array(text: str) -> Optional[List[Any]]:
-    """Helper to parse a JSON array from text, even if surrounded by markdown or commentary."""
+    """Helper to parse a JSON array from text, even if preceded by thinking, reasoning, or prompt text."""
     text = text.strip()
     # 1. Try direct JSON parse
     try:
@@ -45,18 +45,24 @@ def _extract_json_array(text: str) -> Optional[List[Any]]:
     except Exception:
         pass
 
-    # 2. Try regex extraction of bracketed array [...]
-    match = re.search(r"\[\s*([^\]]+?)\s*\]", text, re.DOTALL)
-    if match:
+    # 2. Try regex extraction of bracketed array [...], searching backwards from the last match
+    matches = list(re.finditer(r"\[\s*([^\]]+?)\s*\]", text, re.DOTALL))
+    for match in reversed(matches):
         raw_arr = f"[{match.group(1)}]"
         try:
             data = json.loads(raw_arr)
-            if isinstance(data, list):
+            if isinstance(data, list) and len(data) >= 3:
                 return data
         except Exception:
-            # Fallback: comma split
             items = [re.sub(r"['\"]", "", x).strip() for x in match.group(1).split(",")]
-            return [x for x in items if x]
+            valid_items = [x for x in items if x]
+            if len(valid_items) >= 3:
+                return valid_items
+
+    if matches:
+        items = [re.sub(r"['\"]", "", x).strip() for x in matches[-1].group(1).split(",")]
+        return [x for x in items if x]
+
     return None
 
 

@@ -276,6 +276,17 @@ class Database:
                 for idx, tok in enumerate(tokens):
                     token_deltas[(m, pid, str(tok))] += w
                     token_deltas[(m, pid, f"pos:{idx}:{tok}")] += w
+                has_dup = len(tokens) != len(set(tokens))
+                token_deltas[(m, pid, f"trait:has_dup_{has_dup}")] += w
+                if pid == "arr_int5":
+                    try:
+                        nums = [int(x) for x in tokens]
+                        is_sorted = nums == sorted(nums)
+                        token_deltas[(m, pid, f"trait:is_sorted_{is_sorted}")] += w
+                    except Exception:
+                        pass
+                if pid == "arr_perm5":
+                    token_deltas[(m, pid, f"perm:{','.join(str(x) for x in tokens)}")] += w
 
             for (m, pid, tok), w in token_deltas.items():
                 cursor.execute("""
