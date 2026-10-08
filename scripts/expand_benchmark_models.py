@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from statllm.database import Database
 from statllm.probes import PROBES
+from statllm.perturbations import estimate_tokens
 
 OPENROUTER_KEY = os.environ.get("OPENROUTER_KEY", "")
 
@@ -139,6 +140,9 @@ def collect_for_model(model_cfg: Dict[str, Any], samples_per_probe: int = 4) -> 
                 continue
 
             parsed = probe.parse(raw_text)
+            p_tok = estimate_tokens(probe.prompt)
+            c_tok = estimate_tokens(raw_text)
+            t_tok = p_tok + c_tok
             results.append({
                 "model_name": m_name,
                 "probe_id": pid,
@@ -149,9 +153,12 @@ def collect_for_model(model_cfg: Dict[str, Any], samples_per_probe: int = 4) -> 
                 "strictly_complied": parsed["strictly_complied"],
                 "source_type": "official",
                 "weight": 1.0,
-                "temperature": 0.85
+                "temperature": 0.85,
+                "prompt_tokens": p_tok,
+                "completion_tokens": c_tok,
+                "total_tokens": t_tok
             })
-            print(f"[{m_name}] {pid}#{run_idx} OK (valid={parsed['is_valid']})")
+            print(f"[{m_name}] {pid}#{run_idx} OK (valid={parsed['is_valid']}, tok={t_tok})")
             time.sleep(0.4)
 
     print(f"[{m_name}] Finished! Collected {len(results)} samples.")
@@ -199,6 +206,9 @@ def main():
             strictly_complied=rec["strictly_complied"],
             source_type=rec["source_type"],
             weight=rec["weight"],
+            prompt_tokens=rec["prompt_tokens"],
+            completion_tokens=rec["completion_tokens"],
+            total_tokens=rec["total_tokens"],
             temperature=rec["temperature"]
         )
 
