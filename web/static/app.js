@@ -450,6 +450,13 @@ function applyLanguage(lang) {
 
   // Update rows probe dropdown options, prompts, placeholders, and tooltips
   document.querySelectorAll(".submission-row").forEach(row => {
+    const probeLabelEl = row.querySelector(".row-probe-label");
+    if (probeLabelEl) probeLabelEl.textContent = t("probe_label");
+    const outputLabelEl = row.querySelector(".row-output-label");
+    if (outputLabelEl) outputLabelEl.textContent = t("output_label");
+    const outputTipEl = row.querySelector(".row-output-tip");
+    if (outputTipEl) outputTipEl.textContent = t("output_tip");
+
     const select = row.querySelector(".row-probe-select");
     const currentProbeId = select ? select.value : "arr_int5";
     if (select) {
@@ -670,7 +677,7 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
       <div>
         <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2 h-6">
           <span class="w-2 h-2 rounded-full bg-sky-500"></span>
-          <span>${t("probe_label")}</span>
+          <span class="row-probe-label">${t("probe_label")}</span>
         </label>
         <select class="row-probe-select w-full mt-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition cursor-pointer" onchange="onProbeChange(this)">
           ${optionsHtml}
@@ -691,9 +698,9 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
       <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between h-6">
         <span class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>${t("output_label")}</span>
+          <span class="row-output-label">${t("output_label")}</span>
         </span>
-        <span class="text-xs font-normal text-slate-400">${t("output_tip")}</span>
+        <span class="row-output-tip text-xs font-normal text-slate-400">${t("output_tip")}</span>
       </label>
       
       <div class="flex flex-col sm:flex-row gap-2.5 items-stretch mt-1.5 flex-1 min-h-0">
