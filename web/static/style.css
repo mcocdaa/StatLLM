@@ -137,6 +137,11 @@ html.dark .katex {
   color: #e2e8f0;
 }
 
+.math-rate-badge .katex {
+  color: inherit !important;
+  font-size: 1.05em;
+}
+
 /* Custom crisp scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

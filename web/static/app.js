@@ -124,7 +124,7 @@ const I18N = {
     advisory_unit_items: "题",
     advisory_span_label: "全幅跨度",
     advisory_sufficient: "评测样本量充足（已提供 {count} 道题目），95% 置信区间高度收敛，统计鉴别具备高信度。",
-    advisory_desc_tpl: "由于当前仅提供了 {count} 道题目的回答，95% 置信区间跨度较宽（±{radius}%）。大模型在单次离散抽样中存在固有随机性；建议增加测试轮次（如每道题测试 2~3 轮，达到 15 条以上样本），置信区间将依 1/√n 显著收窄约 {shrink}%（收窄至 ±{newRadius}%），大幅消除不确定度并精准锁定基座模型。",
+    advisory_desc_tpl: "由于当前仅提供了 {count} 道题目的回答，95% 置信区间跨度较宽（±{radius}%）。大模型在单次离散抽样中存在固有随机性；建议增加测试轮次（如每道题测试 2~3 轮，达到 15 条以上样本），置信区间将依 {math_rate} 显著收窄约 {shrink}%（收窄至 ±{newRadius}%），大幅消除不确定度并精准锁定基座模型。",
     forest_title: "各模型独立吻合度与置信区间",
     forest_boot: "双层区间: 68% / 95%",
     forest_col_model: "候选模型与独立吻合度",
@@ -285,7 +285,7 @@ const I18N = {
     advisory_unit_items: "items",
     advisory_span_label: "Full Span",
     advisory_sufficient: "Sufficient sample size ({count} items evaluated); 95% confidence interval is highly converged with strong attribution certainty.",
-    advisory_desc_tpl: "With only {count} sample(s) provided, the 95% confidence interval is relatively wide (span ±{radius}%). LLMs exhibit intrinsic stochasticity in single-shot outputs; submitting additional rounds (e.g. 2–3 runs per probe, ≥15 samples) will shrink the confidence interval by 1/√n by ~{shrink}% (down to ±{newRadius}%), significantly reducing uncertainty and sharpening model attribution.",
+    advisory_desc_tpl: "With only {count} sample(s) provided, the 95% confidence interval is relatively wide (span ±{radius}%). LLMs exhibit intrinsic stochasticity in single-shot outputs; submitting additional rounds (e.g. 2–3 runs per probe, ≥15 samples) will shrink the confidence interval by {math_rate} by ~{shrink}% (down to ±{newRadius}%), significantly reducing uncertainty and sharpening model attribution.",
     forest_title: "Candidate Model Fitness & Confidence Intervals",
     forest_boot: "Dual CI: 68% / 95%",
     forest_col_model: "Candidate Model & Independent Fit",
@@ -941,6 +941,17 @@ function renderEvaluationResults(data) {
   });
 }
 
+function formatMathSqrtN() {
+  if (window.katex && typeof window.katex.renderToString === "function") {
+    try {
+      return window.katex.renderToString("1/\\sqrt{n}", { displayMode: false, throwOnError: false });
+    } catch (e) {
+      console.warn("KaTeX renderToString error:", e);
+    }
+  }
+  return '<span class="inline-flex items-center font-mono font-bold">1/&radic;<span style="text-decoration:overline; padding-left:1px;">n</span></span>';
+}
+
 /**
  * Render Sample Size & Uncertainty Advisory Banner
  */
@@ -961,11 +972,15 @@ function renderSampleAdvisory(evalRes) {
     const newRadius = advisory.expected_radius_pct !== undefined ? advisory.expected_radius_pct : 13.8;
     const recom = advisory.recommended_samples || 15;
 
+    const mathHtml = `<span class="math-rate-badge inline-flex items-center align-middle mx-1 font-mono font-bold bg-amber-500/20 dark:bg-amber-400/20 text-amber-950 dark:text-amber-100 px-1.5 py-0.5 rounded shadow-xs">${formatMathSqrtN()}</span>`;
+
     let desc = t("advisory_desc_tpl")
       .replace("{count}", count)
       .replace("{radius}", ciRadius)
       .replace("{shrink}", shrink)
-      .replace("{newRadius}", newRadius);
+      .replace("{newRadius}", newRadius)
+      .replace("{math_rate}", mathHtml)
+      .replace("1/√n", mathHtml);
 
     container.innerHTML = `
       <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-950/40 p-4 transition-all duration-200">
