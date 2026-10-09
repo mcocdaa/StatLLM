@@ -41,7 +41,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     app = FastAPI(
         title="StatLLM API",
         description="Statistical Large Language Model Fingerprinting & Attribution Engine",
-        version="0.1.0"
+        version="0.1.1"
     )
 
     db = Database(db_path)

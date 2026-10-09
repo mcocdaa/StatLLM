@@ -8,7 +8,7 @@ from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
 from statllm.seed_data import seed_database
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = [
     "PROBES",
     "get_probe",

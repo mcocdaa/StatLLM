@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2026-10-09
+
+### Fixed
+- **Prevent Silent Guessing Contamination**: Eradicated implicit auto-attribution that silently assigned unverified anonymous evaluation data to the predicted `top_model`. If no explicit model is claimed, data is strictly rejected from contaminating baseline distributions.
+
+### Added
+- **Explicit Ground-Truth Model Declaration**: Added interactive ground-truth model input and datalist in the evaluation workbench, requiring explicit model identification before saving crowdsourced samples.
+- **Direct Sample Contribution Modal**: Added standalone sample contribution modal in the Benchmark Database view for explicit single-probe submissions with automatic community model registration.
+
+---
+
 ## [0.1.0] - 2026-10-09
 
 ### Added
