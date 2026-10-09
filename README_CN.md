@@ -64,8 +64,14 @@
 
 ## 🚀 快速上手 (Quickstart)
 
-### 方式一：Docker Compose 容器部署（推荐）
+### 方式一：Docker 容器一键启动（最便捷）
 
+直接拉取并运行官方构建的多架构预编译镜像：
+```bash
+docker run -d -p 8008:8008 --name statllm ghcr.io/mcocdaa/statllm:latest
+```
+
+或通过代码仓库 Docker Compose 本地编排：
 ```bash
 # 1. 克隆代码仓库
 git clone https://github.com/mcocdaa/StatLLM.git
@@ -73,10 +79,6 @@ cd StatLLM
 
 # 2. 一键启动服务
 docker compose up -d
-
-# 3. 检查容器运行状态
-docker compose ps
-docker compose logs -f
 ```
 在浏览器打开 **`http://localhost:8008`** 即可使用。
 

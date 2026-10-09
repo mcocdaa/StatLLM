@@ -85,19 +85,18 @@ When $N \le 5$, the 95% confidence interval spans roughly $\pm 23\%$. Expanding 
 
 ## 🚀 Quickstart
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Docker (Fastest)
 
+Run the prebuilt multi-architecture container image directly:
 ```bash
-# Clone the repository
+docker run -d -p 8008:8008 --name statllm ghcr.io/mcocdaa/statllm:latest
+```
+
+Or clone and run with Docker Compose:
+```bash
 git clone https://github.com/mcocdaa/StatLLM.git
 cd StatLLM
-
-# Start service with Docker Compose
 docker compose up -d
-
-# Check health and view logs
-docker compose ps
-docker compose logs -f
 ```
 Open **`http://localhost:8008`** in your browser.
 
