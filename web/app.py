@@ -24,7 +24,7 @@ class SubmissionItem(BaseModel):
 
 
 class EvaluateRequest(BaseModel):
-    submissions: List[SubmissionItem] = Field(..., min_items=1)
+    submissions: List[SubmissionItem] = Field(..., min_length=1)
     consent_to_collect: bool = False
     claimed_model: Optional[str] = None
     positional_lambda: Optional[float] = Field(0.5, ge=0.0, le=1.0)
@@ -93,26 +93,44 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
         user_point = cluster_projector.project_user_submission(eval_res["parsed_submissions"])
         cluster_data = cluster_projector.get_cluster_data(user_point=user_point)
 
-        # Optional crowdsource collection with user consent
+        # Optional crowdsource collection with user consent & explicit ground truth
+        saved_samples_count = 0
+        claimed_model_clean = (req.claimed_model or "").strip()
         if req.consent_to_collect:
-            assigned_label = req.claimed_model if req.claimed_model else eval_res["top_model"]
-            for parsed_rec in eval_res["parsed_submissions"]:
-                if parsed_rec["is_valid"]:
-                    db.add_sample(
-                        model_name=assigned_label,
-                        probe_id=parsed_rec["probe_id"],
-                        raw_text=parsed_rec["raw_text"],
-                        parsed_tokens=parsed_rec["parsed_tokens"],
-                        traits=parsed_rec.get("traits", {}),
-                        is_valid=parsed_rec["is_valid"],
-                        strictly_complied=parsed_rec["strictly_complied"],
-                        source_type="user",
-                        weight=0.2
+            # STRICT DEFENSE: Reject implicit guessing attribution!
+            # Never attribute to eval_res["top_model"] automatically, which causes poisoning.
+            if claimed_model_clean:
+                assigned_label = claimed_model_clean
+                existing_models = [m["name"] for m in db.list_models()]
+                if assigned_label not in existing_models:
+                    db.add_model(
+                        name=assigned_label,
+                        display_name=assigned_label,
+                        provider="Community",
+                        color="#8b5cf6"
                     )
+                for parsed_rec in eval_res["parsed_submissions"]:
+                    if parsed_rec["is_valid"]:
+                        db.add_sample(
+                            model_name=assigned_label,
+                            probe_id=parsed_rec["probe_id"],
+                            raw_text=parsed_rec["raw_text"],
+                            parsed_tokens=parsed_rec["parsed_tokens"],
+                            traits=parsed_rec.get("traits", {}),
+                            is_valid=parsed_rec["is_valid"],
+                            strictly_complied=parsed_rec["strictly_complied"],
+                            source_type="user",
+                            weight=0.2
+                        )
+                        saved_samples_count += 1
+                if assigned_label not in existing_models:
+                    cluster_projector.fit()
 
         return {
             "evaluation": eval_res,
-            "cluster_data": cluster_data
+            "cluster_data": cluster_data,
+            "saved_samples_count": saved_samples_count,
+            "claimed_model": claimed_model_clean if saved_samples_count > 0 else None
         }
 
     @app.post("/api/contribute")
@@ -125,8 +143,22 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
         if not parse_res["is_valid"]:
             raise HTTPException(status_code=400, detail="Response could not be parsed into a valid array")
 
+        clean_model_name = req.model_name.strip()
+        if not clean_model_name:
+            raise HTTPException(status_code=400, detail="Model name cannot be empty")
+
+        existing_models = [m["name"] for m in db.list_models()]
+        if clean_model_name not in existing_models:
+            db.add_model(
+                name=clean_model_name,
+                display_name=clean_model_name,
+                provider="Community",
+                color="#8b5cf6"
+            )
+            cluster_projector.fit()
+
         sample_id = db.add_sample(
-            model_name=req.model_name,
+            model_name=clean_model_name,
             probe_id=req.probe_id,
             raw_text=req.raw_text,
             parsed_tokens=parse_res["parsed_tokens"],

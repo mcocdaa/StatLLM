@@ -109,7 +109,18 @@ const I18N = {
     lambda_0: "0.0 (纯词袋 / 乱序容忍)",
     lambda_5: "0.5 (默认平衡)",
     lambda_1: "1.0 (严格自回归位置)",
-    consent_label: "数据匿名入库 (w=0.2)",
+    consent_label: "数据入库贡献 (w=0.2)",
+    claimed_model_prefix: "真值模型:",
+    claimed_model_placeholder: "选择或输入被测模型标识 (必填)",
+    alert_claimed_model_required: "您勾选了数据入库贡献，请指明您所测试的真实模型名称（可选择已知基座或输入新模型名称），严禁未声明模型入库以避免污染现有基准。",
+    toast_contribution_saved: "已将 {count} 条有效探针指纹归属于 [{model}] (权重 0.2 计入库)",
+    db_btn_contribute: "贡献单条样本",
+    modal_contribute_title: "向底库贡献模型真实指纹",
+    modal_contribute_desc: "显式指定被测模型真值与探针题目，系统将解析其离散偏好特征并以用户权重 (w=0.2) 存入数据库。",
+    modal_contribute_model_label: "目标模型真值：",
+    modal_contribute_probe_label: "探针题目：",
+    modal_contribute_raw_label: "模型回答文本 (包含数组)：",
+    modal_submit_contribute: "提交入库",
     eval_btn: "开始判定",
 
     verdict_title: "判定结果",
@@ -270,7 +281,18 @@ const I18N = {
     lambda_0: "0.0 (Bag-of-tokens / Permutation-tolerant)",
     lambda_5: "0.5 (Balanced Default)",
     lambda_1: "1.0 (Strict Autoregressive Positional)",
-    consent_label: "Anonymous crowdsource contribution (w=0.2)",
+    consent_label: "Contribute samples to database (w=0.2)",
+    claimed_model_prefix: "Ground Truth:",
+    claimed_model_placeholder: "Select or enter model identifier (Required)",
+    alert_claimed_model_required: "You have enabled sample contribution. Please specify the ground-truth model name (select an existing model or type a custom name) to prevent unverified data from polluting benchmark distributions.",
+    toast_contribution_saved: "Successfully saved {count} valid sample(s) under [{model}] with weight 0.2.",
+    db_btn_contribute: "Contribute Sample",
+    modal_contribute_title: "Contribute Ground-Truth Fingerprint",
+    modal_contribute_desc: "Explicitly specify the ground-truth model and probe. The discrete features will be parsed and recorded under user weight (w=0.2).",
+    modal_contribute_model_label: "Ground Truth Model:",
+    modal_contribute_probe_label: "Probe:",
+    modal_contribute_raw_label: "Model Response (containing array):",
+    modal_submit_contribute: "Submit Sample",
     eval_btn: "Run Attribution",
 
     verdict_title: "Verdict",
@@ -452,6 +474,15 @@ function applyLanguage(lang) {
       } else {
         el.textContent = val;
       }
+    }
+  });
+
+  // Translate all placeholders marked with data-i18n-placeholder
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    const val = t(key);
+    if (val) {
+      el.placeholder = val;
     }
   });
 
@@ -671,6 +702,7 @@ async function loadInitialData() {
     if (posEl) posEl.innerText = `${posCount} ${t("db_pos_unit")}`;
 
     renderClusterCanvas(currentClusterData);
+    populateKnownModelsDatalist();
   } catch (err) {
     console.error("Failed to load initial data", err);
   }
@@ -823,7 +855,12 @@ function resetSubmissions() {
   container.innerHTML = "";
   addSubmissionRow("arr_int5", "");
   const consentEl = document.getElementById("consent-checkbox");
-  if (consentEl) consentEl.checked = false;
+  if (consentEl) {
+    consentEl.checked = false;
+    toggleClaimedModelInput();
+  }
+  const claimedInput = document.getElementById("claimed-model-input");
+  if (claimedInput) claimedInput.value = "";
 }
 
 /**
@@ -851,6 +888,17 @@ async function executeEvaluation() {
   const consentEl = document.getElementById("consent-checkbox");
   const consent = consentEl ? consentEl.checked : false;
 
+  let claimedModel = "";
+  if (consent) {
+    const claimedInput = document.getElementById("claimed-model-input");
+    claimedModel = claimedInput ? claimedInput.value.trim() : "";
+    if (!claimedModel) {
+      alert(t("alert_claimed_model_required"));
+      if (claimedInput) claimedInput.focus();
+      return;
+    }
+  }
+
   const runBtn = document.getElementById("run-eval-btn");
   const spinner = document.getElementById("run-btn-spinner");
   runBtn.disabled = true;
@@ -863,6 +911,7 @@ async function executeEvaluation() {
       body: JSON.stringify({
         submissions: submissions,
         consent_to_collect: consent,
+        claimed_model: claimedModel || null,
         positional_lambda: posLambda
       })
     });
@@ -874,6 +923,14 @@ async function executeEvaluation() {
 
     const data = await res.json();
     renderEvaluationResults(data);
+
+    if (data.saved_samples_count && data.saved_samples_count > 0) {
+      const msg = t("toast_contribution_saved")
+        .replace("{count}", data.saved_samples_count)
+        .replace("{model}", data.claimed_model || claimedModel);
+      showToast(msg, "success");
+      loadInitialData();
+    }
   } catch (err) {
     alert(`${t("alert_eval_err")}${err.message}`);
   } finally {
@@ -1899,4 +1956,117 @@ function showToast(msg, type = "info") {
     setTimeout(() => toast.remove(), 300);
   }, 3500);
 }
+
+function populateKnownModelsDatalist() {
+  const datalist = document.getElementById("known-models-datalist");
+  if (!datalist || !MODELS_DATA) return;
+  datalist.innerHTML = "";
+  MODELS_DATA.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.name;
+    opt.textContent = m.display_name ? `${m.display_name} (${m.provider || "Lab"})` : m.name;
+    datalist.appendChild(opt);
+  });
+}
+
+function toggleClaimedModelInput() {
+  const checkbox = document.getElementById("consent-checkbox");
+  const container = document.getElementById("claimed-model-container");
+  const input = document.getElementById("claimed-model-input");
+  if (!checkbox || !container) return;
+  if (checkbox.checked) {
+    container.classList.remove("hidden");
+    populateKnownModelsDatalist();
+    if (input) input.focus();
+  } else {
+    container.classList.add("hidden");
+  }
+}
+
+function openContributeModal() {
+  const modal = document.getElementById("contribute-modal");
+  if (!modal) return;
+  modal.style.display = "flex";
+  populateKnownModelsDatalist();
+
+  const probeSelect = document.getElementById("modal-contribute-probe");
+  if (probeSelect && PROBES_DATA) {
+    probeSelect.innerHTML = "";
+    PROBES_DATA.forEach(p => {
+      const item = PROBE_I18N[p.id];
+      const title = item ? (currentLang === "en" ? item.en_title : item.zh_title) : p.title;
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = title;
+      probeSelect.appendChild(opt);
+    });
+  }
+
+  const modelInput = document.getElementById("modal-contribute-model");
+  if (modelInput) modelInput.focus();
+}
+
+function closeContributeModal() {
+  const modal = document.getElementById("contribute-modal");
+  if (modal) modal.style.display = "none";
+}
+
+async function submitDirectContribution() {
+  const modelInput = document.getElementById("modal-contribute-model");
+  const probeSelect = document.getElementById("modal-contribute-probe");
+  const rawTextarea = document.getElementById("modal-contribute-raw");
+  const modelName = (modelInput?.value || "").trim();
+  const probeId = probeSelect?.value;
+  const rawText = (rawTextarea?.value || "").trim();
+
+  if (!modelName) {
+    alert(t("alert_claimed_model_required"));
+    if (modelInput) modelInput.focus();
+    return;
+  }
+  if (!rawText) {
+    alert(t("alert_no_input"));
+    if (rawTextarea) rawTextarea.focus();
+    return;
+  }
+
+  const btn = document.getElementById("btn-submit-contribution");
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/contribute", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model_name: modelName,
+        probe_id: probeId,
+        raw_text: rawText,
+        weight: 0.2
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Contribution failed");
+    }
+    const data = await res.json();
+    closeContributeModal();
+    const msg = t("toast_contribution_saved")
+      .replace("{count}", "1")
+      .replace("{model}", modelName);
+    showToast(msg, "success");
+    if (rawTextarea) rawTextarea.value = "";
+    loadInitialData();
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Expose modal and toggle functions to window for HTML handlers
+window.toggleClaimedModelInput = toggleClaimedModelInput;
+window.openContributeModal = openContributeModal;
+window.closeContributeModal = closeContributeModal;
+window.submitDirectContribution = submitDirectContribution;
+
 
