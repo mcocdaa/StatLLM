@@ -32,6 +32,11 @@ StatLLM 是专注于**黑盒大语言模型统计归属鉴定与离散指纹溯�
    - 在向 `statllm.db` 批量写入或恢复数据后，**必须执行 `PRAGMA wal_checkpoint(TRUNCATE)`**，将 WAL 日志完整刷写回主数据库文件，确保 Docker 容器内挂载能实时感知数据变更。
    - 每次底库模型或样本结构变更后，必须重新拟合 2D PCA 聚类投影器（`ClusterProjector(db).fit()`）。
 
+6. **Tag 与版本发布严格授权契约 (Strict Explicit Authorization for Tags & Releases)**：
+   - **严禁擅自打 Git Tag、推送 Tag 或创建 GitHub Release**。
+   - 日常代码修复、逻辑修正、特性增加均仅在 `main` 分支提交与推送（CI/CD 会自动处理 `main` 的容器构建）。
+   - **只有当人类开发者明确发出“发布 Tag”或“发布新版本”的指令时，方可执行打 Tag 与发布操作**。
+
 ---
 
 ## 2. Repository Layout (项目结构速查)
