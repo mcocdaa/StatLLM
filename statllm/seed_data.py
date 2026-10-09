@@ -5,6 +5,7 @@ Initializes baseline benchmark distributions across modern LLMs,
 including Grok-4.7, DeepSeek-V4.1-Flash, GPT-5.6-Luna, Claude-3.5-Sonnet, Gemini-2.0, and Qwen-2.5.
 """
 
+import json
 import numpy as np
 from typing import Dict, Any, List
 from statllm.database import Database
@@ -246,7 +247,7 @@ def seed_database(db: Database, samples_per_probe: int = 100):
                             "first_token": tokens[0]
                         }
                     else:
-                        raw_text = f"[\"{'\", \"'.join(tokens)}\"]"
+                        raw_text = json.dumps(tokens, ensure_ascii=False)
                         traits = {
                             "has_duplicates": len(tokens) != len(set(tokens)),
                             "first_token": tokens[0]
