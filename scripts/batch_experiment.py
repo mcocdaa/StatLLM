@@ -9,10 +9,10 @@ import urllib.request
 import json
 import time
 import re
-from typing import Dict, Any, List
+import os
 
-KOALA_URL = "https://api.openai.com/v1"
-KOALA_KEY = "your_proxy_api_key_here"
+KOALA_URL = os.environ.get("KOALA_URL", "https://api.openai.com/v1")
+KOALA_KEY = os.environ.get("KOALA_KEY", "")
 
 PROMPTS = {
     "arr_int5": "生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",

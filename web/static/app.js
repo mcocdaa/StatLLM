@@ -115,6 +115,16 @@ const I18N = {
     verdict_title: "判定结果",
     stat_margin_label: "吻合度优势: ",
     stat_entropy_label: "不确定性: ",
+    advisory_title: "统计学提示：当前样本量与置信区间范围",
+    advisory_badge: "建议增加测试轮次",
+    advisory_current: "当前题目数: ",
+    advisory_ci_span: "95% 区间半宽: ",
+    advisory_recom: "建议补充至: ",
+    advisory_shrink: "预计收窄",
+    advisory_unit_items: "题",
+    advisory_span_label: "全幅跨度",
+    advisory_sufficient: "评测样本量充足（已提供 {count} 道题目），95% 置信区间高度收敛，统计鉴别具备高信度。",
+    advisory_desc_tpl: "由于当前仅提供了 {count} 道题目的回答，95% 置信区间跨度较宽（±{radius}%）。大模型在单次离散抽样中存在固有随机性；建议增加测试轮次（如每道题测试 2~3 轮，达到 15 条以上样本），置信区间将依 1/√n 显著收窄约 {shrink}%（收窄至 ±{newRadius}%），大幅消除不确定度并精准锁定基座模型。",
     forest_title: "各模型独立吻合度与置信区间",
     forest_boot: "双层区间: 68% / 95%",
     forest_col_model: "候选模型与独立吻合度",
@@ -266,6 +276,16 @@ const I18N = {
     verdict_title: "Verdict",
     stat_margin_label: "Fit Margin: ",
     stat_entropy_label: "Entropy: ",
+    advisory_title: "Statistical Advisory: Sample Size & Confidence Interval Span",
+    advisory_badge: "Additional Rounds Recommended",
+    advisory_current: "Current Samples: ",
+    advisory_ci_span: "95% CI Radius: ",
+    advisory_recom: "Recommended: ",
+    advisory_shrink: "Estimated Reduction",
+    advisory_unit_items: "items",
+    advisory_span_label: "Full Span",
+    advisory_sufficient: "Sufficient sample size ({count} items evaluated); 95% confidence interval is highly converged with strong attribution certainty.",
+    advisory_desc_tpl: "With only {count} sample(s) provided, the 95% confidence interval is relatively wide (span ±{radius}%). LLMs exhibit intrinsic stochasticity in single-shot outputs; submitting additional rounds (e.g. 2–3 runs per probe, ≥15 samples) will shrink the confidence interval by 1/√n by ~{shrink}% (down to ±{newRadius}%), significantly reducing uncertainty and sharpening model attribution.",
     forest_title: "Candidate Model Fitness & Confidence Intervals",
     forest_boot: "Dual CI: 68% / 95%",
     forest_col_model: "Candidate Model & Independent Fit",
@@ -886,6 +906,9 @@ function renderEvaluationResults(data) {
   document.getElementById("stat-n1").innerText = evalRes.unique_probes_tested;
   document.getElementById("stat-n2").innerText = evalRes.sample_count;
 
+  // Render Sample Size & Uncertainty Advisory Banner
+  renderSampleAdvisory(evalRes);
+
   const displayScores = evalRes.independent_fitness || evalRes.posteriors;
   renderForestPlot(
     displayScores,
@@ -916,6 +939,70 @@ function renderEvaluationResults(data) {
     `;
     tbody.appendChild(tr);
   });
+}
+
+/**
+ * Render Sample Size & Uncertainty Advisory Banner
+ */
+function renderSampleAdvisory(evalRes) {
+  const container = document.getElementById("sample-size-advisory-container");
+  if (!container) return;
+
+  const advisory = evalRes.sample_advisory || {};
+  const isLow = advisory.is_low_sample !== undefined ? advisory.is_low_sample : (evalRes.sample_count <= 8);
+  const count = evalRes.sample_count || (evalRes.parsed_submissions ? evalRes.parsed_submissions.length : 1);
+
+  container.classList.remove("hidden");
+
+  if (isLow) {
+    const ciRadius = advisory.ci_radius_pct !== undefined ? advisory.ci_radius_pct : 23.8;
+    const ciSpan = advisory.ci_span_pct !== undefined ? advisory.ci_span_pct : 47.6;
+    const shrink = advisory.reduction_pct !== undefined ? advisory.reduction_pct : 42.3;
+    const newRadius = advisory.expected_radius_pct !== undefined ? advisory.expected_radius_pct : 13.8;
+    const recom = advisory.recommended_samples || 15;
+
+    let desc = t("advisory_desc_tpl")
+      .replace("{count}", count)
+      .replace("{radius}", ciRadius)
+      .replace("{shrink}", shrink)
+      .replace("{newRadius}", newRadius);
+
+    container.innerHTML = `
+      <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-950/40 p-4 transition-all duration-200">
+        <div class="flex items-start gap-3">
+          <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-amber-900 dark:text-amber-200">${t("advisory_title")}</h4>
+              <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-200/70 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 font-semibold border border-amber-300 dark:border-amber-700/60">${t("advisory_badge")}</span>
+            </div>
+            <p class="text-xs sm:text-sm text-amber-950/85 dark:text-amber-200/90 leading-relaxed font-sans">${desc}</p>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-xs text-amber-800 dark:text-amber-300 font-mono">
+              <span class="inline-flex items-center gap-1">• <span>${t("advisory_current")}</span><strong>${count} ${t("advisory_unit_items")}</strong></span>
+              <span class="inline-flex items-center gap-1">• <span>${t("advisory_ci_span")}</span><strong>±${ciRadius}%</strong> <span class="opacity-75">(${t("advisory_span_label")}: ${ciSpan}%)</span></span>
+              <span class="inline-flex items-center gap-1">• <span>${t("advisory_recom")}</span><strong>≥${recom} ${t("advisory_unit_items")}</strong> <span class="opacity-80">(${t("advisory_shrink")}: ~${shrink}%)</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    let msg = t("advisory_sufficient").replace("{count}", count);
+    container.innerHTML = `
+      <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:border-emerald-400/20 dark:bg-emerald-950/30 px-4 py-3 transition-all duration-200">
+        <div class="flex items-center gap-2.5 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-sans">
+          <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>${msg}</span>
+        </div>
+      </div>
+    `;
+  }
 }
 
 /**

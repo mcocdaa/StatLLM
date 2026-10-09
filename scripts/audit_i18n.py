@@ -56,8 +56,9 @@ def audit():
                             "chinese": "".join(set(CHINESE_CHAR_REGEX.findall(val)))
                         })
 
-        print("1. Navigating to http://127.0.0.1:8765/?lang=en ...")
-        page.goto("http://127.0.0.1:8765/?lang=en", wait_until="networkidle")
+        port = os.environ.get("PORT", "8008")
+        print(f"1. Navigating to http://127.0.0.1:{port}/?lang=en ...")
+        page.goto(f"http://127.0.0.1:{port}/?lang=en", wait_until="networkidle")
         time.sleep(1)
 
         # Tab 1: Identification Lab (initial)

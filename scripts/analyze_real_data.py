@@ -13,11 +13,15 @@ from statllm.engine import LikelihoodEvaluator
 
 
 def analyze():
+    import os
+    sample_file = "real_api_samples.json"
+    if not os.path.exists(sample_file):
+        sample_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "real_api_samples.json")
     try:
-        with open("real_api_samples.json", "r", encoding="utf-8") as f:
+        with open(sample_file, "r", encoding="utf-8") as f:
             data = json.load(f)
     except Exception as e:
-        print(f"Error reading real_api_samples.json: {e}")
+        print(f"Error reading {sample_file}: {e}")
         return
 
     print(f"Total collected real samples: {len(data)}")

@@ -9,10 +9,10 @@ import json
 import re
 import subprocess
 import time
-import urllib.request
+import os
 
-KOALA_URL = "https://api.openai.com/v1"
-KOALA_KEY = "your_proxy_api_key_here"
+KOALA_URL = os.environ.get("KOALA_URL", "https://api.openai.com/v1")
+KOALA_KEY = os.environ.get("KOALA_KEY", "")
 
 CASES = [
     {

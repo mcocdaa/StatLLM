@@ -232,6 +232,31 @@ class LikelihoodEvaluator:
                 model_stats[m]["ci_68"] = ci_fit_68.get(m, [0.0, 1.0])
                 model_stats[m]["ci_95"] = ci_fit_95.get(m, [0.0, 1.0])
 
+        # 8. Sample Size Uncertainty Advisory
+        top_ci = ci_fit_95.get(top_model, [0.0, 1.0])
+        ci_span = round(float(top_ci[1] - top_ci[0]), 4)
+        n_samples = len(parsed)
+        n_unique_probes = len(set(r["probe_id"] for r in parsed))
+        is_low_sample = (n_samples <= 8) or (n_unique_probes < 5) or (ci_span >= 0.30)
+
+        target_recom = max(15, n_samples * 3)
+        reduction_factor = 1.0 - math.sqrt(n_samples / target_recom)
+        reduction_pct = round(max(20.0, min(80.0, reduction_factor * 100)), 1)
+        expected_span = round(ci_span * math.sqrt(n_samples / target_recom), 4)
+
+        sample_advisory = {
+            "is_low_sample": is_low_sample,
+            "sample_count": n_samples,
+            "unique_probes": n_unique_probes,
+            "ci_span": ci_span,
+            "ci_span_pct": round(ci_span * 100, 1),
+            "ci_radius_pct": round(ci_span * 50, 1),
+            "recommended_samples": target_recom,
+            "reduction_pct": reduction_pct,
+            "expected_span_pct": round(expected_span * 100, 1),
+            "expected_radius_pct": round(expected_span * 50, 1)
+        }
+
         return {
             "parsed_submissions": parsed,
             "independent_fitness": independent_fitness,
@@ -244,6 +269,7 @@ class LikelihoodEvaluator:
             "log_likelihoods": log_likelihoods,
             "model_statistics": model_stats,
             "summary_statistics": summary_stats,
+            "sample_advisory": sample_advisory,
             "top_model": top_model,
             "top_fitness": round(top_fit, 4),
             "top_probability": round(posteriors.get(top_model, 0.0), 4),

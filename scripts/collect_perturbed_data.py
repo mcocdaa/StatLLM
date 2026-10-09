@@ -17,8 +17,10 @@ from statllm.database import Database
 from statllm.perturbations import apply_perturbation, estimate_tokens
 from statllm.probes import PROBES
 
-KOALA_URL = "https://api.openai.com/v1"
-KOALA_KEY = "your_proxy_api_key_here"
+import os
+
+KOALA_URL = os.environ.get("KOALA_URL", "https://api.openai.com/v1")
+KOALA_KEY = os.environ.get("KOALA_KEY", "")
 
 
 def query_grok(prompt: str, temperature: float = 0.8) -> Dict[str, Any]:

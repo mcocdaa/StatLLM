@@ -46,6 +46,21 @@ statllm.db-shm
 .DS_Store
 Thumbs.db
 
-# Test artifacts
+# Test artifacts & Temporary files
 screenshots/
 scratch/
+*.sql
+*.log
+real_api_samples.json
+expanded_models_samples.json
+
+# Environment variables & Secrets
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.token
+*.cert
+
