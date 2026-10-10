@@ -19,21 +19,21 @@ from statllm.database import Database
 
 
 class LikelihoodEvaluator:
-    def __init__(self, db: Database, alpha: float = 0.12, positional_lambda: float = 0.5):
+    def __init__(self, db: Database, alpha: float = 0.12, beta: float = 0.5, positional_lambda: float = 0.5):
         """
         db: Database instance
-        alpha: Background prior smoothing weight (default 0.12).
-               Uses scale-invariant Jelinek-Mercer background interpolation:
-               P(token | probe, model) = (1 - alpha) * (c / total) + alpha * (1 / vocab_size)
-               This ensures models with smaller sample sizes are not artificially biased
-               over models with larger sample sizes.
-        positional_lambda: Jelinek-Mercer interpolation weight for position-specific distribution.
+        alpha: Legacy background prior smoothing weight for backward compatibility.
+        beta: Dirichlet-Multinomial symmetric prior pseudo-count (default 0.5, Jeffreys prior).
+              Provides strictly normalized probability distributions (sum P == 1.0) and
+              guarantees Bernstein-von Mises asymptotic convergence as sample size N -> infty.
+        positional_lambda: Interpolation weight for position-specific distribution.
                            Range: [0.0, 1.0]. Default: 0.5.
                            0.0 = pure global bag-of-tokens (unordered).
                            1.0 = pure position-specific distribution.
         """
         self.db = db
         self.alpha = max(0.01, min(0.5, float(alpha)))
+        self.beta = max(0.01, float(beta))
         self.positional_lambda = max(0.0, min(1.0, float(positional_lambda)))
 
     def get_token_prob(
@@ -44,17 +44,16 @@ class LikelihoodEvaluator:
         vocab_size: int
     ) -> float:
         """
-        Calculates scale-invariant Jelinek-Mercer smoothed conditional probability:
-        P(token | probe, model) = (1 - alpha) * (c / total_weight) + alpha * (1 / vocab_size)
+        Calculates Bayesian Dirichlet-Multinomial predictive probability:
+        P(token | probe, model) = (c + beta) / (total_weight + vocab_size * beta)
+        Guarantees sum_{v in V} P(v) == 1.0 and asymptotic consistency as total_weight -> infty.
         """
         v_size = max(1, vocab_size)
-        bg_prob = 1.0 / v_size
         if total_weight <= 0.0:
-            return bg_prob
+            return 1.0 / v_size
 
         c = counts_dict.get(val, 0.0)
-        rel_freq = c / total_weight
-        return (1.0 - self.alpha) * rel_freq + self.alpha * bg_prob
+        return (c + self.beta) / (total_weight + v_size * self.beta)
 
     def get_interpolated_token_prob(
         self,
@@ -67,19 +66,26 @@ class LikelihoodEvaluator:
         lam: float
     ) -> float:
         """
-        Calculates Jelinek-Mercer interpolated probability:
+        Calculates position-interpolated probability:
         P(token | pos, probe, model) = (1 - lam) * P_global(token) + lam * P_pos(token | pos)
+        where both P_global and P_pos are normalized Dirichlet-Multinomial distributions:
+        P_global(v) = (c(v) + beta) / (total_weight + |V| * beta)
+        P_pos(v) = (c_pos(v) + beta) / (pos_total_weight + |V| * beta)
         """
         p_global = self.get_token_prob(counts_dict, total_weight, val, vocab_size)
         if lam <= 0.0 or expected_len <= 0 or total_weight <= 0.0:
             return p_global
 
         v_size = max(1, vocab_size)
-        bg_prob = 1.0 / v_size
         pos_tok = f"pos:{pos_idx}:{val}"
         c_pos = counts_dict.get(pos_tok, 0.0)
-        rel_pos_freq = c_pos / total_weight
-        p_pos = (1.0 - self.alpha) * rel_pos_freq + self.alpha * bg_prob
+
+        # Effective position sample mass: sum of all counts at pos_idx, or tot / expected_len fallback
+        pos_total = sum(w for k, w in counts_dict.items() if k.startswith(f"pos:{pos_idx}:"))
+        if pos_total <= 0.0:
+            pos_total = total_weight / max(1, expected_len)
+
+        p_pos = (c_pos + self.beta) / (pos_total + v_size * self.beta)
 
         if lam >= 1.0:
             return p_pos
@@ -149,18 +155,25 @@ class LikelihoodEvaluator:
                     )
                     ll += math.log(max(p, 1e-12))
 
-                # Trait log likelihoods (e.g. duplicate avoidance, sorting habits)
+                # Trait log-likelihoods normalized by sample mass (composite likelihood)
+                sample_tot = counts_dict.get("trait:has_dup_True", 0.0) + counts_dict.get("trait:has_dup_False", 0.0)
+                if sample_tot <= 0.0:
+                    sample_tot = tot / max(1, exp_len)
+
                 if "has_duplicates" in traits:
                     dup_tok = f"trait:has_dup_{traits['has_duplicates']}"
-                    p_dup = self.get_token_prob(counts_dict, tot, dup_tok, 2)
+                    c_dup = counts_dict.get(dup_tok, 0.0)
+                    p_dup = (c_dup + self.beta) / (sample_tot + 2.0 * self.beta)
                     ll += 0.5 * math.log(max(p_dup, 1e-12))
                 if "is_sorted" in traits:
                     sort_tok = f"trait:is_sorted_{traits['is_sorted']}"
-                    p_sort = self.get_token_prob(counts_dict, tot, sort_tok, 2)
+                    c_sort = counts_dict.get(sort_tok, 0.0)
+                    p_sort = (c_sort + self.beta) / (sample_tot + 2.0 * self.beta)
                     ll += 0.5 * math.log(max(p_sort, 1e-12))
                 if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
                     perm_tok = f"perm:{traits['canonical_perm']}"
-                    p_perm = self.get_token_prob(counts_dict, tot, perm_tok, 120)
+                    c_perm = counts_dict.get(perm_tok, 0.0)
+                    p_perm = (c_perm + self.beta) / (sample_tot + 120.0 * self.beta)
                     ll += 0.8 * math.log(max(p_perm, 1e-12))
 
             log_likelihoods[m] = ll
@@ -379,7 +392,11 @@ class LikelihoodEvaluator:
                     )
                     item_ll = math.log(max(p, 1e-12))
                 else:
-                    p = self.get_token_prob(counts_dict, tot, item["val"], item["v_size"])
+                    sample_tot = counts_dict.get("trait:has_dup_True", 0.0) + counts_dict.get("trait:has_dup_False", 0.0)
+                    if sample_tot <= 0.0:
+                        sample_tot = tot / max(1, item.get("exp_len", 5))
+                    c_trait = counts_dict.get(item["val"], 0.0)
+                    p = (c_trait + self.beta) / (sample_tot + item["v_size"] * self.beta)
                     item_ll = math.log(max(p, 1e-12))
                 
                 d = (item_ll - item["null_ll"])
@@ -400,8 +417,18 @@ class LikelihoodEvaluator:
             mean_d = np.sum(diffs * weights) / W
             var_d = np.sum(weights * (diffs - mean_d)**2) / max(1.0, W - 1.0)
             
-            avg_tot = tot_ref / max(1, len(parsed_records))
-            ref_var = 1.0 / max(5.0, avg_tot)
+            # Reference baseline effective sample size across tested probes
+            tested_probes = set(r["probe_id"] for r in parsed_records)
+            ref_sample_counts = []
+            for pid in tested_probes:
+                cd, t = matrix.get(m, {}).get(pid, ({}, 0.0))
+                s_tot = cd.get("trait:has_dup_True", 0.0) + cd.get("trait:has_dup_False", 0.0)
+                if s_tot <= 0.0:
+                    exp_l = PROBES[pid].expected_length if pid in PROBES else 5
+                    s_tot = t / max(1, exp_l)
+                ref_sample_counts.append(s_tot)
+            avg_tot = float(np.mean(ref_sample_counts)) if ref_sample_counts else 10.0
+            ref_var = 1.0 / max(3.0, avg_tot)
             
             se = math.sqrt(var_d / W + ref_var)
             df = max(2, int(round(W - 1)))

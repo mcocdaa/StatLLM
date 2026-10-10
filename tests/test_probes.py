@@ -79,3 +79,58 @@ def test_arr_perm5_parsing():
     assert res["is_valid"] is True
     assert res["parsed_tokens"] == ["4", "1", "5", "3", "2"]
     assert res["traits"]["canonical_perm"] == "4,1,5,3,2"
+
+
+def test_arr_coin10_parsing():
+    p = get_probe("arr_coin10")
+    assert p is not None
+
+    # Chinese format
+    res = p.parse('["正", "反", "正", "正", "反", "反", "正", "反", "正", "反"]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["正", "反", "正", "正", "反", "反", "正", "反", "正", "反"]
+    assert res["traits"]["max_streak"] == 2
+    assert res["traits"]["alternations"] == 7
+
+    # English H/T format
+    res_en = p.parse('["H", "T", "H", "H", "H", "T", "T", "H", "T", "H"]')
+    assert res_en["is_valid"] is True
+    assert res_en["parsed_tokens"] == ["正", "反", "正", "正", "正", "反", "反", "正", "反", "正"]
+    assert res_en["traits"]["max_streak"] == 3
+
+
+def test_arr_dice6_parsing():
+    p = get_probe("arr_dice6")
+    assert p is not None
+
+    res = p.parse('[3, 6, 2, 1, 5, 4]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["3", "6", "2", "1", "5", "4"]
+    assert res["traits"]["dice_sum"] == 21
+    assert res["traits"]["has_duplicates"] is False
+
+
+def test_arr_prime5_parsing():
+    p = get_probe("arr_prime5")
+    assert p is not None
+
+    res = p.parse('[7, 23, 41, 73, 89]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["7", "23", "41", "73", "89"]
+    assert res["traits"]["is_sorted"] is True
+
+    # Composite number rejection
+    res_invalid = p.parse('[7, 23, 42, 73, 89]')
+    assert res_invalid["is_valid"] is False
+
+
+def test_arr_bit8_parsing():
+    p = get_probe("arr_bit8")
+    assert p is not None
+
+    res = p.parse('[0, 1, 1, 0, 1, 0, 0, 1]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["0", "1", "1", "0", "1", "0", "0", "1"]
+    assert res["traits"]["popcount"] == 4
+    assert res["traits"]["alternations"] == 5
+

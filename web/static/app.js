@@ -62,6 +62,30 @@ const PROBE_I18N = {
     en_title: "Q5: [1,2,3,4,5] Random Permutation Array",
     zh_prompt: "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_coin10: {
+    zh_title: "Q6: 10次独立抛硬币正反面序列",
+    en_title: "Q6: 10-Toss Bernoulli Coin Flip Array",
+    zh_prompt: "进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate 10 independent random coin flips and output a JSON array of 10 items, where each element is strictly either \"H\" or \"T\", e.g. [\"H\", \"T\", \"H\", \"H\", \"T\", \"T\", \"H\", \"T\", \"H\", \"T\"]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_dice6: {
+    zh_title: "Q7: 6次六面骰子独立掷点数组",
+    en_title: "Q7: 6-Roll Standard 6-Sided Dice Array",
+    zh_prompt: "掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate rolling a standard 6-sided die 6 independent times and output a JSON array of 6 integers (1 to 6), e.g. [3, 6, 2, 1, 5, 4]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_prime5: {
+    zh_title: "Q8: 5个100以内的质数数组",
+    en_title: "Q8: 5 Prime Numbers Under 100 Array",
+    zh_prompt: "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly pick 5 prime numbers under 100 and output a JSON array, e.g. [7, 23, 41, 73, 89]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_bit8: {
+    zh_title: "Q9: 8位二进制独立随机比特流",
+    en_title: "Q9: 8-Bit Random Binary Stream Array",
+    zh_prompt: "生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please generate a JSON array of 8 independent random binary bits (0 or 1), formatted as [0, 1, 1, 0, 1, 0, 0, 1]. Output only the JSON array, with no other text or markdown codeblocks."
   }
 };
 

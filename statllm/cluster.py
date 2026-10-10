@@ -4,6 +4,7 @@ StatLLM Dimension Reduction & Clustering Visualizer for Array Probes.
 
 from collections import defaultdict
 import json
+import math
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from sklearn.decomposition import PCA
@@ -46,9 +47,10 @@ class ClusterProjector:
         counts_by_probe: Dict[str, Tuple[Dict[str, float], float]]
     ) -> np.ndarray:
         """
-        Builds a normalized multi-probe fingerprint vector.
-        Each probe's probability distribution is normalized independently
-        so every probe carries equal weight, avoiding dominance by probes with larger vocabularies.
+        Builds a normalized multi-probe fingerprint vector using Hellinger / square-root embedding.
+        Under Chentsov's Theorem, mapping probability vectors to the Hellinger sphere (v_i = sqrt(p_i))
+        isometrically embeds the Fisher information metric into Euclidean space.
+        Each probe's distribution is normalized on the unit sphere, ensuring balanced weighting.
         """
         d = len(self.feature_keys)
         vec = np.zeros(d, dtype=np.float64)
@@ -60,7 +62,8 @@ class ClusterProjector:
                 key = self.feature_keys[idx]
                 val = key[1]
                 c = c_dict.get(val, 0.0)
-                sub_vec[i] = (c + 0.5) / (tot + 0.5 * v_size)
+                prob = (c + 0.5) / (tot + 0.5 * v_size)
+                sub_vec[i] = math.sqrt(max(1e-12, prob))
             sub_norm = np.linalg.norm(sub_vec)
             if sub_norm > 0:
                 vec[st:ed] = sub_vec / sub_norm

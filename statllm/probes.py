@@ -355,6 +355,268 @@ class PermutationArrayProbe(ArrayProbe):
         }
 
 
+class CoinArrayProbe(ArrayProbe):
+    """
+    Q6: Array of 10 Bernoulli coin tosses (正/反 or H/T).
+    Measures: Run length distribution, Gambler's Fallacy, alternation rate, head bias.
+    """
+    COIN_MAP = {
+        "正": "正", "反": "反",
+        "h": "正", "t": "反",
+        "heads": "正", "head": "正",
+        "tails": "反", "tail": "反",
+        "1": "正", "0": "反"
+    }
+
+    def __init__(self):
+        super().__init__(
+            id="arr_coin10",
+            title="Q6: 10次独立抛硬币正反面序列",
+            prompt="进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+            category="binary_array",
+            description="测试10步伯努利试验中的游程长度偏好（是否规避长连续段）、翻转率与赌徒谬误倾向。",
+            expected_length=10,
+            element_vocab_size=3,
+            allowed_elements=["正", "反"]
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr:
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "max_streak": 0, "alternations": 0, "first_token": "INVALID"}
+            }
+
+        tokens = []
+        for item in arr:
+            s = str(item).strip().lower()
+            if s in self.COIN_MAP:
+                tokens.append(self.COIN_MAP[s])
+            else:
+                tokens.append("INVALID")
+
+        is_valid = len(tokens) == self.expected_length and "INVALID" not in tokens
+
+        max_streak = 0
+        cur_streak = 0
+        last_t = None
+        alternations = 0
+        if is_valid:
+            for t in tokens:
+                if t == last_t:
+                    cur_streak += 1
+                else:
+                    cur_streak = 1
+                    if last_t is not None:
+                        alternations += 1
+                max_streak = max(max_streak, cur_streak)
+                last_t = t
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": max_streak >= 2 if is_valid else False,
+                "max_streak": max_streak,
+                "alternations": alternations,
+                "first_token": tokens[0] if tokens else "INVALID"
+            }
+        }
+
+
+class DiceArrayProbe(ArrayProbe):
+    """
+    Q7: Array of 6 independent 6-sided die rolls (1 to 6).
+    Measures: Discrete uniform distribution, sum central limit centering, adjacent duplication.
+    """
+    ALLOWED = ["1", "2", "3", "4", "5", "6"]
+
+    def __init__(self):
+        super().__init__(
+            id="arr_dice6",
+            title="Q7: 6次六面骰子独立掷点数组",
+            prompt="掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+            category="dice_array",
+            description="测试在6元骰子点数上的均匀度偏好、中心极限定理总和偏倚与相邻点数回避倾向。",
+            expected_length=6,
+            element_vocab_size=7,
+            allowed_elements=self.ALLOWED
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr:
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "is_sorted": False, "dice_sum": 0, "first_token": "INVALID"}
+            }
+
+        tokens = []
+        int_vals = []
+        for item in arr:
+            try:
+                num = int(str(item).strip())
+                if 1 <= num <= 6:
+                    tokens.append(str(num))
+                    int_vals.append(num)
+                else:
+                    tokens.append("INVALID")
+            except ValueError:
+                tokens.append("INVALID")
+
+        is_valid = len(int_vals) == self.expected_length and "INVALID" not in tokens
+        has_duplicates = len(int_vals) != len(set(int_vals)) if is_valid else False
+        is_sorted = (int_vals == sorted(int_vals)) if is_valid else False
+        dice_sum = sum(int_vals) if is_valid else 0
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": has_duplicates,
+                "is_sorted": is_sorted,
+                "dice_sum": dice_sum,
+                "first_token": tokens[0] if tokens else "INVALID"
+            }
+        }
+
+
+class PrimeArrayProbe(ArrayProbe):
+    """
+    Q8: Array of 5 prime numbers under 100.
+    Measures: Prime attractor distribution across all 25 primes < 100.
+    """
+    PRIMES_UNDER_100 = [
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+        31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+        73, 79, 83, 89, 97
+    ]
+    PRIME_SET = set(PRIMES_UNDER_100)
+
+    def __init__(self):
+        super().__init__(
+            id="arr_prime5",
+            title="Q8: 5个100以内的质数数组",
+            prompt="在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+            category="prime_array",
+            description="从100以内全部25个离散质数中测量模型的吸引子偏好（如7、17、23、37与合数形态回避）。",
+            expected_length=5,
+            element_vocab_size=26,
+            allowed_elements=[str(p) for p in self.PRIMES_UNDER_100]
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr:
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "is_sorted": False, "first_token": "INVALID"}
+            }
+
+        tokens = []
+        int_vals = []
+        for item in arr:
+            try:
+                num = int(str(item).strip())
+                if num in self.PRIME_SET:
+                    tokens.append(str(num))
+                    int_vals.append(num)
+                else:
+                    tokens.append("INVALID")
+            except ValueError:
+                tokens.append("INVALID")
+
+        is_valid = len(int_vals) == self.expected_length and "INVALID" not in tokens
+        has_duplicates = len(int_vals) != len(set(int_vals)) if is_valid else False
+        is_sorted = (int_vals == sorted(int_vals)) if is_valid else False
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": has_duplicates,
+                "is_sorted": is_sorted,
+                "first_token": tokens[0] if tokens else "INVALID"
+            }
+        }
+
+
+class BitArrayProbe(ArrayProbe):
+    """
+    Q9: Array of 8 random binary bits (0 or 1).
+    Measures: Hamming weight (Popcount), bit alternations, 0/1 bias.
+    """
+    ALLOWED = ["0", "1"]
+
+    def __init__(self):
+        super().__init__(
+            id="arr_bit8",
+            title="Q9: 8位二进制独立随机比特流",
+            prompt="生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+            category="bit_array",
+            description="测试8位离散二进制空间的汉明重量（Popcount）、比特翻转率与词元切分偏置。",
+            expected_length=8,
+            element_vocab_size=3,
+            allowed_elements=self.ALLOWED
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr:
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "popcount": 0, "alternations": 0, "first_token": "INVALID"}
+            }
+
+        tokens = []
+        for item in arr:
+            s = str(item).strip()
+            if s in ["0", "1"]:
+                tokens.append(s)
+            else:
+                tokens.append("INVALID")
+
+        is_valid = len(tokens) == self.expected_length and "INVALID" not in tokens
+        popcount = sum(1 for t in tokens if t == "1") if is_valid else 0
+        alternations = sum(1 for i in range(1, len(tokens)) if tokens[i] != tokens[i-1]) if is_valid else 0
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": len(tokens) != len(set(tokens)) if is_valid else False,
+                "popcount": popcount,
+                "alternations": alternations,
+                "first_token": tokens[0] if tokens else "INVALID"
+            }
+        }
+
+
 # Global Probe Registry (All Array-based!)
 PROBES: Dict[str, ArrayProbe] = {
     "arr_int5": IntArrayProbe(),
@@ -362,6 +624,10 @@ PROBES: Dict[str, ArrayProbe] = {
     "arr_rps5": RPSArrayProbe(),
     "arr_letter5": LetterArrayProbe(),
     "arr_perm5": PermutationArrayProbe(),
+    "arr_coin10": CoinArrayProbe(),
+    "arr_dice6": DiceArrayProbe(),
+    "arr_prime5": PrimeArrayProbe(),
+    "arr_bit8": BitArrayProbe(),
 }
 
 

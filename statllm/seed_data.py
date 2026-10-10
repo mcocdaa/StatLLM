@@ -73,6 +73,18 @@ MODEL_ARRAY_PREFERENCES = {
         },
         "arr_perm5": {
             "perms": {"4,1,5,3,2": 0.35, "3,5,1,4,2": 0.35, "2,5,1,4,3": 0.30}
+        },
+        "arr_coin10": {
+            "token_bias": {"正": 0.55, "反": 0.45}
+        },
+        "arr_dice6": {
+            "token_bias": {"6": 0.28, "3": 0.22, "5": 0.18, "2": 0.14, "4": 0.10, "1": 0.08}
+        },
+        "arr_prime5": {
+            "token_bias": {"7": 0.25, "23": 0.20, "73": 0.18, "17": 0.15, "41": 0.12, "89": 0.10}
+        },
+        "arr_bit8": {
+            "token_bias": {"1": 0.58, "0": 0.42}
         }
     },
     "DeepSeek-V4.1-Flash": {
@@ -95,6 +107,18 @@ MODEL_ARRAY_PREFERENCES = {
         },
         "arr_perm5": {
             "perms": {"5,3,1,4,2": 0.35, "2,4,1,5,3": 0.35, "3,1,5,2,4": 0.30}
+        },
+        "arr_coin10": {
+            "token_bias": {"反": 0.58, "正": 0.42}
+        },
+        "arr_dice6": {
+            "token_bias": {"4": 0.26, "6": 0.24, "1": 0.18, "5": 0.14, "3": 0.10, "2": 0.08}
+        },
+        "arr_prime5": {
+            "token_bias": {"17": 0.24, "37": 0.20, "7": 0.18, "53": 0.15, "13": 0.13, "67": 0.10}
+        },
+        "arr_bit8": {
+            "token_bias": {"0": 0.56, "1": 0.44}
         }
     },
     "GPT-5.6-Luna": {
@@ -117,6 +141,19 @@ MODEL_ARRAY_PREFERENCES = {
         },
         "arr_perm5": {
             "perms": {"1,3,5,2,4": 0.38, "2,1,4,3,5": 0.34, "3,1,2,5,4": 0.28}
+        },
+        "arr_coin10": {
+            "token_bias": {"正": 0.51, "反": 0.49}
+        },
+        "arr_dice6": {
+            "token_bias": {"3": 0.25, "5": 0.22, "2": 0.18, "6": 0.15, "4": 0.12, "1": 0.08}
+        },
+        "arr_prime5": {
+            "token_bias": {"2": 0.22, "3": 0.20, "5": 0.18, "7": 0.15, "11": 0.13, "13": 0.12},
+            "is_sorted": True
+        },
+        "arr_bit8": {
+            "token_bias": {"1": 0.52, "0": 0.48}
         }
     },
     "Claude-3.5-Sonnet": {
@@ -139,6 +176,18 @@ MODEL_ARRAY_PREFERENCES = {
         },
         "arr_perm5": {
             "perms": {"4,2,5,1,3": 0.36, "3,5,2,1,4": 0.34, "5,1,3,2,4": 0.30}
+        },
+        "arr_coin10": {
+            "token_bias": {"正": 0.50, "反": 0.50}
+        },
+        "arr_dice6": {
+            "token_bias": {"1": 0.22, "4": 0.20, "2": 0.18, "5": 0.16, "3": 0.14, "6": 0.10}
+        },
+        "arr_prime5": {
+            "token_bias": {"43": 0.22, "71": 0.20, "29": 0.18, "83": 0.16, "19": 0.14, "97": 0.10}
+        },
+        "arr_bit8": {
+            "token_bias": {"0": 0.50, "1": 0.50}
         }
     },
     "Gemini-2.0-Flash": {
@@ -161,6 +210,18 @@ MODEL_ARRAY_PREFERENCES = {
         },
         "arr_perm5": {
             "perms": {"1,4,2,5,3": 0.38, "3,1,4,2,5": 0.32, "4,1,3,5,2": 0.30}
+        },
+        "arr_coin10": {
+            "token_bias": {"正": 0.60, "反": 0.40}
+        },
+        "arr_dice6": {
+            "token_bias": {"6": 0.30, "5": 0.25, "4": 0.18, "3": 0.12, "2": 0.08, "1": 0.07}
+        },
+        "arr_prime5": {
+            "token_bias": {"7": 0.28, "11": 0.22, "13": 0.18, "17": 0.14, "19": 0.10, "23": 0.08}
+        },
+        "arr_bit8": {
+            "token_bias": {"1": 0.62, "0": 0.38}
         }
     },
     "Qwen-2.5-72B": {
@@ -183,6 +244,18 @@ MODEL_ARRAY_PREFERENCES = {
         },
         "arr_perm5": {
             "perms": {"2,5,3,1,4": 0.38, "5,2,4,1,3": 0.32, "3,4,1,5,2": 0.30}
+        },
+        "arr_coin10": {
+            "token_bias": {"反": 0.54, "正": 0.46}
+        },
+        "arr_dice6": {
+            "token_bias": {"2": 0.24, "5": 0.22, "3": 0.18, "6": 0.16, "1": 0.12, "4": 0.08}
+        },
+        "arr_prime5": {
+            "token_bias": {"31": 0.25, "59": 0.20, "79": 0.18, "3": 0.15, "37": 0.12, "47": 0.10}
+        },
+        "arr_bit8": {
+            "token_bias": {"0": 0.54, "1": 0.46}
         }
     }
 }
@@ -232,18 +305,50 @@ def seed_database(db: Database, samples_per_probe: int = 100):
                     # Normalize weights
                     w_arr = np.array(cand_weights) / sum(cand_weights)
                     
-                    # Choose 5 elements
-                    chosen = rng.choice(cand_tokens, size=5, replace=True, p=w_arr)
+                    # Choose elements according to probe's expected length
+                    exp_len = probe.expected_length
+                    chosen = rng.choice(cand_tokens, size=exp_len, replace=True, p=w_arr)
                     tokens = [str(x) for x in chosen]
                     
-                    # Formatting
-                    if pid == "arr_int5":
+                    # Formatting and traits per probe type
+                    if pid in ["arr_int5", "arr_dice6", "arr_prime5"]:
                         if probe_pref.get("is_sorted", False):
                             tokens = sorted(tokens, key=lambda x: int(x))
                         raw_text = f"[{', '.join(tokens)}]"
                         traits = {
                             "has_duplicates": len(tokens) != len(set(tokens)),
                             "is_sorted": tokens == sorted(tokens, key=lambda x: int(x)),
+                            "first_token": tokens[0]
+                        }
+                        if pid == "arr_dice6":
+                            traits["dice_sum"] = sum(int(x) for x in tokens)
+                    elif pid == "arr_coin10":
+                        raw_text = json.dumps(tokens, ensure_ascii=False)
+                        max_s = 0
+                        cur_s = 0
+                        last_t = None
+                        alts = 0
+                        for t in tokens:
+                            if t == last_t:
+                                cur_s += 1
+                            else:
+                                cur_s = 1
+                                if last_t is not None:
+                                    alts += 1
+                            max_s = max(max_s, cur_s)
+                            last_t = t
+                        traits = {
+                            "has_duplicates": max_s >= 2,
+                            "max_streak": max_s,
+                            "alternations": alts,
+                            "first_token": tokens[0]
+                        }
+                    elif pid == "arr_bit8":
+                        raw_text = json.dumps([int(x) for x in tokens], ensure_ascii=False)
+                        traits = {
+                            "has_duplicates": len(tokens) != len(set(tokens)),
+                            "popcount": sum(1 for t in tokens if t == "1"),
+                            "alternations": sum(1 for i in range(1, len(tokens)) if tokens[i] != tokens[i-1]),
                             "first_token": tokens[0]
                         }
                     else:
