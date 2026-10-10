@@ -31,7 +31,7 @@ function formatDisplayToken(tok) {
 const SUN_SVG = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
 const MOON_SVG = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`;
 
-// Bilingual dictionary for probes
+// Bilingual dictionary for probes (Ordered by empirical discriminative power)
 const PROBE_I18N = {
   arr_int5: {
     zh_title: "Q1: 5个1~100随机整数数组",
@@ -39,53 +39,53 @@ const PROBE_I18N = {
     zh_prompt: "请生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please generate a JSON array containing 5 random integers between 1 and 100, formatted as [12, 45, 78, 3, 99]. Output only the JSON array, with no other text or markdown codeblocks."
   },
-  arr_color5: {
-    zh_title: "Q2: 5个离散颜色序列数组",
-    en_title: "Q2: 5 Discrete Colors Array",
-    zh_prompt: "在[红, 橙, 黄, 绿, 青, 蓝, 紫]中随机挑选5次，组成JSON数组，例如[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please randomly choose 5 times from [Red, Orange, Yellow, Green, Cyan, Blue, Purple] to form a JSON array, e.g. [\"Red\", \"Blue\", \"Green\", \"Red\", \"Purple\"]. Output only the JSON array, with no other text or markdown codeblocks."
-  },
-  arr_rps5: {
-    zh_title: "Q3: 5局石头剪刀布出拳序列",
-    en_title: "Q3: 5-Round Rock-Paper-Scissors Array",
-    zh_prompt: "进行5次完全独立的石头剪刀布随机选择，输出一个JSON数组，例如[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate 5 independent rounds of Rock-Paper-Scissors and output a JSON array of 5 moves from [\"Rock\", \"Scissors\", \"Paper\"], e.g. [\"Rock\", \"Scissors\", \"Paper\", \"Rock\", \"Scissors\"]. Output only the JSON array, with no other text or markdown codeblocks."
-  },
   arr_letter5: {
-    zh_title: "Q4: 5个随机大写英文字母数组",
-    en_title: "Q4: 5 Random Uppercase Letters Array",
+    zh_title: "Q2: 5个随机大写英文字母数组",
+    en_title: "Q2: 5 Random Uppercase Letters Array",
     zh_prompt: "请生成一个包含5个随机大写英文字母（A-Z）的JSON数组，例如[\"M\", \"X\", \"R\", \"A\", \"K\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please generate a JSON array of 5 random uppercase English letters (A-Z), formatted as [\"M\", \"X\", \"R\", \"A\", \"K\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
-  arr_perm5: {
-    zh_title: "Q5: [1,2,3,4,5] 随机置乱排列",
-    en_title: "Q5: [1,2,3,4,5] Random Permutation Array",
-    zh_prompt: "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
-  },
-  arr_coin10: {
-    zh_title: "Q6: 10次独立抛硬币正反面序列",
-    en_title: "Q6: 10-Toss Bernoulli Coin Flip Array",
-    zh_prompt: "进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate 10 independent random coin flips and output a JSON array of 10 items, where each element is strictly either \"H\" or \"T\", e.g. [\"H\", \"T\", \"H\", \"H\", \"T\", \"T\", \"H\", \"T\", \"H\", \"T\"]. Output only the JSON array, with no other text or markdown codeblocks."
-  },
-  arr_dice6: {
-    zh_title: "Q7: 6次六面骰子独立掷点数组",
-    en_title: "Q7: 6-Roll Standard 6-Sided Dice Array",
-    zh_prompt: "掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate rolling a standard 6-sided die 6 independent times and output a JSON array of 6 integers (1 to 6), e.g. [3, 6, 2, 1, 5, 4]. Output only the JSON array, with no other text or markdown codeblocks."
-  },
   arr_prime5: {
-    zh_title: "Q8: 5个100以内的质数数组",
-    en_title: "Q8: 5 Prime Numbers Under 100 Array",
+    zh_title: "Q3: 5个100以内的质数数组",
+    en_title: "Q3: 5 Prime Numbers Under 100 Array",
     zh_prompt: "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please randomly pick 5 prime numbers under 100 and output a JSON array, e.g. [7, 23, 41, 73, 89]. Output only the JSON array, with no other text or markdown codeblocks."
   },
+  arr_dice6: {
+    zh_title: "Q4: 6次六面骰子独立掷点数组",
+    en_title: "Q4: 6-Roll Standard 6-Sided Dice Array",
+    zh_prompt: "掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate rolling a standard 6-sided die 6 independent times and output a JSON array of 6 integers (1 to 6), e.g. [3, 6, 2, 1, 5, 4]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_color5: {
+    zh_title: "Q5: 5个离散颜色序列数组",
+    en_title: "Q5: 5 Discrete Colors Array",
+    zh_prompt: "在[红, 橙, 黄, 绿, 青, 蓝, 紫]中随机挑选5次，组成JSON数组，例如[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly choose 5 times from [Red, Orange, Yellow, Green, Cyan, Blue, Purple] to form a JSON array, e.g. [\"Red\", \"Blue\", \"Green\", \"Red\", \"Purple\"]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
   arr_bit8: {
-    zh_title: "Q9: 8位二进制独立随机比特流",
-    en_title: "Q9: 8-Bit Random Binary Stream Array",
+    zh_title: "Q6: 8位二进制独立随机比特流",
+    en_title: "Q6: 8-Bit Random Binary Stream Array",
     zh_prompt: "生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please generate a JSON array of 8 independent random binary bits (0 or 1), formatted as [0, 1, 1, 0, 1, 0, 0, 1]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_coin10: {
+    zh_title: "Q7: 10次独立抛硬币正反面序列",
+    en_title: "Q7: 10-Toss Bernoulli Coin Flip Array",
+    zh_prompt: "进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate 10 independent random coin flips and output a JSON array of 10 items, where each element is strictly either \"H\" or \"T\", e.g. [\"H\", \"T\", \"H\", \"H\", \"T\", \"T\", \"H\", \"T\", \"H\", \"T\"]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_rps5: {
+    zh_title: "Q8: 5局石头剪刀布出拳序列",
+    en_title: "Q8: 5-Round Rock-Paper-Scissors Array",
+    zh_prompt: "进行5次完全独立的石头剪刀布随机选择，输出一个JSON数组，例如[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate 5 independent rounds of Rock-Paper-Scissors and output a JSON array of 5 moves from [\"Rock\", \"Scissors\", \"Paper\"], e.g. [\"Rock\", \"Scissors\", \"Paper\", \"Rock\", \"Scissors\"]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_perm5: {
+    zh_title: "Q9: [1,2,3,4,5] 随机置乱排列",
+    en_title: "Q9: [1,2,3,4,5] Random Permutation Array",
+    zh_prompt: "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
   }
 };
 
