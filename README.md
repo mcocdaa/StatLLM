@@ -1,7 +1,7 @@
 # 📊 StatLLM: Black-Box Statistical Large Language Model Fingerprinting & Attribution
 
 > **Scientific Black-Box LLM Attribution via Discrete Multinomial Bias, Dirichlet-Smoothed Likelihood, Central Limit Theorem Confidence Convergence, and 2D PCA Cluster Projection.**  
-> *Benchmark across 15+ Frontier Flagship Models with 1,190+ Empirical Authentic Samples under Contextual Prompt Perturbations.*
+> *Benchmark across 15 Frontier Flagship Models with 2,338+ Empirical Authentic Samples under Multi-Axis Contextual Prompt Perturbations across 9 Discrete Probes.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
@@ -21,33 +21,34 @@ In today's generative AI ecosystem, model-as-a-service (MaaS) gateways, aggregat
 **StatLLM** demonstrates that **you don't need weights or logits to fingerprint an LLM**. Because autoregressive transformers inherently lack physical true randomness, their tokenizer vocabulary, pre-training corpus distributions, and RLHF alignment carve permanent, model-specific discrete biases:
 - **Zero White-box Assumptions**: Evaluates purely on public inputs and output text arrays.
 - **15 Frontier Flagships Covered**: Empirical reference profiles for DeepSeek, Zhipu GLM, Meta, Google Gemma/Gemini, OpenAI, Anthropic, xAI, Alibaba, MiniMax, and Moonshot.
-- **Contextual Noise Immunity**: Over 500+ perturbed samples testing resistance against system personas, chit-chat history, and business text wrappers.
+- **9 High-Precision Discrete Mathematical Probes**: Random integer vectors, color selections, rock-paper-scissors game dynamics, English letter alphabets, full permutation orderings, coin flips, dice roll distributions, prime number sequences, and bitstream run-lengths.
+- **Contextual Noise Immunity**: Over 1,340+ perturbed samples testing resistance against system personas, chit-chat history, and business text wrappers across stratified temperatures ($T \in [0.4, 1.1]$).
 - **Strict Mathematical Rigor**: Computes Dirichlet-smoothed posterior probabilities, Null Hypothesis baseline likelihoods, and 95%/68% confidence intervals.
 - **Sample-Size Uncertainty Advisory**: Guides users when low sample size ($N \le 5$) widens confidence intervals, showing precise mathematical predictions for how collecting $N \ge 15$ narrows error bounds by $40\%+$.
 
 ---
 
-## 🔬 Benchmark Matrix (15 Models, 1,190 Authentic Samples)
+## 🔬 Benchmark Matrix (15 Models, 2,338 Authentic Samples)
 
-Every reference sample in `statllm.db` is harvested through authentic API endpoints under randomized prompt perturbations ($T \in [0.70, 0.95]$):
+Every reference sample in `statllm.db` is harvested through authentic API endpoints under randomized prompt perturbations and stratified sampling temperatures ($T \in [0.40, 1.10]$):
 
 | AI Frontier Lab | Flagship Model | Endpoint / Channel | Samples | Key Discrete Fingerprint Traits |
 |:---|:---|:---|:---:|:---|
-| **DeepSeek** | **DeepSeek-V4.1-Flash** | `openrouter` | **105** | Pronounced favorite integers (7, 23, 41); distinct permutation inversion profile |
-| **Zhipu AI** | **GLM-5.3** | `opencode` / `openrouter` | **74** | Strong affinity for 27, 84, 15; extreme color preference for Purple/Cyan |
+| **DeepSeek** | **DeepSeek-V4.1-Flash** | `openrouter` | **190** | Pronounced favorite integers (7, 23, 41); distinct permutation inversion profile |
+| **xAI** | **Grok-4.7** | `openrouter` | **172** | High affinity for 23, 37, 82; prominent Rock bias in game-theoretic RPS |
+| **Anthropic** | **Claude-Sonnet-5.5** | `openrouter` | **170** | High entropy across color and integer probes with characteristic blue/cyan leads |
+| **OpenAI** | **GPT-6-Astra** | `openrouter` | **170** | Strong integer affinity (17, 42, 64, 92); letter preference for B, Q, L |
+| **Google (Fast)** | **Gemini 2.5 Flash** | `openrouter` | **170** | Fast latency; tight letter clustering (G, P, K, D) |
+| **MiniMax** | **MiniMax-M3** | `openrouter` | **170** | Unique tokenizer boundary alignments; Orange/Purple initial selections |
+| **Alibaba Cloud** | **Qwen-3.8-Max** | `openrouter` | **169** | Strong Chinese native representation; Cyan/Orange bias in color probes |
+| **Moonshot AI** | **Kimi-K3** | `openrouter` | **168** | High long-context noise resistance; characteristic letter clusters (F, L, T, Z) |
+| **OpenAI** | **GPT-5.6-Luna** | `openrouter` | **165** | Extreme initial-token integer bias (17 at >90%); high compliance |
+| **Meta AI (Open)** | **Llama-3.3-70B** | `openrouter` | **156** | Uniform integer spread; characteristic cyclic RPS patterns |
+| **Zhipu AI** | **GLM-5.3** | `openrouter` | **152** | Strong affinity for 27, 84, 15; extreme color preference for Purple/Cyan |
+| **OpenAI** | **GPT-6-Luna** | `openrouter` | **145** | High mathematical precision with distinct deterministic clusters |
+| **Google (4-Gen)** | **Gemma 4 31B** | `openrouter` | **145** | Latest 4-series architecture; heavy clustering around 23, 87, 12, 56, 91 |
+| **Google (Cloud)** | **Gemini Pro (Latest)** | `openrouter` | **127** | CoT thinking reasoning traces; distinct 42, 17, 88, 5, 73 preference pattern |
 | **Meta AI** | **Meta Muse-Spark 1.3** | `opencode` | **69** | Distinct preference for 27, 84, 33; strong permutation 4/5-lead biases |
-| **Meta AI (Open)** | **Llama-3.3-70B** | `openrouter` | **74** | Uniform integer spread; characteristic cyclic RPS patterns |
-| **Google (4-Gen)** | **Gemma 4 31B** | `openrouter` | **60** | Latest 4-series architecture; heavy clustering around 23, 87, 12, 56, 91 |
-| **Google (Cloud)** | **Gemini Pro (Latest)** | `openrouter` | **70** | CoT thinking reasoning traces; distinct 42, 17, 88, 5, 73 preference pattern |
-| **Google (Fast)** | **Gemini 2.5 Flash** | `openrouter` | **85** | Fast latency; tight letter clustering (G, P, K, D) |
-| **OpenAI** | **GPT-6-Astra** | `openrouter` | **85** | Strong integer affinity (17, 42, 64, 92); letter preference for B, Q, L |
-| **OpenAI** | **GPT-5.6-Luna** | `openrouter` | **80** | Extreme initial-token integer bias (17 at >90%); high compliance |
-| **OpenAI** | **GPT-6-Luna** | `openrouter` | **60** | High mathematical precision with distinct deterministic clusters |
-| **Anthropic** | **Claude-Sonnet-5.5** | `openrouter` | **85** | High entropy across color and integer probes with characteristic blue/cyan leads |
-| **xAI** | **Grok-4.7** | `openrouter` | **90** | High affinity for 23, 37, 82; prominent Rock bias in game-theoretic RPS |
-| **Alibaba Cloud** | **Qwen-3.8-Max** | `openrouter` | **85** | Strong Chinese native representation; Cyan/Orange bias in color probes |
-| **MiniMax** | **MiniMax-M3** | `openrouter` | **85** | Unique tokenizer boundary alignments; Orange/Purple initial selections |
-| **Moonshot AI** | **Kimi-K3** | `openrouter` | **83** | High long-context noise resistance; characteristic letter clusters (F, L, T, Z) |
 
 ---
 
