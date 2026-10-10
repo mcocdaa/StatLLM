@@ -130,7 +130,7 @@ flowchart TD
     Extraction --> Traits["特征提取 (首词偏好/重复性/逆序数)"]
     Traits --> Likelihood["对数似然评估 (engine.py)"]
     
-    DB[("SQLite 指纹库 (2,330+ 真实样本)")] --> Prior["Dirichlet-Multinomial 平滑先验"]
+    DB[("SQLite 指纹库 (5,540+ 真实样本)")] --> Prior["Dirichlet-Multinomial 平滑先验"]
     Prior --> Likelihood
     
     Likelihood --> Posterior["排他性贝叶斯后验 P(Model | Data)"]
