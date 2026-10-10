@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from statllm.database import Database
 from statllm.probes import PROBES
-from statllm.perturbations import apply_perturbation, estimate_tokens
+from statllm.perturbations import apply_perturbation, estimate_tokens, get_stratified_temperature
 from statllm.cluster import ClusterProjector
 
 OPENROUTER_KEY = os.environ.get("OPENROUTER_KEY", "")
@@ -202,15 +202,15 @@ def sample_single(
     if not probe:
         return None
 
-    # Every single test uses a randomized prompt perturbation + question
-    full_prompt, actual_pert_type, pert_prefix = apply_perturbation(probe.prompt)
+    # Multi-axis diverse prompt perturbation: syntactic paraphrase + persona/chit-chat/context noise
+    full_prompt, actual_pert_type, pert_prefix = apply_perturbation(probe, diverse_phrasing=True)
     m_name = model_cfg["name"]
     channel = model_cfg["channel"]
     mid = model_cfg["model_id"]
     max_tok = model_cfg.get("max_tokens", 200)
 
-    # Randomized temperature between 0.7 and 0.95
-    temp = round(random.choice([0.7, 0.8, 0.85, 0.9, 0.95]), 2)
+    # Stratified temperature sampling across low (0.4~0.6), mid (0.7~0.85), and high (0.9~1.1)
+    temp = get_stratified_temperature()
 
     raw_text = ""
     if channel == "opencode":

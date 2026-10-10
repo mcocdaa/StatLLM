@@ -91,7 +91,7 @@ def process_single_sample(
     if not probe:
         return None
 
-    full_prompt, pert_type, pert_prefix = apply_perturbation(probe.prompt)
+    full_prompt, pert_type, pert_prefix = apply_perturbation(probe, diverse_phrasing=True)
 
     # Temperature schedule: 25% 0.5, 50% 0.8, 25% 1.0
     if target_runs <= 1:

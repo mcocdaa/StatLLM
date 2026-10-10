@@ -7,6 +7,7 @@ observe sequence transition probabilities, duplicate avoidance, and sorting bias
 
 import re
 import json
+import random
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 
@@ -21,6 +22,13 @@ class ArrayProbe:
     expected_length: int
     element_vocab_size: int
     allowed_elements: List[str] = field(default_factory=list)
+    prompt_variants: List[str] = field(default_factory=list)
+
+    def get_diverse_prompt(self) -> str:
+        """Returns a diverse prompt variant across linguistic and semantic phrasing styles."""
+        if self.prompt_variants:
+            return random.choice(self.prompt_variants)
+        return self.prompt
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
         """
@@ -80,7 +88,15 @@ class IntArrayProbe(ArrayProbe):
             description="同时获取5个随机数字偏置，检测模型首数字偏好、升序倾向（排序偏置）与去重偏好。",
             expected_length=5,
             element_vocab_size=102,
-            allowed_elements=[str(i) for i in range(1, 101)]
+            allowed_elements=[str(i) for i in range(1, 101)],
+            prompt_variants=[
+                "请生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "帮我随机挑选5个1至100范围内的整数，以纯JSON数组形式给出，如[34, 12, 88, 9, 60]。不要输出任何解释或代码块。",
+                "请模拟5次在区间[1, 100]内的独立均匀随机抽样，输出为一个JSON数组。仅返回该数组，严禁附带额外内容。",
+                "Generate a JSON array containing 5 random integers between 1 and 100, e.g. [12, 45, 78, 3, 99]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Output a valid JSON array of 5 uniformly sampled integers in the range [1, 100]. Strict constraint: Output JSON array only, no explanation.",
+                "随机给出5个1到100的自然数，格式严格为JSON列表[a, b, c, d, e]，严禁输出多余文字。"
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -146,7 +162,14 @@ class ColorArrayProbe(ArrayProbe):
             description="测试在7种基础颜色上的5元组合转移概率，检测模型对相邻重复颜色的排斥倾向。",
             expected_length=5,
             element_vocab_size=8,
-            allowed_elements=self.COLORS
+            allowed_elements=self.COLORS,
+            prompt_variants=[
+                "在[红, 橙, 黄, 绿, 青, 蓝, 紫]中随机挑选5次，组成JSON数组，例如[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "请从彩虹七色（红、橙、黄、绿、青、蓝、紫）中进行5次独立随机抽取，输出为一个JSON字符串数组。只输出数组本身。",
+                "在红、橙、黄、绿、青、蓝、紫这7个候选中随意挑5个排成列表，输出纯JSON数组，如[\"蓝\", \"黄\", \"红\", \"紫\", \"橙\"]，不要添加代码块。",
+                "Please randomly choose 5 times from [Red, Orange, Yellow, Green, Cyan, Blue, Purple] to form a JSON array, e.g. [\"Red\", \"Blue\", \"Green\", \"Red\", \"Purple\"]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Simulate 5 independent draws from the 7 rainbow colors: [Red, Orange, Yellow, Green, Cyan, Blue, Purple]. Return strictly a JSON array."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -205,7 +228,14 @@ class RPSArrayProbe(ArrayProbe):
             description="测试多步博弈出拳的马尔可夫转移模式（如是否出现周期循环或避免连续出相同拳）。",
             expected_length=5,
             element_vocab_size=4,
-            allowed_elements=self.CHOICES
+            allowed_elements=self.CHOICES,
+            prompt_variants=[
+                "进行5次完全独立的石头剪刀布随机选择，输出一个JSON数组，例如[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "模拟5局石头剪刀布博弈的出拳决策，以JSON数组格式输出5次选择（只能从\"石头\"、\"剪刀\"、\"布\"中选）。仅输出数组。",
+                "请独立随机生成5个石头剪刀布动作，格式如[\"布\", \"石头\", \"剪刀\", \"石头\", \"布\"]，纯JSON输出，不要写解释。",
+                "Please simulate 5 independent rounds of Rock-Paper-Scissors and output a JSON array of 5 moves from [\"Rock\", \"Scissors\", \"Paper\"], e.g. [\"Rock\", \"Scissors\", \"Paper\", \"Rock\", \"Scissors\"]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Generate a sequence of 5 independent choices for rock-paper-scissors in a JSON array format. JSON only, no markdown."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -259,7 +289,14 @@ class LetterArrayProbe(ArrayProbe):
             description="测试26个大写字母在5元序列上的先验选择与音节/辅音扎堆现象。",
             expected_length=5,
             element_vocab_size=27,
-            allowed_elements=self.LETTERS
+            allowed_elements=self.LETTERS,
+            prompt_variants=[
+                "Generate a JSON array of 5 random English capital letters (A-Z), e.g. [\"M\", \"X\", \"R\", \"A\", \"K\"]. Output strictly the JSON array only, without code blocks or extra words.",
+                "请生成一个包含5个随机大写英文字母（A-Z）的JSON数组，例如[\"M\", \"X\", \"R\", \"A\", \"K\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "随机挑5个26个英文字母中的大写字母，直接组成JSON数组返回，如[\"D\", \"P\", \"A\", \"Z\", \"L\"]，严禁其他文字。",
+                "Pick 5 uppercase English letters (A through Z) uniformly at random. Return them in a JSON array. Only the JSON array, nothing else.",
+                "Randomly sample 5 capital letters from A-Z and format as a JSON array like [\"C\", \"V\", \"T\", \"Y\", \"U\"]. No markdown or preamble."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -311,7 +348,14 @@ class PermutationArrayProbe(ArrayProbe):
             description="从 120 种严格不重复的全排列空间中测量模型的置乱习惯与不动点保留偏好。",
             expected_length=5,
             element_vocab_size=121,
-            allowed_elements=[]
+            allowed_elements=[],
+            prompt_variants=[
+                "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "请对列表[1, 2, 3, 4, 5]执行一次完全随机置乱（洗牌），输出置乱后的JSON数组，每个数字必须恰好出现一次。只输出JSON数组。",
+                "把1到5这五个数字随机打乱顺序，排成一个JSON数组，例如[2, 5, 1, 4, 3]。严禁输出代码块或多余解释。",
+                "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Perform a uniform random permutation of the array [1, 2, 3, 4, 5]. Return strictly the resulting JSON array. No markdown code blocks."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -377,7 +421,14 @@ class CoinArrayProbe(ArrayProbe):
             description="测试10步伯努利试验中的游程长度偏好（是否规避长连续段）、翻转率与赌徒谬误倾向。",
             expected_length=10,
             element_vocab_size=3,
-            allowed_elements=["正", "反"]
+            allowed_elements=["正", "反"],
+            prompt_variants=[
+                "进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "模拟抛一枚均匀硬币10次，以JSON数组格式输出每次正反面结果（元素只能是\"正\"或\"反\"）。只输出JSON列表本身。",
+                "请生成10次独立投币的结果序列，严格格式如[\"正\", \"反\", \"反\", \"正\", \"正\", \"反\", \"正\", \"反\", \"反\", \"正\"]，纯JSON输出，严禁废话。",
+                "Please simulate 10 independent random coin flips and output a JSON array of 10 items, where each element is strictly either \"H\" or \"T\", e.g. [\"H\", \"T\", \"H\", \"H\", \"T\", \"T\", \"H\", \"T\", \"H\", \"T\"]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Generate a sequence of 10 Bernoulli trials (coin tosses) with outcomes 'H' (heads) or 'T' (tails). Return strictly as a JSON array."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -447,7 +498,14 @@ class DiceArrayProbe(ArrayProbe):
             description="测试在6元骰子点数上的均匀度偏好、中心极限定理总和偏倚与相邻点数回避倾向。",
             expected_length=6,
             element_vocab_size=7,
-            allowed_elements=self.ALLOWED
+            allowed_elements=self.ALLOWED,
+            prompt_variants=[
+                "掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "模拟掷六面骰子6次，把每次投出的点数（1到6之间的整数）装入一个JSON数组中返回。只输出数组。",
+                "请独立掷骰子6次（点数1~6），输出纯JSON数组格式，如[2, 5, 1, 6, 4, 3]，不要任何解释或代码块。",
+                "Please simulate rolling a standard 6-sided die 6 independent times and output a JSON array of 6 integers (1 to 6), e.g. [3, 6, 2, 1, 5, 4]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Simulate 6 rolls of a fair 6-sided die. Output the 6 outcome values in a JSON array. Only the JSON array, without commentary."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -515,7 +573,14 @@ class PrimeArrayProbe(ArrayProbe):
             description="从100以内全部25个离散质数中测量模型的吸引子偏好（如7、17、23、37与合数形态回避）。",
             expected_length=5,
             element_vocab_size=26,
-            allowed_elements=[str(p) for p in self.PRIMES_UNDER_100]
+            allowed_elements=[str(p) for p in self.PRIMES_UNDER_100],
+            prompt_variants=[
+                "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "请从小于100的所有素数中任意抽取5个，以JSON列表格式返回，例如[3, 17, 31, 59, 83]。只输出JSON数组本身。",
+                "随便选5个100以内的质数排成一个JSON数组，格式如[11, 29, 47, 71, 97]，不要写代码块或附加文字。",
+                "Please randomly pick 5 prime numbers under 100 and output a JSON array, e.g. [7, 23, 41, 73, 89]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Sample 5 primes uniformly at random from the 25 primes below 100. Return as a JSON array like [5, 13, 37, 61, 79]. Strictly JSON only."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
@@ -576,7 +641,14 @@ class BitArrayProbe(ArrayProbe):
             description="测试8位离散二进制空间的汉明重量（Popcount）、比特翻转率与词元切分偏置。",
             expected_length=8,
             element_vocab_size=3,
-            allowed_elements=self.ALLOWED
+            allowed_elements=self.ALLOWED,
+            prompt_variants=[
+                "生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+                "请随机生成一个8位的二进制随机数流，用长度为8的JSON数组表示（每个元素只能是0或1）。仅输出该数组。",
+                "生成8个随机比特位（0或1），输出为纯JSON数组，如[1, 0, 0, 1, 1, 0, 1, 0]，严禁多余文字与代码块。",
+                "Please generate a JSON array of 8 independent random binary bits (0 or 1), formatted as [0, 1, 1, 0, 1, 0, 0, 1]. Output only the JSON array, with no other text or markdown codeblocks.",
+                "Output a stream of 8 random binary digits (0 or 1) as a JSON array. Strictly format as [b0, b1, ..., b7]. No other words."
+            ]
         )
 
     def parse(self, raw_text: str) -> Dict[str, Any]:
