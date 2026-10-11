@@ -91,11 +91,16 @@ class LikelihoodEvaluator:
             return p_pos
         return (1.0 - lam) * p_global + lam * p_pos
 
+    def clear_cache(self):
+        self._cached_matrix = None
+        self._cached_models = None
+
     def evaluate(
         self,
         submissions: List[Dict[str, str]],
         positional_lambda: Optional[float] = None,
-        n_boot: int = 800
+        n_boot: int = 800,
+        matrix: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Evaluates a set of user submissions containing array answers.
@@ -127,9 +132,15 @@ class LikelihoodEvaluator:
                 "expected_length": probe.expected_length
             })
 
-        # 2. Load count table from database
-        matrix = self.db.get_all_model_probe_counts()
-        models = self.db.list_models()
+        # 2. Load count table from database (with in-memory cache)
+        if matrix is None:
+            if not hasattr(self, "_cached_matrix") or self._cached_matrix is None:
+                self._cached_matrix = self.db.get_all_model_probe_counts()
+            matrix = self._cached_matrix
+
+        if not hasattr(self, "_cached_models") or self._cached_models is None:
+            self._cached_models = self.db.list_models()
+        models = self._cached_models
         model_names = [m["name"] for m in models] if models else list(matrix.keys())
 
         if not model_names:

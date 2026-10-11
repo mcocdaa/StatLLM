@@ -23,7 +23,7 @@ def test_engine_array_evaluation(temp_db):
     # Grok-4.7 characteristic array inputs
     submissions = [
         {"probe_id": "arr_int5", "raw_text": "[27, 83, 5, 61, 44]"},
-        {"probe_id": "arr_color5", "raw_text": '["黄", "青", "红", "紫", "橙"]'},
+        {"probe_id": "arr_prime5", "raw_text": "[11, 23, 47, 71, 89]"},
         {"probe_id": "arr_letter5", "raw_text": '["K", "W", "B", "R", "M"]'},
     ]
 
@@ -69,12 +69,12 @@ def test_engine_probability_conservation(temp_db):
     evaluator = LikelihoodEvaluator(temp_db, beta=0.5, positional_lambda=0.5)
     matrix = temp_db.get_all_model_probe_counts()
 
-    probe = get_probe("arr_color5")
+    probe = get_probe("arr_letter5")
     vocab = probe.allowed_elements
     vocab_size = probe.element_vocab_size
 
     for m in matrix.keys():
-        counts_dict, tot = matrix[m].get("arr_color5", ({}, 0.0))
+        counts_dict, tot = matrix[m].get("arr_letter5", ({}, 0.0))
         assert tot > 0
 
         # 1. Global probability sums to 1.0 across the full vocabulary simplex (including OOV slot)

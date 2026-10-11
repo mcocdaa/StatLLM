@@ -9,7 +9,7 @@ import json
 import numpy as np
 from typing import Dict, Any, List
 from statllm.database import Database
-from statllm.probes import PROBES
+from statllm.probes import PROBES, ALL_PROBES
 
 
 MODELS_META = [
@@ -283,7 +283,7 @@ def seed_database(db: Database, samples_per_probe: int = 100):
         m_name = m_meta["name"]
         prefs = MODEL_ARRAY_PREFERENCES[m_name]
 
-        for pid, probe in PROBES.items():
+        for pid, probe in ALL_PROBES.items():
             probe_pref = prefs.get(pid, {})
             if not probe_pref:
                 continue

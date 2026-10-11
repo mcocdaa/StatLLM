@@ -39,6 +39,24 @@ const PROBE_I18N = {
     zh_prompt: "请生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please generate a JSON array containing 5 random integers between 1 and 100, formatted as [12, 45, 78, 3, 99]. Output only the JSON array, with no other text or markdown codeblocks."
   },
+  arr_pseudo_cvc5: {
+    zh_title: "Q2: 5个3字母自然发音伪词数组",
+    en_title: "Q2: 5 Pseudo-Words (CVC) Array",
+    zh_prompt: "请随机生成5个由3个英文字母组成且符合自然拼读规则但实际不存在的英文伪单词（结构必须为：辅音+元音+辅音），以全小写JSON数组格式直接输出。严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly generate 5 pronounceable, non-existent English pseudo-words of exactly 3 letters (consonant-vowel-consonant structure). Output as a lowercase JSON array, with no other text or markdown codeblocks."
+  },
+  arr_int_big5: {
+    zh_title: "Q3: 5个1000~99999大整数数组",
+    en_title: "Q3: 5 Large Integers (1000~99999) Array",
+    zh_prompt: "请在1000到99999之间完全随机挑选5个互不相同的正整数，以JSON数组格式直接输出。严禁任何多余文字、说明或markdown代码块。",
+    en_prompt: "Please randomly pick 5 distinct positive integers between 1000 and 99999 and output as a JSON array. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_grid_walk6: {
+    zh_title: "Q4: 6步二维网格随机游走路径",
+    en_title: "Q4: 6-Step 2D Random Walk Array",
+    zh_prompt: "从坐标原点出发进行6步独立随机游走，每步仅在上(U)、下(D)、左(L)、右(R)中独立随机选择一个大写方向。以包含这6个字符的JSON数组直接输出，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate a 6-step independent random walk from the origin, choosing from ['U', 'D', 'L', 'R'] at each step. Output as a JSON array of 6 directional letters. Output only the JSON array, with no other text or markdown codeblocks."
+  },
   arr_letter5: {
     zh_title: "Q2: 5个随机大写英文字母数组",
     en_title: "Q2: 5 Random Uppercase Letters Array",
@@ -48,8 +66,8 @@ const PROBE_I18N = {
   arr_prime5: {
     zh_title: "Q3: 5个100以内的质数数组",
     en_title: "Q3: 5 Prime Numbers Under 100 Array",
-    zh_prompt: "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please randomly pick 5 prime numbers under 100 and output a JSON array, e.g. [7, 23, 41, 73, 89]. Output only the JSON array, with no other text or markdown codeblocks."
+    zh_prompt: "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组。仅输出中括号包裹数字的JSON数组本身，严禁任何多余文字、示例或markdown代码块。",
+    en_prompt: "Please randomly pick 5 prime numbers under 100 and output a JSON array of 5 integers. Output only the JSON array, with no other text, examples, or markdown codeblocks."
   },
   arr_dice6: {
     zh_title: "Q4: 6次六面骰子独立掷点数组",
@@ -95,6 +113,7 @@ const I18N = {
     doc_title: "StatLLM - 大模型统计指纹与黑盒归因平台",
     brand_subtitle: "统计指纹归因",
     nav_lab: "模型鉴定",
+    nav_matrix: "单题透视",
     nav_theory: "统计原理",
     nav_db: "底库基准",
     db_badge_suffix: "条真实 API 样本",
@@ -258,6 +277,42 @@ const I18N = {
     toast_import_fail: "导入失败: ",
     toast_export_fail: "导出失败: ",
 
+    matrix_badge: "单题两两概率优势矩阵与分位数透视",
+    matrix_title: "单题辨识力与经验分位数透视实验室",
+    matrix_subtitle: "针对单一题目，深入透视 15×15 两两概率优势矩阵、五档经验分位数（P05, P25, P50, P75, P95）与核心盲区混淆对。",
+    matrix_select_probe: "探针题目透视选择：",
+    matrix_select_probe_tip: "可自由切换全量探针（支持高区分度推荐题与实验探索题）",
+    matrix_kpi_mdi: "综合区分度 (MDI)",
+    matrix_kpi_mean: "全局平均概率差",
+    matrix_kpi_median: "全局中位数",
+    matrix_kpi_winrate: "全局平均胜率",
+    matrix_kpi_bottleneck: "最难相持瓶颈对",
+    matrix_kpi_inversions: "倒挂对数 (<0)",
+    matrix_focus_title: "两两模型分位数透视与对比",
+    matrix_model_a: "真实生成模型 (Model A):",
+    matrix_model_b: "对比候选竞品 (Model B):",
+    matrix_win_rate_label: "胜率: ",
+    matrix_median_delta_label: "中位数 (P50): ",
+    matrix_mean_delta_label: "概率差均值: ",
+    matrix_ladder_label: "经验分位数阶梯 (Empirical Quantiles):",
+    matrix_q_p05: "P05 (下尾 5%)",
+    matrix_q_p25: "P25 (下四分位)",
+    matrix_q_p50: "P50 (中位数)",
+    matrix_q_p75: "P75 (上四分位)",
+    matrix_q_p95: "P95 (上尾 95%)",
+    matrix_iqr_label: "50% 散布区间 (P25 ~ P75): ",
+    matrix_range90_label: "90% 散布区间 (P05 ~ P95): ",
+    matrix_live_title: "单题单次输入实测器",
+    matrix_live_desc: "输入该题目的一条实际回答文本，系统将计算其实时概率差并自动比对历史分位数区间：",
+    matrix_live_input_placeholder: "在此输入一条回答数组，例如 [41, 51, 41, 26, 49]...",
+    matrix_live_btn: "单题即时诊断",
+    matrix_live_result_title: "单题诊断结果：",
+    matrix_live_pa: "模型 A 瞬时后验: ",
+    matrix_live_pb: "模型 B 瞬时后验: ",
+    matrix_live_delta: "瞬时概率差 Δ: ",
+    matrix_table_title: "15×15 全量两两概率优势矩阵表",
+    matrix_table_desc: "行代表真实生成模型（真值），列代表比较模型。单元格数字为 [中位数 (%) / 胜率 (小数)]。点击任意单元格可快速在上方透视该对模型的五档分位数详情。",
+
     footer_license: "StatLLM 开源项目 · 遵循 MIT 开源协议",
     footer_repo: "GitHub 仓库",
     alert_no_input: "请在回答框内填入至少一个探针的回答！",
@@ -267,6 +322,7 @@ const I18N = {
     doc_title: "StatLLM - LLM Statistical Fingerprinting & Attribution Engine",
     brand_subtitle: "Statistical Attribution",
     nav_lab: "Identification Lab",
+    nav_matrix: "Single-Probe Lab",
     nav_theory: "Methodology",
     nav_db: "Benchmark Database",
     db_badge_suffix: "Real API Samples",
@@ -430,6 +486,42 @@ const I18N = {
     toast_import_fail: "Import failed: ",
     toast_export_fail: "Export failed: ",
 
+    matrix_badge: "SINGLE-PROBE PAIRWISE MATRIX & QUANTILE LAB",
+    matrix_title: "Single-Probe Discrimination & Quantile Lab",
+    matrix_subtitle: "Deep-dive inspection for a single probe: 15×15 pairwise margin matrix, 5-level empirical quantiles (P05, P25, P50, P75, P95), and bottleneck confusion pairs.",
+    matrix_select_probe: "Select Probe Question:",
+    matrix_select_probe_tip: "Freely inspect any probe (High Discrimination & Exploratory Probes)",
+    matrix_kpi_mdi: "Discrimination (MDI)",
+    matrix_kpi_mean: "Global Mean Margin",
+    matrix_kpi_median: "Global Median",
+    matrix_kpi_winrate: "Global Mean Win Rate",
+    matrix_kpi_bottleneck: "Hardest Bottleneck Pair",
+    matrix_kpi_inversions: "Inversions (<0)",
+    matrix_focus_title: "Pairwise Quantile & Margin Inspector",
+    matrix_model_a: "Ground Truth Model (Model A):",
+    matrix_model_b: "Candidate Competitor (Model B):",
+    matrix_win_rate_label: "Win Rate: ",
+    matrix_median_delta_label: "Median (P50): ",
+    matrix_mean_delta_label: "Mean Margin: ",
+    matrix_ladder_label: "Empirical Quantiles Ladder:",
+    matrix_q_p05: "P05 (5th Percentile)",
+    matrix_q_p25: "P25 (Lower Quartile)",
+    matrix_q_p50: "P50 (Median)",
+    matrix_q_p75: "P75 (Upper Quartile)",
+    matrix_q_p95: "P95 (95th Percentile)",
+    matrix_iqr_label: "50% Spread (P25 ~ P75): ",
+    matrix_range90_label: "90% Spread (P05 ~ P95): ",
+    matrix_live_title: "Single-Probe Live Evaluator",
+    matrix_live_desc: "Input a single response for this probe; system will evaluate instantaneous probability margin and compare against historical quantiles:",
+    matrix_live_input_placeholder: "Paste a single response array, e.g. [41, 51, 41, 26, 49]...",
+    matrix_live_btn: "Instant Diagnose",
+    matrix_live_result_title: "Diagnosis Result:",
+    matrix_live_pa: "Model A Instant Posterior: ",
+    matrix_live_pb: "Model B Instant Posterior: ",
+    matrix_live_delta: "Instant Margin Δ: ",
+    matrix_table_title: "15×15 Full Pairwise Margin Matrix Table",
+    matrix_table_desc: "Rows represent ground-truth models; columns represent competitors. Cells display [Median (%) / Win Rate (decimal)]. Click any cell to inspect detailed quantiles above.",
+
     footer_license: "StatLLM Open Source Project · Under MIT License",
     footer_repo: "GitHub Repository",
     alert_no_input: "Please fill in at least one model response before evaluating!",
@@ -444,8 +536,8 @@ function t(key) {
 document.addEventListener("DOMContentLoaded", async () => {
   initLanguage();
   initTheme();
-  setupTabs();
   await loadInitialData();
+  setupTabs();
   resetSubmissions();
   renderMath();
 
@@ -559,16 +651,7 @@ function applyLanguage(lang) {
     const select = row.querySelector(".row-probe-select");
     const currentProbeId = select ? select.value : "arr_int5";
     if (select) {
-      select.innerHTML = "";
-      PROBES_DATA.forEach(p => {
-        const item = PROBE_I18N[p.id];
-        const title = item ? (lang === "en" ? item.en_title : item.zh_title) : p.title;
-        const opt = document.createElement("option");
-        opt.value = p.id;
-        opt.textContent = title;
-        if (p.id === currentProbeId) opt.selected = true;
-        select.appendChild(opt);
-      });
+      select.innerHTML = buildProbeOptionsHtml(currentProbeId);
     }
     const promptEl = row.querySelector(".row-prompt-text");
     if (promptEl) {
@@ -602,6 +685,13 @@ function applyLanguage(lang) {
     renderEvaluationResults(cachedEvaluationData);
   } else if (currentClusterData) {
     renderClusterCanvas(currentClusterData);
+  }
+
+  // Re-render matrix tab if loaded
+  if (currentMatrixData) {
+    populateMatrixProbeSelect();
+    renderFocusPairDetails();
+    renderMatrixHeatmapTable();
   }
 
   // Re-render math
@@ -657,14 +747,17 @@ function toggleTheme() {
 function setupTabs() {
   const navTabs = [
     { btnId: "tab-lab-btn", contentId: "tab-lab" },
+    { btnId: "tab-matrix-btn", contentId: "tab-matrix" },
     { btnId: "tab-theory-btn", contentId: "tab-theory" },
     { btnId: "tab-db-btn", contentId: "tab-db" }
   ];
 
   window.switchToTab = function(targetTabId) {
+    window.scrollTo({ top: 0, behavior: "instant" });
     navTabs.forEach(t => {
       const btn = document.getElementById(t.btnId);
       const content = document.getElementById(t.contentId);
+      if (!btn || !content) return;
       if (t.contentId === targetTabId) {
         btn.classList.add("active");
         btn.classList.remove("text-slate-600", "dark:text-slate-400");
@@ -678,14 +771,17 @@ function setupTabs() {
 
     if (targetTabId === "tab-db") {
       refreshDbStats();
+    } else if (targetTabId === "tab-matrix") {
+      initMatrixTab();
     }
     
     setTimeout(renderMath, 50);
   };
 
   const hash = window.location.hash.replace("#", "");
-  if (hash && ["tab-lab", "tab-theory", "tab-db"].includes(hash)) {
+  if (hash && ["tab-lab", "tab-matrix", "tab-theory", "tab-db"].includes(hash)) {
     window.switchToTab(hash);
+    setTimeout(() => window.scrollTo(0, 0), 10);
   }
 }
 
@@ -740,6 +836,37 @@ function updateHeaderStats(stats) {
   }
 }
 
+function buildProbeOptionsHtml(selectedProbeId) {
+  let recOptions = "";
+  let otherOptions = "";
+
+  const list = (PROBES_DATA && PROBES_DATA.length > 0)
+    ? PROBES_DATA
+    : Object.keys(PROBE_I18N).map(k => ({ id: k, is_recommended: ["arr_int5", "arr_pseudo_cvc5", "arr_int_big5", "arr_grid_walk6"].includes(k) }));
+
+  list.forEach(p => {
+    const isSel = p.id === selectedProbeId;
+    const item = PROBE_I18N[p.id];
+    const title = item ? (currentLang === "en" ? item.en_title : item.zh_title) : (p.title || p.id);
+    const isRecommended = p.is_recommended !== false && ["arr_int5", "arr_pseudo_cvc5", "arr_int_big5", "arr_grid_walk6"].includes(p.id);
+    const optStr = `<option value="${p.id}" ${isSel ? "selected" : ""}>${title}</option>`;
+    if (isRecommended) {
+      recOptions += optStr;
+    } else {
+      otherOptions += optStr;
+    }
+  });
+
+  const recLabel = currentLang === "en" ? "⭐ High Discrimination Probes (Recommended)" : "⭐ 高区分度基准探针 (推荐)";
+  const otherLabel = currentLang === "en" ? "📋 Exploratory & Historical Probes" : "📋 其他实验与历史探针";
+
+  let html = `<optgroup label="${recLabel}">${recOptions}</optgroup>`;
+  if (otherOptions) {
+    html += `<optgroup label="${otherLabel}">${otherOptions}</optgroup>`;
+  }
+  return html;
+}
+
 /**
  * Submissions Management (Full-Width, Left-Right Split, Bilingual, Larger Fonts)
  */
@@ -753,22 +880,13 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
   row.id = rowId;
   row.className = "submission-row w-full bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 sm:p-5 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch transition";
 
-  let optionsHtml = "";
-  let selectedPrompt = "";
-
-  PROBES_DATA.forEach(p => {
-    const isSel = p.id === probeId;
-    const item = PROBE_I18N[p.id];
-    const title = item ? (currentLang === "en" ? item.en_title : item.zh_title) : p.title;
-    if (isSel) {
-      selectedPrompt = item ? (currentLang === "en" ? item.en_prompt : item.zh_prompt) : p.prompt;
-    }
-    optionsHtml += `<option value="${p.id}" ${isSel ? "selected" : ""}>${title}</option>`;
-  });
-
+  const optionsHtml = buildProbeOptionsHtml(probeId);
+  const selectedItem = PROBE_I18N[probeId];
+  let selectedPrompt = selectedItem ? (currentLang === "en" ? selectedItem.en_prompt : selectedItem.zh_prompt) : "";
   if (!selectedPrompt && PROBES_DATA.length > 0) {
-    const firstItem = PROBE_I18N[PROBES_DATA[0].id];
-    selectedPrompt = firstItem ? (currentLang === "en" ? firstItem.en_prompt : firstItem.zh_prompt) : PROBES_DATA[0].prompt;
+    const firstP = PROBES_DATA.find(p => p.id === probeId) || PROBES_DATA[0];
+    const firstItem = PROBE_I18N[firstP.id];
+    selectedPrompt = firstItem ? (currentLang === "en" ? firstItem.en_prompt : firstItem.zh_prompt) : firstP.prompt;
   }
 
   row.innerHTML = `
@@ -779,9 +897,14 @@ function addSubmissionRow(probeId = "arr_int5", rawText = "") {
           <span class="w-2 h-2 rounded-full bg-sky-500"></span>
           <span class="row-probe-label">${t("probe_label")}</span>
         </label>
-        <select class="row-probe-select w-full mt-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition cursor-pointer" onchange="onProbeChange(this)">
-          ${optionsHtml}
-        </select>
+        <div class="relative mt-1.5">
+          <select class="row-probe-select appearance-none w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-500 rounded-xl px-3.5 py-2.5 pr-10 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition cursor-pointer" onchange="onProbeChange(this)">
+            ${optionsHtml}
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
       </div>
 
       <div class="relative mt-2.5 p-3.5 rounded-lg bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/90 group flex-1 min-h-[76px] flex flex-col justify-center">
@@ -2092,5 +2215,536 @@ window.toggleClaimedModelInput = toggleClaimedModelInput;
 window.openContributeModal = openContributeModal;
 window.closeContributeModal = closeContributeModal;
 window.submitDirectContribution = submitDirectContribution;
+
+/**
+ * ============================================================================
+ * Single-Probe Discrimination & Quantile Lab (单题透视实验室)
+ * ============================================================================
+ */
+let currentMatrixData = null;
+let currentMatrixProbeId = "arr_int5";
+
+/**
+ * Modern Custom Dropdown System
+ * Replaces unstyled native OS popups with Tailwind-styled, rounded, dark/light theme aware floating menus
+ */
+function initCustomDropdown(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  
+  const wrapper = sel.parentElement;
+  if (!wrapper) return;
+
+  sel.classList.add("sr-only");
+
+  // Remove existing static chevrons in the wrapper if any
+  const oldChevrons = wrapper.querySelectorAll(":scope > .pointer-events-none");
+  oldChevrons.forEach(c => c.remove());
+
+  let trigger = wrapper.querySelector(":scope > .custom-dropdown-trigger");
+  let menu = wrapper.querySelector(":scope > .custom-dropdown-menu");
+
+  if (!trigger) {
+    trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.id = `${selectId}-custom-trigger`;
+    trigger.className = "custom-dropdown-trigger w-full flex items-center justify-between bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 shadow-2xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer text-left";
+
+    const labelDiv = document.createElement("div");
+    labelDiv.className = "flex items-center gap-2 truncate pr-2";
+    labelDiv.id = `${selectId}-custom-label`;
+
+    const chevron = document.createElement("div");
+    chevron.className = "custom-chevron pointer-events-none flex-shrink-0 text-slate-400 dark:text-slate-500 transition-transform duration-200";
+    chevron.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+
+    trigger.appendChild(labelDiv);
+    trigger.appendChild(chevron);
+    wrapper.appendChild(trigger);
+  }
+
+  if (!menu) {
+    menu = document.createElement("div");
+    menu.id = `${selectId}-custom-menu`;
+    menu.className = "custom-dropdown-menu hidden absolute left-0 right-0 z-50 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-h-72 overflow-y-auto p-1.5 space-y-0.5 backdrop-blur-md";
+    wrapper.appendChild(menu);
+
+    trigger.onclick = (e) => {
+      e.stopPropagation();
+      const isHidden = menu.classList.contains("hidden");
+      // Close other open custom menus
+      document.querySelectorAll(".custom-dropdown-menu:not(.hidden)").forEach(m => {
+        if (m !== menu) {
+          m.classList.add("hidden");
+          const c = m.parentElement?.querySelector(".custom-chevron");
+          if (c) c.classList.remove("rotate-180");
+        }
+      });
+      if (isHidden) {
+        renderMenu();
+        menu.classList.remove("hidden");
+        const c = trigger.querySelector(".custom-chevron");
+        if (c) c.classList.add("rotate-180");
+      } else {
+        menu.classList.add("hidden");
+        const c = trigger.querySelector(".custom-chevron");
+        if (c) c.classList.remove("rotate-180");
+      }
+    };
+
+    document.addEventListener("click", (e) => {
+      if (!wrapper.contains(e.target)) {
+        menu.classList.add("hidden");
+        const c = trigger.querySelector(".custom-chevron");
+        if (c) c.classList.remove("rotate-180");
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        menu.classList.add("hidden");
+        const c = trigger.querySelector(".custom-chevron");
+        if (c) c.classList.remove("rotate-180");
+      }
+    });
+  }
+
+  function renderMenu() {
+    menu.innerHTML = "";
+    const children = Array.from(sel.children);
+
+    children.forEach(child => {
+      if (child.tagName === "OPTGROUP") {
+        const groupHeader = document.createElement("div");
+        groupHeader.className = "px-3 py-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-100/70 dark:bg-slate-800/50 rounded-md my-1 flex items-center gap-1.5";
+        groupHeader.textContent = child.label;
+        menu.appendChild(groupHeader);
+
+        Array.from(child.children).forEach(opt => appendOptionItem(opt));
+      } else if (child.tagName === "OPTION") {
+        appendOptionItem(child);
+      }
+    });
+
+    updateTriggerLabel();
+  }
+
+  function appendOptionItem(opt) {
+    const isSelected = opt.value === sel.value;
+    const itemBtn = document.createElement("button");
+    itemBtn.type = "button";
+    itemBtn.className = `w-full text-left px-3 py-2 rounded-lg text-xs sm:text-sm transition flex items-center justify-between cursor-pointer ${
+      isSelected
+        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold"
+        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/70"
+    }`;
+
+    // Format text
+    const rawText = opt.textContent || opt.value;
+    let mainText = rawText;
+    let subText = "";
+    const match = rawText.match(/^(.*?)\s*\((.*?)\)$/);
+    if (match) {
+      mainText = match[1];
+      subText = match[2];
+    }
+
+    const textWrap = document.createElement("div");
+    textWrap.className = "flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 truncate";
+
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "truncate font-medium";
+    titleSpan.textContent = mainText;
+    textWrap.appendChild(titleSpan);
+
+    if (subText) {
+      const codeSpan = document.createElement("span");
+      codeSpan.className = "text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate";
+      codeSpan.textContent = `(${subText})`;
+      textWrap.appendChild(codeSpan);
+    }
+
+    itemBtn.appendChild(textWrap);
+
+    if (isSelected) {
+      const checkIcon = document.createElement("span");
+      checkIcon.className = "text-indigo-600 dark:text-indigo-400 flex-shrink-0 ml-2 font-bold";
+      checkIcon.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+      itemBtn.appendChild(checkIcon);
+    }
+
+    itemBtn.onclick = (e) => {
+      e.stopPropagation();
+      sel.value = opt.value;
+      menu.classList.add("hidden");
+      const c = trigger.querySelector(".custom-chevron");
+      if (c) c.classList.remove("rotate-180");
+      renderMenu();
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+
+    menu.appendChild(itemBtn);
+  }
+
+  function updateTriggerLabel() {
+    const labelDiv = trigger.querySelector(`#${selectId}-custom-label`);
+    if (!labelDiv) return;
+    const selOpt = sel.options[sel.selectedIndex];
+    if (!selOpt) {
+      labelDiv.innerHTML = `<span class="text-slate-400">Select...</span>`;
+      return;
+    }
+    const rawText = selOpt.textContent || selOpt.value;
+    const match = rawText.match(/^(.*?)\s*\((.*?)\)$/);
+    if (match) {
+      labelDiv.innerHTML = `<span class="font-medium text-slate-800 dark:text-slate-200 truncate">${match[1]}</span><span class="text-[11px] font-mono text-slate-400 dark:text-slate-500 hidden sm:inline truncate">(${match[2]})</span>`;
+    } else {
+      labelDiv.innerHTML = `<span class="font-medium text-slate-800 dark:text-slate-200 truncate">${rawText}</span>`;
+    }
+  }
+
+  sel._refreshCustom = renderMenu;
+  renderMenu();
+}
+
+function refreshCustomDropdown(selOrId) {
+  const sel = typeof selOrId === "string" ? document.getElementById(selOrId) : selOrId;
+  if (!sel) return;
+  if (sel._refreshCustom) {
+    sel._refreshCustom();
+  } else {
+    initCustomDropdown(sel.id);
+  }
+}
+
+function getModelDisplayName(name) {
+  if (!name) return "";
+  const found = (MODELS_DATA || []).find(m => m.name === name);
+  return (found && found.display_name) || name;
+}
+
+async function initMatrixTab() {
+  if (!PROBES_DATA || PROBES_DATA.length === 0) {
+    try {
+      const res = await fetch("/api/probes");
+      PROBES_DATA = await res.json();
+    } catch (err) {
+      console.error("Failed to load probes:", err);
+    }
+  }
+  populateMatrixProbeSelect();
+  await loadProbeMatrixData(currentMatrixProbeId);
+}
+
+function populateMatrixProbeSelect() {
+  const sel = document.getElementById("matrix-probe-select");
+  if (!sel) return;
+  sel.innerHTML = buildProbeOptionsHtml(currentMatrixProbeId);
+  initCustomDropdown("matrix-probe-select");
+}
+
+async function onMatrixProbeChange() {
+  const sel = document.getElementById("matrix-probe-select");
+  if (!sel) return;
+  currentMatrixProbeId = sel.value;
+  await loadProbeMatrixData(currentMatrixProbeId);
+}
+
+async function loadProbeMatrixData(probeId) {
+  try {
+    const res = await fetch(`/api/probes/${probeId}/matrix`);
+    if (!res.ok) throw new Error("Failed to load probe matrix");
+    currentMatrixData = await res.json();
+
+    // Render KPI Cards
+    const kpiMdi = document.getElementById("matrix-kpi-mdi");
+    const kpiMean = document.getElementById("matrix-kpi-mean");
+    const kpiMedian = document.getElementById("matrix-kpi-median");
+    const kpiWin = document.getElementById("matrix-kpi-winrate");
+    const kpiBneck = document.getElementById("matrix-kpi-bottleneck");
+    const kpiInv = document.getElementById("matrix-kpi-inversions");
+
+    if (kpiMdi) {
+      const mdiVal = currentMatrixData.mdi !== undefined ? currentMatrixData.mdi : "--";
+      const tierVal = currentMatrixData.tier || "";
+      const tierColor = tierVal === "S" ? "text-purple-600 dark:text-purple-400" :
+                        (tierVal === "A" ? "text-emerald-600 dark:text-emerald-400" :
+                        (tierVal === "B" ? "text-sky-600 dark:text-sky-400" :
+                        (tierVal === "C" ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400")));
+      kpiMdi.innerHTML = `<span class="${tierColor}">${mdiVal}</span> <span class="text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 ${tierColor} ml-1">${tierVal}</span>`;
+    }
+
+    if (kpiMean) kpiMean.textContent = `+${(currentMatrixData.overall_avg_margin * 100).toFixed(1)}%`;
+    if (kpiMedian) kpiMedian.textContent = `+${(currentMatrixData.overall_median_margin * 100).toFixed(1)}%`;
+    if (kpiWin) kpiWin.textContent = Number(currentMatrixData.overall_win_rate).toFixed(2);
+    if (kpiBneck) {
+      const p = currentMatrixData.bottleneck_pair || [];
+      const m1 = getModelDisplayName(p[0]) || "--";
+      const m2 = getModelDisplayName(p[1]) || "--";
+      const val = (currentMatrixData.min_bottleneck_margin * 100).toFixed(1);
+      kpiBneck.innerHTML = `<span>${m1} vs ${m2}</span><span class="block text-[11px] font-normal text-slate-500 dark:text-slate-400 mt-0.5">(${val}%)</span>`;
+      kpiBneck.title = `${p[0]} vs ${p[1]} (${val}%)`;
+    }
+    if (kpiInv) kpiInv.textContent = `${currentMatrixData.inversions_count}`;
+
+    // Populate model select dropdowns A and B
+    populateMatrixModelSelectors();
+    renderFocusPairDetails();
+    renderMatrixHeatmapTable();
+  } catch (err) {
+    console.error("Error loading matrix data:", err);
+  }
+}
+
+function populateMatrixModelSelectors() {
+  if (!currentMatrixData || !currentMatrixData.models) return;
+  const selA = document.getElementById("matrix-model-a");
+  const selB = document.getElementById("matrix-model-b");
+  if (!selA || !selB) return;
+
+  const prevA = selA.value;
+  const prevB = selB.value;
+  selA.innerHTML = "";
+  selB.innerHTML = "";
+
+  currentMatrixData.models.forEach(m => {
+    const dName = getModelDisplayName(m);
+    const optA = document.createElement("option");
+    optA.value = m;
+    optA.textContent = `${dName} (${m})`;
+    selA.appendChild(optA);
+
+    const optB = document.createElement("option");
+    optB.value = m;
+    optB.textContent = `${dName} (${m})`;
+    selB.appendChild(optB);
+  });
+
+  const models = currentMatrixData.models;
+  let defaultA = models.find(m => m.includes("deepseek")) || models[0];
+  let defaultB = models.find(m => m.includes("gpt") || m.includes("openai")) || models[1] || models[0];
+
+  if (prevA && models.includes(prevA)) defaultA = prevA;
+  if (prevB && models.includes(prevB)) defaultB = prevB;
+
+  selA.value = defaultA;
+  selB.value = defaultB;
+
+  initCustomDropdown("matrix-model-a");
+  initCustomDropdown("matrix-model-b");
+}
+
+function renderFocusPairDetails() {
+  if (!currentMatrixData || !currentMatrixData.matrix) return;
+  const selA = document.getElementById("matrix-model-a");
+  const selB = document.getElementById("matrix-model-b");
+  if (!selA || !selB) return;
+
+  const mA = selA.value;
+  const mB = selB.value;
+  const pair = currentMatrixData.matrix?.[mA]?.[mB];
+
+  const nEl = document.getElementById("matrix-pair-samples");
+  const winEl = document.getElementById("focus-win-rate");
+  const medEl = document.getElementById("focus-median-delta");
+  const meanEl = document.getElementById("focus-mean-delta");
+
+  const q05El = document.getElementById("focus-q-p05");
+  const q25El = document.getElementById("focus-q-p25");
+  const q50El = document.getElementById("focus-q-p50");
+  const q75El = document.getElementById("focus-q-p75");
+  const q95El = document.getElementById("focus-q-p95");
+
+  const iqrEl = document.getElementById("focus-iqr-range");
+  const r90El = document.getElementById("focus-p05-p95-range");
+
+  if (!pair) {
+    if (mA === mB) {
+      if (winEl) winEl.textContent = "0.50";
+      if (medEl) medEl.textContent = "+0.0%";
+      if (meanEl) meanEl.textContent = "+0.0%";
+      [q05El, q25El, q50El, q75El, q95El].forEach(el => { if (el) el.textContent = "0.0%"; });
+      if (iqrEl) iqrEl.textContent = "[0.0%, 0.0%]";
+      if (r90El) r90El.textContent = "[0.0%, 0.0%]";
+    }
+    return;
+  }
+
+  if (nEl) nEl.textContent = `N=${pair.samples_count}`;
+  if (winEl) winEl.textContent = Number(pair.win_rate).toFixed(2);
+  if (medEl) medEl.textContent = `${pair.median_margin >= 0 ? "+" : ""}${(pair.median_margin * 100).toFixed(1)}%`;
+  if (meanEl) meanEl.textContent = `${pair.mean_margin >= 0 ? "+" : ""}${(pair.mean_margin * 100).toFixed(1)}%`;
+
+  const q = pair.quantiles || {};
+  if (q05El) q05El.textContent = `${q.p05 !== undefined ? (q.p05 * 100).toFixed(1) + "%" : "--"}`;
+  if (q25El) q25El.textContent = `${q.p25 !== undefined ? (q.p25 * 100).toFixed(1) + "%" : "--"}`;
+  if (q50El) q50El.textContent = `${q.p50 !== undefined ? (q.p50 * 100).toFixed(1) + "%" : "--"}`;
+  if (q75El) q75El.textContent = `${q.p75 !== undefined ? (q.p75 * 100).toFixed(1) + "%" : "--"}`;
+  if (q95El) q95El.textContent = `${q.p95 !== undefined ? (q.p95 * 100).toFixed(1) + "%" : "--"}`;
+
+  if (iqrEl) {
+    iqrEl.textContent = pair.iqr_range ? `[${(pair.iqr_range[0] * 100).toFixed(1)}%, ${(pair.iqr_range[1] * 100).toFixed(1)}%]` : "--";
+  }
+  if (r90El) {
+    r90El.textContent = pair.p05_p95_range ? `[${(pair.p05_p95_range[0] * 100).toFixed(1)}%, ${(pair.p05_p95_range[1] * 100).toFixed(1)}%]` : "--";
+  }
+}
+
+function selectPairFromTable(mA, mB) {
+  const selA = document.getElementById("matrix-model-a");
+  const selB = document.getElementById("matrix-model-b");
+  if (selA && selB) {
+    selA.value = mA;
+    selB.value = mB;
+    refreshCustomDropdown("matrix-model-a");
+    refreshCustomDropdown("matrix-model-b");
+    renderFocusPairDetails();
+    selA.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+function renderMatrixHeatmapTable() {
+  const table = document.getElementById("matrix-heatmap-table");
+  if (!table || !currentMatrixData || !currentMatrixData.models) return;
+
+  const models = currentMatrixData.models;
+  const matrix = currentMatrixData.matrix;
+
+  // Header
+  let html = `<thead class="bg-slate-100 dark:bg-slate-800/80 text-[11px] sticky top-0 z-10">`;
+  html += `<tr>`;
+  html += `<th class="p-2 text-left font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 sticky left-0 bg-slate-100 dark:bg-slate-800">True \\ Comp</th>`;
+  models.forEach(m => {
+    const shortName = getModelDisplayName(m).split(" ")[0];
+    html += `<th class="p-1.5 text-center font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 min-w-[70px]" title="${m}">${shortName}</th>`;
+  });
+  html += `</tr></thead>`;
+
+  // Body
+  html += `<tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-[11px]">`;
+  models.forEach(mA => {
+    const dNameA = getModelDisplayName(mA).split(" ")[0];
+    html += `<tr>`;
+    html += `<td class="p-2 font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 sticky left-0 bg-slate-50 dark:bg-slate-900 truncate max-w-[120px]" title="${mA}">${dNameA}</td>`;
+
+    models.forEach(mB => {
+      if (mA === mB) {
+        html += `<td class="p-1.5 text-center bg-slate-100/60 dark:bg-slate-800/30 text-slate-400 border border-slate-200 dark:border-slate-800">-</td>`;
+      } else {
+        const pair = matrix?.[mA]?.[mB];
+        if (!pair) {
+          html += `<td class="p-1.5 text-center text-slate-400 border border-slate-200 dark:border-slate-800">--</td>`;
+        } else {
+          const med = pair.median_margin;
+          const win = pair.win_rate;
+          let bgClass = "bg-white dark:bg-slate-900";
+
+          if (med < 0) {
+            bgClass = "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold";
+          } else if (win >= 0.90) {
+            bgClass = "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold";
+          } else if (win >= 0.75) {
+            bgClass = "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300";
+          } else {
+            bgClass = "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300";
+          }
+
+          const medPct = (med * 100).toFixed(0);
+          const winDec = Number(win).toFixed(2);
+          html += `<td onclick="selectPairFromTable('${mA}', '${mB}')" class="p-1.5 text-center cursor-pointer hover:ring-2 hover:ring-indigo-500 border border-slate-200 dark:border-slate-800 transition ${bgClass}" title="${mA} vs ${mB}&#10;Median: ${(med * 100).toFixed(1)}%&#10;Win Rate: ${winDec}&#10;50% Spread: [${(pair.iqr_range[0] * 100).toFixed(1)}%, ${(pair.iqr_range[1] * 100).toFixed(1)}%]&#10;90% Spread: [${(pair.p05_p95_range[0] * 100).toFixed(1)}%, ${(pair.p05_p95_range[1] * 100).toFixed(1)}%]">
+            <span class="block">${med >= 0 ? "+" : ""}${medPct}%</span>
+            <span class="block text-[10px] opacity-75 font-mono">${winDec}</span>
+          </td>`;
+        }
+      }
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody>`;
+
+  table.innerHTML = html;
+}
+
+async function runSingleProbeTest() {
+  const inputEl = document.getElementById("matrix-live-input");
+  const rawText = inputEl ? inputEl.value.trim() : "";
+  if (!rawText) {
+    alert(t("alert_no_input"));
+    if (inputEl) inputEl.focus();
+    return;
+  }
+
+  const selA = document.getElementById("matrix-model-a");
+  const selB = document.getElementById("matrix-model-b");
+  const mA = selA ? selA.value : "";
+  const mB = selB ? selB.value : "";
+
+  try {
+    const res = await fetch("/api/evaluate/single-probe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        probe_id: currentMatrixProbeId,
+        raw_text: rawText,
+        model_A: mA,
+        model_B: mB
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Single probe evaluation failed");
+    }
+
+    const data = await res.json();
+    const resultCard = document.getElementById("matrix-live-result");
+    if (!resultCard) return;
+    resultCard.classList.remove("hidden");
+
+    const topModelEl = document.getElementById("matrix-live-top-model");
+    const paEl = document.getElementById("live-pa");
+    const pbEl = document.getElementById("live-pb");
+    const deltaEl = document.getElementById("live-delta");
+    const outlierEl = document.getElementById("live-outlier-tag");
+
+    if (topModelEl) {
+      topModelEl.textContent = getModelDisplayName(data.top_model);
+      topModelEl.title = data.top_model;
+    }
+
+    const diag = data.pairwise_diagnostic;
+    if (diag) {
+      if (paEl) paEl.textContent = `${(diag.pA * 100).toFixed(1)}%`;
+      if (pbEl) pbEl.textContent = `${(diag.pB * 100).toFixed(1)}%`;
+      const sign = diag.instant_delta >= 0 ? "+" : "";
+      if (deltaEl) deltaEl.textContent = `${sign}${(diag.instant_delta * 100).toFixed(1)}%`;
+
+      if (outlierEl) {
+        const d = diag.instant_delta;
+        const iqr = diag.historical_iqr_50 || [];
+        if (diag.is_outlier) {
+          outlierEl.textContent = currentLang === "en" ? "⚠️ Outside 90% Spread (Outlier)" : "⚠️ 落在 90% 散布区间外 (离群样本)";
+          outlierEl.className = "text-[11px] font-semibold text-rose-600 dark:text-rose-400";
+        } else if (iqr.length === 2 && d >= iqr[0] && d <= iqr[1]) {
+          outlierEl.textContent = currentLang === "en" ? "✓ Within 50% Spread" : "✓ 处于 50% 散布区间内";
+          outlierEl.className = "text-[11px] font-semibold text-emerald-600 dark:text-emerald-400";
+        } else {
+          outlierEl.textContent = currentLang === "en" ? "✓ Within 90% Spread" : "✓ 处于 90% 散布区间内";
+          outlierEl.className = "text-[11px] font-semibold text-sky-600 dark:text-sky-400";
+        }
+      }
+    }
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+// Expose matrix lab functions to window
+window.initMatrixTab = initMatrixTab;
+window.onMatrixProbeChange = onMatrixProbeChange;
+window.renderFocusPairDetails = renderFocusPairDetails;
+window.selectPairFromTable = selectPairFromTable;
+window.runSingleProbeTest = runSingleProbeTest;
+
 
 

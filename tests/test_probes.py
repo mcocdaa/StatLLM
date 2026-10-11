@@ -134,3 +134,76 @@ def test_arr_bit8_parsing():
     assert res["traits"]["popcount"] == 4
     assert res["traits"]["alternations"] == 5
 
+
+def test_arr_pseudo_cvc5_parsing():
+    p = get_probe("arr_pseudo_cvc5")
+    assert p is not None
+
+    res = p.parse('["bem", "lod", "kiv", "zug", "tep"]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["bem", "lod", "kiv", "zug", "tep"]
+    assert res["traits"]["has_duplicates"] is False
+    assert res["traits"]["first_token"] == "bem"
+    assert res["traits"]["vowel_signature"] == "eoiue"
+
+    # With markdown
+    res2 = p.parse('```json\n["zab", "fep", "lut", "kox", "yim"]\n```')
+    assert res2["is_valid"] is True
+    assert res2["strictly_complied"] is False
+    assert res2["traits"]["first_token"] == "zab"
+
+    # Duplicates detection
+    res3 = p.parse('["bem", "bem", "kiv", "zug", "tep"]')
+    assert res3["traits"]["has_duplicates"] is True
+
+    # Invalid length
+    res4 = p.parse('["bem", "lod"]')
+    assert res4["is_valid"] is False
+
+
+def test_arr_int_big5_parsing():
+    p = get_probe("arr_int_big5")
+    assert p is not None
+
+    res = p.parse('[48217, 3906, 71452, 15389, 62730]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["48217", "3906", "71452", "15389", "62730"]
+    assert res["traits"]["has_duplicates"] is False
+    assert res["traits"]["is_sorted"] is False
+    assert res["traits"]["first_token"] == "48217"
+    assert res["traits"]["first_digit_sig"] == "43716"
+
+    # Sorted detection
+    res2 = p.parse('[1200, 3400, 5600, 7800, 9900]')
+    assert res2["traits"]["is_sorted"] is True
+
+    # Duplicates detection
+    res3 = p.parse('[5000, 5000, 7000, 8000, 9000]')
+    assert res3["traits"]["has_duplicates"] is True
+
+    # Invalid range or length
+    res4 = p.parse('[100, 200]')
+    assert res4["is_valid"] is False
+
+
+def test_arr_grid_walk6_parsing():
+    p = get_probe("arr_grid_walk6")
+    assert p is not None
+
+    res = p.parse('["U", "R", "R", "D", "L", "U"]')
+    assert res["is_valid"] is True
+    assert res["parsed_tokens"] == ["U", "R", "R", "D", "L", "U"]
+    assert res["traits"]["first_token"] == "U"
+    assert res["traits"]["displacement_sq"] == 2
+    assert res["traits"]["backtracks"] == 0
+
+    # Backtracks test: U followed by D
+    res2 = p.parse('["U", "D", "L", "R", "U", "D"]')
+    assert res2["traits"]["displacement_sq"] == 0
+    assert res2["traits"]["backtracks"] == 3
+
+    # Invalid direction
+    res3 = p.parse('["U", "D", "X", "R", "U", "D"]')
+    assert res3["is_valid"] is False
+
+

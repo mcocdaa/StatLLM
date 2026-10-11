@@ -81,29 +81,29 @@ def audit():
                 })
 
         # Add multiple probe rows with English outputs
-        print("3. Adding English probe rows (Int, Color, RPS)...")
+        print("3. Adding English probe rows (Int, Letter, Prime)...")
         # Row 1: arr_int5
         page.fill(".row-raw-text", "[17, 64, 92, 8, 41]")
         
-        # Click Add Record for arr_color5
+        # Click Add Record for arr_letter5
         page.click("button:has-text('Add Probe Record')")
         time.sleep(0.3)
         rows = page.query_selector_all(".submission-row")
         if len(rows) >= 2:
             select2 = rows[1].query_selector(".row-probe-select")
-            select2.select_option("arr_color5")
+            select2.select_option("arr_letter5")
             time.sleep(0.3)
-            rows[1].query_selector(".row-raw-text").fill('["Red", "Blue", "Green", "Red", "Purple"]')
+            rows[1].query_selector(".row-raw-text").fill('["K", "W", "B", "R", "M"]')
 
-        # Click Add Record for arr_rps5
+        # Click Add Record for arr_prime5
         page.click("button:has-text('Add Probe Record')")
         time.sleep(0.3)
         rows = page.query_selector_all(".submission-row")
         if len(rows) >= 3:
             select3 = rows[2].query_selector(".row-probe-select")
-            select3.select_option("arr_rps5")
+            select3.select_option("arr_prime5")
             time.sleep(0.3)
-            rows[2].query_selector(".row-raw-text").fill('["Rock", "Scissors", "Paper", "Rock", "Scissors"]')
+            rows[2].query_selector(".row-raw-text").fill('[11, 23, 47, 71, 89]')
 
         page.screenshot(path="screenshots/en_tab_lab_inputs.png", full_page=True)
 
@@ -114,6 +114,13 @@ def audit():
         time.sleep(1)
         page.screenshot(path="screenshots/en_tab_lab_evaluated.png", full_page=True)
         check_elements("Tab 1 - Lab (Evaluated)")
+
+        # Tab: Single-Probe Lab
+        print("4b. Checking Tab - Single-Probe Lab...")
+        page.click("#tab-matrix-btn")
+        time.sleep(1)
+        page.screenshot(path="screenshots/en_tab_matrix.png", full_page=True)
+        check_elements("Tab - Single-Probe Lab")
 
         # Tab 2: Theory
         print("5. Checking Tab 2 - Theory...")

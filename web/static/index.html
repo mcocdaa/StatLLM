@@ -56,6 +56,9 @@
         <button id="tab-lab-btn" class="nav-tab active px-4 py-1.5 rounded-lg text-sm font-semibold transition cursor-pointer" onclick="switchToTab('tab-lab')" data-i18n="nav_lab">
           模型鉴定
         </button>
+        <button id="tab-matrix-btn" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition cursor-pointer" onclick="switchToTab('tab-matrix')" data-i18n="nav_matrix">
+          单题透视
+        </button>
         <button id="tab-theory-btn" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition cursor-pointer" onclick="switchToTab('tab-theory')" data-i18n="nav_theory">
           统计原理
         </button>
@@ -311,14 +314,212 @@
 
     </div>
 
+    <!-- ==================== TAB: PROBE DISCRIMINATION LAB (单题透视) ==================== -->
+    <div id="tab-matrix" class="tab-content hidden space-y-7 scroll-mt-24">
+      
+      <!-- Academic Header Banner -->
+      <div class="border-b border-slate-200 dark:border-slate-800/80 pb-5">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white" data-i18n="matrix_title">
+          单题辨识力与经验分位数透视实验室
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400 text-sm mt-1 max-w-4xl leading-relaxed" data-i18n="matrix_subtitle">
+          针对单一题目，深入透视 15×15 两两概率优势矩阵、五档经验分位数（P05, P25, P50, P75, P95）与核心盲区混淆对。
+        </p>
+      </div>
+
+      <!-- Dedicated Styled Probe Selection Control Bar -->
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 border border-indigo-200/80 dark:border-indigo-800/80 shadow-2xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          </div>
+          <div>
+            <label class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 block" data-i18n="matrix_select_probe">探针题目透视选择：</label>
+            <span class="text-xs text-slate-500 dark:text-slate-400" data-i18n="matrix_select_probe_tip">可自由切换全量探针（支持高区分度推荐题与实验探索题）</span>
+          </div>
+        </div>
+
+        <div class="relative w-full md:w-auto md:min-w-[360px]">
+          <select id="matrix-probe-select" onchange="onMatrixProbeChange()" class="sr-only">
+            <!-- Dynamically populated with optgroups -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Overview KPI Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium" data-i18n="matrix_kpi_mdi">区分度指数 (MDI)</span>
+          <div id="matrix-kpi-mdi" class="text-xl sm:text-2xl font-bold font-mono text-purple-600 dark:text-purple-400 mt-1 block">--</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium" data-i18n="matrix_kpi_mean">全局平均概率差</span>
+          <span id="matrix-kpi-mean" class="text-xl sm:text-2xl font-bold font-mono text-sky-600 dark:text-sky-400 mt-1 block">--</span>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium" data-i18n="matrix_kpi_median">全局中位数</span>
+          <span id="matrix-kpi-median" class="text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">--</span>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium" data-i18n="matrix_kpi_winrate">全局平均胜率</span>
+          <span id="matrix-kpi-winrate" class="text-xl sm:text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-1 block">--</span>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium" data-i18n="matrix_kpi_bottleneck">最难相持瓶颈对</span>
+          <div id="matrix-kpi-bottleneck" class="text-xs sm:text-sm font-bold font-mono text-amber-600 dark:text-amber-400 mt-1 break-words">--</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium" data-i18n="matrix_kpi_inversions">倒挂对数 (&lt;0)</span>
+          <span id="matrix-kpi-inversions" class="text-xl sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-1 block">0</span>
+        </div>
+      </div>
+
+      <!-- Two-Column Section: Focus Pair Quantiles vs Live Single-Probe Tester -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Focus Pair Quantiles (7 cols) -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+              <span data-i18n="matrix_focus_title">两两模型分位数透视与对比</span>
+            </h3>
+            <span id="matrix-pair-samples" class="text-xs font-mono text-slate-500 dark:text-slate-400">N=43</span>
+          </div>
+
+          <!-- Model Selectors with custom styled dropdowns -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400" data-i18n="matrix_model_a">真实生成模型 (Model A):</label>
+              <div class="relative">
+                <select id="matrix-model-a" onchange="renderFocusPairDetails()" class="sr-only"></select>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400" data-i18n="matrix_model_b">对比候选竞品 (Model B):</label>
+              <div class="relative">
+                <select id="matrix-model-b" onchange="renderFocusPairDetails()" class="sr-only"></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Badges: Win Rate, Mean, Median -->
+          <div class="grid grid-cols-3 gap-3 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono">
+            <div>
+              <span class="text-xs text-slate-500 dark:text-slate-400 block" data-i18n="matrix_win_rate_label">胜率: </span>
+              <strong id="focus-win-rate" class="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">--</strong>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 dark:text-slate-400 block" data-i18n="matrix_median_delta_label">中位数 (P50): </span>
+              <strong id="focus-median-delta" class="text-base sm:text-lg font-bold text-sky-600 dark:text-sky-400">--%</strong>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 dark:text-slate-400 block" data-i18n="matrix_mean_delta_label">概率差均值: </span>
+              <strong id="focus-mean-delta" class="text-base sm:text-lg font-bold text-indigo-600 dark:text-indigo-400">--%</strong>
+            </div>
+          </div>
+
+          <!-- 5-Level Quantiles Ladder -->
+          <div class="space-y-2">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 block font-mono" data-i18n="matrix_ladder_label">经验分位数阶梯 (Empirical Quantiles):</span>
+            <div class="grid grid-cols-5 gap-2 text-center font-mono text-xs">
+              <div class="bg-slate-100 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                <span class="text-slate-500 dark:text-slate-400 block text-[11px]" data-i18n="matrix_q_p05">P05 (下尾 5%)</span>
+                <span id="focus-q-p05" class="font-bold text-slate-800 dark:text-slate-200">--%</span>
+              </div>
+              <div class="bg-sky-50 dark:bg-sky-950/40 p-2 rounded-lg border border-sky-200 dark:border-sky-800">
+                <span class="text-sky-600 dark:text-sky-400 block text-[11px]" data-i18n="matrix_q_p25">P25 (下四分位)</span>
+                <span id="focus-q-p25" class="font-bold text-sky-700 dark:text-sky-300">--%</span>
+              </div>
+              <div class="bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-lg border border-emerald-200 dark:border-emerald-800 shadow-2xs">
+                <span class="text-emerald-600 dark:text-emerald-400 block text-[11px] font-bold" data-i18n="matrix_q_p50">P50 (中位数)</span>
+                <span id="focus-q-p50" class="font-bold text-emerald-700 dark:text-emerald-300">--%</span>
+              </div>
+              <div class="bg-sky-50 dark:bg-sky-950/40 p-2 rounded-lg border border-sky-200 dark:border-sky-800">
+                <span class="text-sky-600 dark:text-sky-400 block text-[11px]" data-i18n="matrix_q_p75">P75 (上四分位)</span>
+                <span id="focus-q-p75" class="font-bold text-sky-700 dark:text-sky-300">--%</span>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                <span class="text-slate-500 dark:text-slate-400 block text-[11px]" data-i18n="matrix_q_p95">P95 (上尾 95%)</span>
+                <span id="focus-q-p95" class="font-bold text-slate-800 dark:text-slate-200">--%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spread Ranges Badges (Unified Spread Nomenclature) -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+            <div><span data-i18n="matrix_iqr_label">50% 散布区间 (P25 ~ P75): </span><strong id="focus-iqr-range" class="text-sky-600 dark:text-sky-400 font-bold">--</strong></div>
+            <div><span data-i18n="matrix_range90_label">90% 散布区间 (P05 ~ P95): </span><strong id="focus-p05-p95-range" class="text-indigo-600 dark:text-indigo-400 font-bold">--</strong></div>
+          </div>
+        </div>
+
+        <!-- Right Column: Live Single-Probe Tester (5 cols) -->
+        <div class="lg:col-span-5 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+          <div class="border-b border-slate-200 dark:border-slate-800/80 pb-3">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span data-i18n="matrix_live_title">单题单次输入实测器</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="matrix_live_desc">
+              输入该题目的一条实际回答文本，系统将计算其实时概率差并自动比对历史分位数区间：
+            </p>
+          </div>
+
+          <div>
+            <textarea id="matrix-live-input" rows="3" placeholder="[41, 51, 41, 26, 49]" data-i18n-placeholder="matrix_live_input_placeholder" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 text-xs sm:text-sm font-mono text-slate-800 dark:text-slate-200"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button onclick="runSingleProbeTest()" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+              <span data-i18n="matrix_live_btn">单题即时诊断</span>
+            </button>
+          </div>
+
+          <!-- Live Output Card -->
+          <div id="matrix-live-result" class="hidden bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 space-y-2 text-xs font-mono">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
+              <strong class="text-slate-800 dark:text-slate-200" data-i18n="matrix_live_result_title">单题诊断结果：</strong>
+              <span id="matrix-live-top-model" class="px-2 py-0.5 rounded text-[11px] font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800">--</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-400">
+              <div><span data-i18n="matrix_live_pa">模型 A 瞬时后验: </span><strong id="live-pa" class="text-slate-800 dark:text-slate-200">--%</strong></div>
+              <div><span data-i18n="matrix_live_pb">模型 B 瞬时后验: </span><strong id="live-pb" class="text-slate-800 dark:text-slate-200">--%</strong></div>
+            </div>
+            <div class="pt-1 flex items-center justify-between">
+              <span><span data-i18n="matrix_live_delta">瞬时概率差 Δ: </span><strong id="live-delta" class="text-sm font-bold text-sky-600 dark:text-sky-400">--%</strong></span>
+              <span id="live-outlier-tag" class="text-[11px] font-semibold"></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Full 15x15 Pairwise Matrix Table -->
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+            <span data-i18n="matrix_table_title">15×15 全量两两概率优势矩阵表</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="matrix_table_desc">
+            行代表真实生成模型（真值），列代表比较模型。单元格数字为 [中位数 (%) / 胜率 (小数)]。点击任意单元格可快速在上方透视该对模型的五档分位数详情。
+          </p>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg max-h-[500px]">
+          <table id="matrix-heatmap-table" class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs font-mono">
+            <!-- Dynamically populated via JS -->
+          </table>
+        </div>
+      </div>
+
+    </div>
+
     <!-- ==================== TAB 2: METHODOLOGY (学术原理) ==================== -->
     <div id="tab-theory" class="tab-content hidden space-y-8 max-w-5xl mx-auto">
       
       <!-- Paper Title Header -->
-      <div class="border-b border-slate-200 dark:border-slate-800 pb-5 space-y-2">
-        <div class="inline-block px-3 py-1 rounded text-xs font-mono font-medium bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800" data-i18n="theory_badge">
-          METHODOLOGY & STATISTICAL FORMULATION
-        </div>
+      <div class="border-b border-slate-200 dark:border-slate-800 pb-5 space-y-1">
         <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight" data-i18n="theory_title">
           StatLLM: 基于离散阵列探针与贝叶斯似然的大语言模型黑盒指纹归因
         </h2>

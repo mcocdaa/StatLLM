@@ -15,6 +15,7 @@ from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
 from statllm.probes import list_probes, get_probe
 from statllm.archive import export_archive_bundle, import_archive_bundle
+from statllm.matrix import get_probe_matrix, rank_probes_by_discrimination
 
 
 
@@ -28,6 +29,14 @@ class EvaluateRequest(BaseModel):
     consent_to_collect: bool = False
     claimed_model: Optional[str] = None
     positional_lambda: Optional[float] = Field(0.5, ge=0.0, le=1.0)
+
+
+class SingleProbeTestRequest(BaseModel):
+    probe_id: str
+    raw_text: str
+    model_A: Optional[str] = None
+    model_B: Optional[str] = None
+    positional_lambda: Optional[float] = Field(0.25, ge=0.0, le=1.0)
 
 
 class ContributeRequest(BaseModel):
@@ -79,6 +88,81 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     @app.get("/api/cluster")
     def get_cluster():
         return cluster_projector.get_cluster_data()
+
+    @app.get("/api/probes/ranking")
+    def get_probes_ranking_endpoint():
+        try:
+            return rank_probes_by_discrimination(db, evaluator)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/probes/{probe_id}/matrix")
+    def get_probe_matrix_endpoint(probe_id: str, force_refresh: bool = False):
+        try:
+            return get_probe_matrix(db, evaluator, probe_id, force_refresh=force_refresh)
+        except ValueError as ve:
+            raise HTTPException(status_code=404, detail=str(ve))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/evaluate/single-probe")
+    def evaluate_single_probe(req: SingleProbeTestRequest):
+        probe = get_probe(req.probe_id)
+        if not probe:
+            raise HTTPException(status_code=400, detail=f"Unknown probe ID: {req.probe_id}")
+
+        lam = req.positional_lambda if req.positional_lambda is not None else 0.25
+        try:
+            eval_res = evaluator.evaluate(
+                [{"probe_id": req.probe_id, "raw_text": req.raw_text}],
+                positional_lambda=lam,
+                n_boot=300
+            )
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        parsed = eval_res["parsed_submissions"][0] if eval_res["parsed_submissions"] else {}
+        posteriors = eval_res["posteriors"]
+
+        pairwise_diagnostic = None
+        if req.model_A and req.model_B:
+            mA, mB = req.model_A.strip(), req.model_B.strip()
+            pA = posteriors.get(mA, 0.0)
+            pB = posteriors.get(mB, 0.0)
+            delta = pA - pB
+
+            # Look up baseline reference matrix
+            try:
+                hist_matrix = get_probe_matrix(db, evaluator, req.probe_id)
+                pair_ref = hist_matrix.get("matrix", {}).get(mA, {}).get(mB, {})
+            except Exception:
+                pair_ref = {}
+
+            q_range = pair_ref.get("p05_p95_range", pair_ref.get("ci_95", []))
+            pairwise_diagnostic = {
+                "model_A": mA,
+                "model_B": mB,
+                "pA": round(float(pA), 4),
+                "pB": round(float(pB), 4),
+                "instant_delta": round(float(delta), 4),
+                "historical_mean_delta": pair_ref.get("mean_margin"),
+                "historical_median_delta": pair_ref.get("median_margin"),
+                "historical_quantiles": pair_ref.get("quantiles"),
+                "historical_quantile_range_90": q_range,
+                "historical_iqr_50": pair_ref.get("iqr_range"),
+                "historical_win_rate": pair_ref.get("win_rate"),
+                "is_outlier": (delta < q_range[0] or delta > q_range[1]) if len(q_range) == 2 else False
+            }
+
+        return {
+            "probe_id": req.probe_id,
+            "is_valid": parsed.get("is_valid", False),
+            "parsed_tokens": parsed.get("parsed_tokens", []),
+            "top_model": eval_res.get("top_model"),
+            "posteriors": posteriors,
+            "fitness": eval_res.get("fitness", {}),
+            "pairwise_diagnostic": pairwise_diagnostic
+        }
 
     @app.post("/api/evaluate")
     def evaluate(req: EvaluateRequest):

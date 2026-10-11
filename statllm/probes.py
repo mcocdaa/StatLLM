@@ -568,18 +568,18 @@ class PrimeArrayProbe(ArrayProbe):
         super().__init__(
             id="arr_prime5",
             title="Q3: 5个100以内的质数数组",
-            prompt="在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+            prompt="在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组。仅输出中括号包裹数字的JSON数组本身，严禁任何多余文字、示例或markdown代码块。",
             category="prime_array",
-            description="从100以内全部25个离散质数中测量模型的吸引子偏好（如7、17、23、37与合数形态回避）。",
+            description="从100以内全部25个离散质数中测量模型的无偏随机采样偏好与质数吸引子分布。",
             expected_length=5,
             element_vocab_size=26,
             allowed_elements=[str(p) for p in self.PRIMES_UNDER_100],
             prompt_variants=[
-                "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组，例如[7, 23, 41, 73, 89]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-                "请从小于100的所有素数中任意抽取5个，以JSON列表格式返回，例如[3, 17, 31, 59, 83]。只输出JSON数组本身。",
-                "随便选5个100以内的质数排成一个JSON数组，格式如[11, 29, 47, 71, 97]，不要写代码块或附加文字。",
-                "Please randomly pick 5 prime numbers under 100 and output a JSON array, e.g. [7, 23, 41, 73, 89]. Output only the JSON array, with no other text or markdown codeblocks.",
-                "Sample 5 primes uniformly at random from the 25 primes below 100. Return as a JSON array like [5, 13, 37, 61, 79]. Strictly JSON only."
+                "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组。仅输出中括号包裹数字的JSON数组本身，严禁任何多余文字、示例或markdown代码块。",
+                "请从小于100的所有素数中任意抽取5个，以JSON列表格式返回。只输出包含5个质数整数的JSON数组，不要输出任何解释。",
+                "随便选5个100以内的质数排成一个JSON数组，纯JSON格式，严禁出现代码块标记或额外说明。",
+                "Please randomly pick 5 prime numbers under 100 and output a JSON array of 5 integers. Output only the JSON array, with no other text, examples, or markdown codeblocks.",
+                "Sample 5 primes uniformly at random from the 25 primes below 100. Return strictly as a JSON array of 5 integers. JSON only."
             ]
         )
 
@@ -689,25 +689,245 @@ class BitArrayProbe(ArrayProbe):
         }
 
 
-# Global Probe Registry (Ordered by Empirical Discriminative Power & Information Gain)
+class PseudoCVCArrayProbe(ArrayProbe):
+    """
+    Q2: 5 Pseudo-Words (CVC) Array.
+    Measures: Subword BPE phonotactic transition priors, consonant/vowel entropy, duplicate avoidance.
+    """
+    def __init__(self):
+        super().__init__(
+            id="arr_pseudo_cvc5",
+            title="5个3字母自然发音伪词数组",
+            prompt="请随机生成5个由3个英文字母组成且符合自然拼读规则但实际不存在的英文伪单词（结构必须为：辅音+元音+辅音），以全小写JSON数组格式直接输出。严禁任何多余文字或markdown代码块。",
+            category="phonotactic_array",
+            description="利用辅音-元音-辅音(CVC)发音三元组检测各模型底层BPE子词马尔可夫转移偏置。",
+            expected_length=5,
+            element_vocab_size=2205,
+            prompt_variants=[
+                "请随机生成5个由3个英文字母组成且符合自然拼读规则但实际不存在的英文伪单词（结构必须为：辅音+元音+辅音），以全小写JSON数组格式直接输出。严禁任何多余文字或markdown代码块。",
+                "Generate a JSON array of 5 pronounceable, non-existent English pseudo-words of exactly 3 letters (consonant-vowel-consonant structure). Output JSON array only.",
+                "帮我生成5个符合英文发音规律的3字母无意义假词（CVC结构），以全小写JSON数组给出，严禁包含任何说明文字。"
+            ]
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr or not isinstance(arr, list):
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "first_token": "INVALID", "vowel_signature": ""}
+            }
+
+        tokens = []
+        for item in arr:
+            s = str(item).strip().lower()
+            s = re.sub(r"[^a-z]", "", s)
+            if len(s) == 3:
+                tokens.append(s)
+            elif 2 <= len(s) <= 4:
+                tokens.append(s[:3])
+            else:
+                tokens.append("INVALID")
+
+        is_valid = len(tokens) == self.expected_length and "INVALID" not in tokens
+        vowels = set("aeiou")
+        v_sig = "".join([t[1] if len(t) == 3 and t[1] in vowels else "?" for t in tokens]) if is_valid else ""
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": len(tokens) != len(set(tokens)) if is_valid else False,
+                "first_token": tokens[0] if tokens else "INVALID",
+                "vowel_signature": v_sig
+            }
+        }
+
+
+class BigIntArrayProbe(ArrayProbe):
+    """
+    Q3: 5 Large Integers (1000~99999) Array.
+    Measures: Tokenizer multi-digit slicing boundaries, Benford's Law first-digit collapse, sort order.
+    """
+    def __init__(self):
+        super().__init__(
+            id="arr_int_big5",
+            title="5个1000~99999跨数量级大整数数组",
+            prompt="请在1000到99999之间完全随机挑选5个互不相同的正整数，以JSON数组格式直接输出。严禁任何多余文字、说明或markdown代码块。",
+            category="numeric_array",
+            description="检测模型多位数值切分碎裂模式、首位本福特法则坍缩与跨数量级分布方差。",
+            expected_length=5,
+            element_vocab_size=10000,
+            prompt_variants=[
+                "请在1000到99999之间完全随机挑选5个互不相同的正整数，以JSON数组格式直接输出。严禁任何多余文字、说明或markdown代码块。",
+                "Generate a JSON array of 5 distinct random integers between 1000 and 99999. Strict constraint: Output only the JSON array, no markdown or text.",
+                "随机给出5个在1000至99999区间内的不同整数，以JSON数组格式输出，严禁任何额外解释。"
+            ]
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr or not isinstance(arr, list):
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "is_sorted": False, "first_token": "INVALID", "first_digit_sig": ""}
+            }
+
+        tokens = []
+        for item in arr:
+            s = str(item).strip()
+            clean_digits = re.sub(r"[^\d]", "", s)
+            if clean_digits:
+                val = int(clean_digits)
+                if 1000 <= val <= 99999:
+                    tokens.append(str(val))
+                else:
+                    tokens.append(str(val))
+            else:
+                tokens.append("INVALID")
+
+        is_valid = len(tokens) == self.expected_length and "INVALID" not in tokens
+        f_digits = "".join([t[0] for t in tokens if t != "INVALID"]) if is_valid else ""
+
+        is_sorted = False
+        if is_valid:
+            try:
+                nums = [int(t) for t in tokens]
+                is_sorted = (nums == sorted(nums)) or (nums == sorted(nums, reverse=True))
+            except Exception:
+                pass
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": len(tokens) != len(set(tokens)) if is_valid else False,
+                "is_sorted": is_sorted,
+                "first_token": tokens[0] if tokens else "INVALID",
+                "first_digit_sig": f_digits
+            }
+        }
+
+
+class GridWalkArrayProbe(ArrayProbe):
+    """
+    Q4: 6-Step 2D Random Walk Array.
+    Measures: Autoregressive geometric symmetry, origin return rate (displacement variance), backtrack penalty.
+    """
+    def __init__(self):
+        super().__init__(
+            id="arr_grid_walk6",
+            title="6步二维网格随机游走路径",
+            prompt="从坐标原点出发进行6步独立随机游走，每步仅在上(U)、下(D)、左(L)、右(R)中独立随机选择一个大写方向。以包含这6个字符的JSON数组直接输出，严禁任何多余文字或markdown代码块。",
+            category="spatial_array",
+            description="检测模型在二维平面移动决策中的长程自回归对称性、原点闭合偏好与回退率。",
+            expected_length=6,
+            element_vocab_size=4,
+            allowed_elements=["U", "D", "L", "R"],
+            prompt_variants=[
+                "从坐标原点出发进行6步独立随机游走，每步仅在上(U)、下(D)、左(L)、右(R)中独立随机选择一个大写方向。以包含这6个字符的JSON数组直接输出，严禁任何多余文字或markdown代码块。",
+                "Simulate a 6-step random walk from origin (0,0). Each step randomly choose from ['U', 'D', 'L', 'R']. Output a JSON array of 6 directional strings. Output JSON only.",
+                "请给出包含6次独立随机方向（U, D, L, R）的JSON数组，例如模拟网格随机移动。仅输出JSON列表。"
+            ]
+        )
+
+    def parse(self, raw_text: str) -> Dict[str, Any]:
+        text = raw_text.strip()
+        strictly_complied = text.startswith("[") and text.endswith("]") and "```" not in text
+        arr = _extract_json_array(text)
+
+        if not arr or not isinstance(arr, list):
+            return {
+                "parsed_tokens": ["INVALID"],
+                "is_valid": False,
+                "strictly_complied": False,
+                "traits": {"has_duplicates": False, "displacement_sq": 0, "backtracks": 0, "first_token": "INVALID"}
+            }
+
+        valid_dirs = {"U", "D", "L", "R"}
+        tokens = []
+        for item in arr:
+            s = str(item).strip().upper()
+            if s in valid_dirs:
+                tokens.append(s)
+            elif len(s) == 1 and s.upper() in valid_dirs:
+                tokens.append(s.upper())
+            else:
+                tokens.append("INVALID")
+
+        is_valid = len(tokens) == self.expected_length and "INVALID" not in tokens
+
+        dx, dy = 0, 0
+        backtracks = 0
+        opposites = {("U", "D"), ("D", "U"), ("L", "R"), ("R", "L")}
+        if is_valid:
+            for i, t in enumerate(tokens):
+                if t == "U": dy += 1
+                elif t == "D": dy -= 1
+                elif t == "L": dx -= 1
+                elif t == "R": dx += 1
+
+                if i > 0 and (tokens[i-1], t) in opposites:
+                    backtracks += 1
+
+        disp_sq = dx * dx + dy * dy if is_valid else 0
+
+        return {
+            "parsed_tokens": tokens,
+            "is_valid": is_valid,
+            "strictly_complied": strictly_complied and is_valid,
+            "traits": {
+                "has_duplicates": len(tokens) != len(set(tokens)) if is_valid else False,
+                "displacement_sq": disp_sq,
+                "backtracks": backtracks,
+                "first_token": tokens[0] if tokens else "INVALID"
+            }
+        }
+
+
+# Active 4-Probe High-Discrimination Benchmark Suite
 PROBES: Dict[str, ArrayProbe] = {
-    "arr_int5": IntArrayProbe(),          # Q1: Top-1 50.4%, Margin 0.595 (⭐⭐⭐⭐⭐)
-    "arr_letter5": LetterArrayProbe(),    # Q2: Top-1 46.6%, Margin 0.388 (⭐⭐⭐⭐⭐)
-    "arr_prime5": PrimeArrayProbe(),      # Q3: Top-1 32.8%, Margin 0.290 (⭐⭐⭐⭐)
-    "arr_dice6": DiceArrayProbe(),        # Q4: Top-1 32.1%, Margin 0.229 (⭐⭐⭐⭐)
-    "arr_color5": ColorArrayProbe(),      # Q5: Top-1 26.7%, Margin 0.193 (⭐⭐⭐)
-    "arr_bit8": BitArrayProbe(),          # Q6: Top-1 22.1%, Margin 0.047 (⭐⭐⭐)
-    "arr_coin10": CoinArrayProbe(),       # Q7: Top-1 19.8%, Margin 0.046 (⭐⭐)
-    "arr_rps5": RPSArrayProbe(),          # Q8: Top-1 19.1%, Margin 0.056 (⭐⭐)
-    "arr_perm5": PermutationArrayProbe(), # Q9: Top-1 18.3%, Margin 0.170 (⭐⭐)
+    "arr_int5": IntArrayProbe(),             # Q1: 经典 1~100 整数基准 (⭐⭐⭐⭐⭐, 5500+实测底库)
+    "arr_pseudo_cvc5": PseudoCVCArrayProbe(),# Q2: 3字母高熵伪词音节 (⭐⭐⭐⭐⭐, BPE子词发音图)
+    "arr_int_big5": BigIntArrayProbe(),      # Q3: 跨数量级大整数 (⭐⭐⭐⭐⭐, Tokenizer切分与本福特法则)
+    "arr_grid_walk6": GridWalkArrayProbe(),  # Q4: 2D网格随机游走 (⭐⭐⭐⭐⭐, 自回归长程几何平衡)
+}
+
+# Complete Registry for Historical Parsing, Diagnostics & Regression Tests
+ALL_PROBES: Dict[str, ArrayProbe] = {
+    "arr_int5": PROBES["arr_int5"],
+    "arr_pseudo_cvc5": PROBES["arr_pseudo_cvc5"],
+    "arr_int_big5": PROBES["arr_int_big5"],
+    "arr_grid_walk6": PROBES["arr_grid_walk6"],
+    "arr_letter5": LetterArrayProbe(),
+    "arr_prime5": PrimeArrayProbe(),
+    "arr_dice6": DiceArrayProbe(),
+    "arr_color5": ColorArrayProbe(),
+    "arr_bit8": BitArrayProbe(),
+    "arr_coin10": CoinArrayProbe(),
+    "arr_rps5": RPSArrayProbe(),
+    "arr_perm5": PermutationArrayProbe(),
 }
 
 
 def get_probe(probe_id: str) -> Optional[ArrayProbe]:
-    return PROBES.get(probe_id)
+    return ALL_PROBES.get(probe_id)
 
 
-def list_probes() -> List[Dict[str, Any]]:
+def list_probes(all_probes: bool = True) -> List[Dict[str, Any]]:
+    source = ALL_PROBES if all_probes else PROBES
     return [
         {
             "id": p.id,
@@ -717,7 +937,8 @@ def list_probes() -> List[Dict[str, Any]]:
             "description": p.description,
             "expected_length": p.expected_length,
             "element_vocab_size": p.element_vocab_size,
-            "allowed_elements": p.allowed_elements
+            "allowed_elements": p.allowed_elements,
+            "is_recommended": p.id in PROBES
         }
-        for p in PROBES.values()
+        for p in source.values()
     ]
