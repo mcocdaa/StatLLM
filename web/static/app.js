@@ -217,6 +217,27 @@ const I18N = {
     warn_mismatch_desc: "第 {row} 行输入无法被题目【{current}】解析（全无效 Token 导致各模型吻合度归零）。系统检测到该内容符合【{suggested}】。",
     warn_no_match: "未知探针格式",
     btn_switch_reeval: "一键切换为【{suggested}】并重新判定",
+    robust_title: "稳健抗涨落归因诊断",
+    robust_subtitle: "依据历史矩阵负轴倒挂风险 (Downside Tail Risk) 与方差稳定性自适应加权，过滤单次抽样离群坏点扰动",
+    robust_badge_flipped: "⚡ 稳健分析修正了原始判定",
+    robust_badge_confirmed: "✓ 稳健加权与原始判定高度一致",
+    robust_card_raw_title: "原始经验判定 (Raw MLE)",
+    robust_card_raw_sub: "各题目等权累加，易受偶发离群坏点带偏",
+    robust_card_raw_tag: "等权累加",
+    robust_card_robust_title: "稳健修正判定 (Robust)",
+    robust_card_robust_sub: "依据下尾倒挂风险自适应调权，滤除蒸馏碰撞",
+    robust_card_robust_tag: "自适应调权",
+    robust_card_runner_up: "第二名: {model} ({prob})",
+    robust_breakdown_title: "题目稳定性与自适应权重明细",
+    robust_th_probe: "测试题目",
+    robust_th_gstab: "全局稳定性",
+    robust_th_cstab: "核心对抗稳定性",
+    robust_th_downside: "90% 散布下尾倒挂 (P05)",
+    robust_th_weight: "稳健权重 w",
+    robust_th_tier: "稳定性评级",
+    robust_tier_high: "⭐ 高度稳健",
+    robust_tier_mod: "△ 中度稳健",
+    robust_tier_vol: "⚠️ 显著涨落风险",
 
     theory_badge: "统计指纹与贝叶斯推断数学原理",
     theory_title: "StatLLM: 基于离散阵列探针与贝叶斯似然的大语言模型黑盒指纹归因",
@@ -430,6 +451,27 @@ const I18N = {
     warn_mismatch_desc: "Input in Row {row} failed parsing under [{current}] (invalid tokens cause fitness to drop to near zero). Detected match for [{suggested}].",
     warn_no_match: "Unknown probe format",
     btn_switch_reeval: "Switch to [{suggested}] & Re-evaluate",
+    robust_title: "Stability-Weighted Robust Attribution Diagnostic",
+    robust_subtitle: "Adaptive likelihood weighting based on empirical downside tail risk (P05) and variance stability to filter single-sample distillation outliers",
+    robust_badge_flipped: "⚡ Robust Correction Applied",
+    robust_badge_confirmed: "✓ Robust Analysis Confirms Raw Verdict",
+    robust_card_raw_title: "Raw Empirical Verdict (MLE)",
+    robust_card_raw_sub: "Equal probe weighting, sensitive to single-sample tail anomalies",
+    robust_card_raw_tag: "Equal Weights",
+    robust_card_robust_title: "Robust Adjusted Verdict",
+    robust_card_robust_sub: "Downweighted by downside inversion risk to filter distillation artifacts",
+    robust_card_robust_tag: "Adaptive w",
+    robust_card_runner_up: "Runner-up: {model} ({prob})",
+    robust_breakdown_title: "Probe Stability & Adaptive Weight Breakdown",
+    robust_th_probe: "Probe",
+    robust_th_gstab: "Global Stability",
+    robust_th_cstab: "Contestant Pair Stability",
+    robust_th_downside: "Downside Tail (P05)",
+    robust_th_weight: "Robust Weight w",
+    robust_th_tier: "Stability Tier",
+    robust_tier_high: "⭐ High Stability",
+    robust_tier_mod: "△ Moderate",
+    robust_tier_vol: "⚠️ High Volatility",
 
     theory_badge: "METHODOLOGY & STATISTICAL FORMULATION",
     theory_title: "StatLLM: Black-Box Model Attribution via Discrete Array Probes and Bayesian Likelihood",
@@ -1268,6 +1310,7 @@ function renderEvaluationResults(data) {
     evalRes.summary_statistics || {}
   );
   renderClusterCanvas(clusterData);
+  renderRobustAttribution(evalRes.robust_attribution);
 
   const tbody = document.getElementById("parsed-table-body");
   tbody.innerHTML = "";
@@ -1366,6 +1409,183 @@ function renderSampleAdvisory(evalRes) {
       </div>
     `;
   }
+}
+
+/**
+ * Render Robust Stability-Weighted Attribution Card
+ */
+function renderRobustAttribution(robust) {
+  const container = document.getElementById("robust-attribution-container");
+  if (!container) return;
+
+  if (!robust || !robust.probe_breakdown || robust.probe_breakdown.length === 0) {
+    container.classList.add("hidden");
+    container.innerHTML = "";
+    return;
+  }
+
+  container.classList.remove("hidden");
+
+  const isFlipped = robust.is_verdict_flipped;
+  const badgeClass = isFlipped
+    ? "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30"
+    : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30";
+  const badgeText = isFlipped ? t("robust_badge_flipped") : t("robust_badge_confirmed");
+
+  const explanation = currentLang === "en" ? robust.explanation_en : robust.explanation_zh;
+
+  // Build probe breakdown table rows
+  const rowsHtml = robust.probe_breakdown.map((item, idx) => {
+    const probeMeta = PROBE_I18N[item.probe_id];
+    const probeTitle = probeMeta ? (currentLang === "en" ? probeMeta.en_title : probeMeta.zh_title) : item.probe_id;
+    
+    let tierBadge = "";
+    if (item.stability_tier === "High") {
+      tierBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">${t("robust_tier_high")}</span>`;
+    } else if (item.stability_tier === "Moderate") {
+      tierBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-300 dark:border-sky-800">${t("robust_tier_mod")}</span>`;
+    } else {
+      tierBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse">${t("robust_tier_vol")}</span>`;
+    }
+
+    const weightColor = item.is_volatile
+      ? "text-amber-600 dark:text-amber-400 font-bold"
+      : "text-slate-800 dark:text-slate-200 font-bold";
+
+    const downsideColor = item.downside_tail_pct > 30
+      ? "text-rose-600 dark:text-rose-400 font-bold"
+      : "text-slate-600 dark:text-slate-400";
+
+    return `
+      <tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+        <td class="p-3">
+          <div class="font-mono text-xs text-slate-500 dark:text-slate-400 font-bold">#${idx + 1}</div>
+          <div class="font-mono text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200" title="${probeTitle}">${item.probe_id}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-none">${probeTitle}</div>
+        </td>
+        <td class="p-3 text-center font-mono text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+          ${item.global_stability_pct}%
+        </td>
+        <td class="p-3 text-center font-mono text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+          ${item.contestant_stability_pct}%
+        </td>
+        <td class="p-3 text-center font-mono text-xs sm:text-sm ${downsideColor}">
+          -${item.downside_tail_pct}%
+        </td>
+        <td class="p-3 text-center font-mono text-xs sm:text-sm ${weightColor}">
+          ${item.effective_weight.toFixed(3)}
+        </td>
+        <td class="p-3 text-center">
+          ${tierBadge}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const rawTopProbPct = (robust.raw_top_probability * 100).toFixed(1);
+  const robustTopProbPct = (robust.top_probability * 100).toFixed(1);
+  const runnerUpProbPct = (robust.runner_up_probability * 100).toFixed(1);
+
+  const rawBorder = isFlipped ? "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 opacity-75" : "border-indigo-500/30 bg-indigo-500/5 dark:bg-indigo-950/20";
+  const robustBorder = isFlipped ? "border-amber-500/50 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-950/30 shadow-sm ring-1 ring-amber-500/20" : "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20";
+
+  let runnerUpHtml = "";
+  if (robust.runner_up_model) {
+    const runnerUpText = t("robust_card_runner_up")
+      .replace("{model}", robust.runner_up_model)
+      .replace("{prob}", runnerUpProbPct + "%");
+    runnerUpHtml = `<div class="text-xs font-mono text-slate-500 dark:text-slate-400">${runnerUpText}</div>`;
+  }
+
+  container.innerHTML = `
+    <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs transition-colors duration-200">
+      <!-- Header row -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-indigo-500 dark:text-indigo-400">⚖️</span>
+              <span>${t("robust_title")}</span>
+            </h3>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeClass}">
+              ${badgeText}
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            ${t("robust_subtitle")}
+          </p>
+        </div>
+      </div>
+
+      <!-- Comparison Cards: Raw vs Robust -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Raw Verdict Card -->
+        <div class="rounded-xl border ${rawBorder} p-4 flex flex-col justify-between transition-all">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">${t("robust_card_raw_title")}</span>
+              <span class="text-xs font-mono text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded bg-slate-200/50 dark:bg-slate-800/60 font-semibold">${t("robust_card_raw_tag")}</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${t("robust_card_raw_sub")}</p>
+          </div>
+          <div class="mt-3 flex items-baseline justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
+            <span class="font-mono font-bold text-base sm:text-lg text-slate-800 dark:text-slate-200">${robust.raw_top_model}</span>
+            <span class="font-mono text-sm sm:text-base font-bold text-indigo-600 dark:text-indigo-400">${rawTopProbPct}%</span>
+          </div>
+        </div>
+
+        <!-- Robust Verdict Card -->
+        <div class="rounded-xl border ${robustBorder} p-4 flex flex-col justify-between transition-all">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">${t("robust_card_robust_title")}</span>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">${t("robust_card_robust_tag")}</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${t("robust_card_robust_sub")}</p>
+          </div>
+          <div class="mt-3 flex items-baseline justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
+            <div>
+              <span class="font-mono font-bold text-base sm:text-lg text-slate-900 dark:text-white">${robust.top_model}</span>
+              ${runnerUpHtml}
+            </div>
+            <span class="font-mono text-lg sm:text-xl font-black ${isFlipped ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">${robustTopProbPct}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mechanistic explanation banner -->
+      <div class="rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 p-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
+        <div class="flex items-start gap-2.5">
+          <span class="text-base select-none shrink-0 mt-0.5">💡</span>
+          <div>${explanation}</div>
+        </div>
+      </div>
+
+      <!-- Breakdown Table -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+          ${t("robust_breakdown_title")}
+        </h4>
+        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead>
+              <tr class="bg-slate-100/70 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs font-mono uppercase tracking-wider">
+                <th class="p-3">${t("robust_th_probe")}</th>
+                <th class="p-3 text-center">${t("robust_th_gstab")}</th>
+                <th class="p-3 text-center">${t("robust_th_cstab")}</th>
+                <th class="p-3 text-center">${t("robust_th_downside")}</th>
+                <th class="p-3 text-center">${t("robust_th_weight")}</th>
+                <th class="p-3 text-center">${t("robust_th_tier")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /**

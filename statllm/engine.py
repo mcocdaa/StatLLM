@@ -16,6 +16,10 @@ from collections import defaultdict
 
 from statllm.probes import get_probe, PROBES
 from statllm.database import Database
+try:
+    from statllm.stability_data import PROBE_STABILITY_DATA
+except ImportError:
+    PROBE_STABILITY_DATA = {}
 
 
 class LikelihoodEvaluator:
@@ -376,6 +380,15 @@ class LikelihoodEvaluator:
             "expected_radius_pct": round(expected_span * 50, 1)
         }
 
+        # 9. Stability-Weighted Robust Attribution Analysis
+        robust_attribution = self.compute_robust_attribution(
+            parsed_records=parsed,
+            raw_posteriors=posteriors,
+            matrix=matrix,
+            model_names=model_names,
+            lam=lam
+        )
+
         return {
             "parsed_submissions": parsed,
             "independent_fitness": independent_fitness,
@@ -398,7 +411,161 @@ class LikelihoodEvaluator:
             "sample_count": len(parsed),
             "unique_probes_tested": len(set(r["probe_id"] for r in parsed)),
             "has_invalid_submissions": len(validation_warnings) > 0,
-            "validation_warnings": validation_warnings
+            "validation_warnings": validation_warnings,
+            "robust_attribution": robust_attribution
+        }
+
+    def compute_robust_attribution(
+        self,
+        parsed_records: List[Dict[str, Any]],
+        raw_posteriors: Dict[str, float],
+        matrix: Dict[str, Dict[str, Tuple[Dict[str, float], float]]],
+        model_names: List[str],
+        lam: float = 0.5
+    ) -> Dict[str, Any]:
+        """
+        Computes Stability-Weighted Robust Attribution.
+        Downweights probes that exhibit severe downside tail risk (P05 << 0)
+        between the top competing models to filter out single-sample distillation outliers.
+        """
+        if not parsed_records or not raw_posteriors:
+            return {}
+
+        sorted_raw = sorted(raw_posteriors.items(), key=lambda x: -x[1])
+        top_raw_model, top_raw_prob = sorted_raw[0]
+        runner_up_model, runner_up_prob = sorted_raw[1] if len(sorted_raw) > 1 else (top_raw_model, 0.0)
+
+        submission_lls = []
+        for rec in parsed_records:
+            pid = rec["probe_id"]
+            tokens = rec["parsed_tokens"]
+            v_size = max(1, rec["element_vocab_size"])
+            exp_len = rec.get("expected_length", len(tokens))
+            
+            sub_m_ll = {}
+            for m in model_names:
+                cd, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
+                rec_ll = 0.0
+                for idx, tok in enumerate(tokens):
+                    tok_str = str(tok)
+                    if pid == "arr_int_big5":
+                        p_exact = self.get_interpolated_token_prob(cd, tot, tok_str, idx, 90000, exp_len, lam)
+                        if len(tok_str) >= 2:
+                            pref = tok_str[:2]
+                            c_pref = cd.get(f"pref:{pref}", 0.0)
+                            p_pref_glob = (c_pref + self.beta) / (tot + 90.0 * self.beta)
+                            c_pref_pos = cd.get(f"pos_pref:{idx}:{pref}", 0.0)
+                            p_pref_pos = (c_pref_pos + self.beta) / ((tot / max(1, exp_len)) + 90.0 * self.beta)
+                            p_pref = (1.0 - lam) * p_pref_glob + lam * p_pref_pos
+                        else:
+                            p_pref = 1.0 / 90.0
+
+                        if len(tok_str) >= 1:
+                            lead = tok_str[0]
+                            c_lead = cd.get(f"lead:{lead}", 0.0)
+                            p_lead = (c_lead + self.beta) / (tot + 9.0 * self.beta)
+                        else:
+                            p_lead = 1.0 / 9.0
+
+                        p = 0.25 * p_exact + 0.55 * p_pref + 0.20 * p_lead
+                    elif pid == "arr_pseudo_cvc5":
+                        p_exact = self.get_interpolated_token_prob(cd, tot, tok_str, idx, 2205, exp_len, lam)
+                        if len(tok_str) == 3:
+                            c_init = cd.get(f"init:{tok_str[0]}", 0.0)
+                            p_init = (c_init + self.beta) / (tot + 21.0 * self.beta)
+                            c_vow = cd.get(f"vow:{tok_str[1]}", 0.0)
+                            p_vow = (c_vow + self.beta) / (tot + 5.0 * self.beta)
+                            c_coda = cd.get(f"coda:{tok_str[2]}", 0.0)
+                            p_coda = (c_coda + self.beta) / (tot + 21.0 * self.beta)
+                            p_cvc = p_init * p_vow * p_coda
+                        else:
+                            p_cvc = 1.0 / 2205.0
+                        p = 0.35 * p_exact + 0.65 * p_cvc
+                    else:
+                        p = self.get_interpolated_token_prob(cd, tot, tok_str, idx, v_size, exp_len, lam)
+                    rec_ll += math.log(max(p, 1e-12))
+                sub_m_ll[m] = rec_ll
+            submission_lls.append(sub_m_ll)
+
+        weights = []
+        probe_breakdown = []
+        for s_idx, rec in enumerate(parsed_records):
+            pid = rec["probe_id"]
+            stab_entry = PROBE_STABILITY_DATA.get(pid, {})
+            g_stab = float(stab_entry.get("global_stability", 0.85))
+            pair_map = stab_entry.get("pairwise_p05", {})
+            
+            p05_12 = float(pair_map.get(top_raw_model, {}).get(runner_up_model, 0.0))
+            p05_21 = float(pair_map.get(runner_up_model, {}).get(top_raw_model, 0.0))
+            downside = max(0.0, -p05_12, -p05_21)
+            c_stab = max(0.10, min(1.0, 1.0 - downside))
+            
+            eff_weight = round(float(0.35 * g_stab + 0.65 * c_stab), 3)
+            weights.append(eff_weight)
+            
+            tier = "High" if eff_weight >= 0.80 else ("Moderate" if eff_weight >= 0.50 else "Volatile")
+            probe_breakdown.append({
+                "submission_index": s_idx,
+                "probe_id": pid,
+                "global_stability_pct": round(g_stab * 100, 1),
+                "contestant_stability_pct": round(c_stab * 100, 1),
+                "downside_tail_pct": round(downside * 100, 1),
+                "effective_weight": eff_weight,
+                "stability_tier": tier,
+                "is_volatile": eff_weight < 0.60
+            })
+
+        robust_lls = {}
+        for m in model_names:
+            robust_lls[m] = sum(weights[i] * submission_lls[i][m] for i in range(len(parsed_records)))
+
+        max_r = max(robust_lls.values())
+        exps = {m: math.exp(ll - max_r) for m, ll in robust_lls.items()}
+        tot_e = sum(exps.values())
+        robust_post = {m: round(float(exps[m] / tot_e), 4) for m in model_names}
+
+        sorted_robust = sorted(robust_post.items(), key=lambda x: -x[1])
+        robust_top_model, robust_top_prob = sorted_robust[0]
+        robust_runner_up, robust_runner_up_prob = sorted_robust[1] if len(sorted_robust) > 1 else (robust_top_model, 0.0)
+
+        is_flipped = (robust_top_model != top_raw_model)
+
+        if is_flipped:
+            volatile_probes = [p["probe_id"] for p in probe_breakdown if p["is_volatile"]]
+            v_str_zh = ", ".join(volatile_probes) if volatile_probes else "部分低信噪比题目"
+            v_str_en = ", ".join(volatile_probes) if volatile_probes else "certain low-SNR probes"
+            explanation_zh = (
+                f"原始最大似然推断中，各题目等权累加判定为 [{top_raw_model}] ({top_raw_prob*100:.1f}%)。"
+                f"但在稳健抗涨落分析中，检测到 [{v_str_zh}] 在核心候选对竞争中存在显著负轴下尾倒挂风险，其贡献被自适应降低；"
+                f"高信噪比探针主导了稳健推断，判定成功修正为 [{robust_top_model}] ({robust_top_prob*100:.1f}%)。"
+            )
+            explanation_en = (
+                f"Raw likelihood favored [{top_raw_model}] ({top_raw_prob*100:.1f}%) with equal probe weights. "
+                f"In stability-weighted robust analysis, [{v_str_en}] exhibited significant downside tail risk between top contenders and was downweighted; "
+                f"high-SNR probes dominated the evidence, successfully flipping the robust verdict to [{robust_top_model}] ({robust_top_prob*100:.1f}%)."
+            )
+        else:
+            explanation_zh = (
+                f"稳健抗涨落加权分析与原始最大似然推断高度一致，确认 [{robust_top_model}] ({robust_top_prob*100:.1f}%) "
+                f"在排除潜在长尾波动风险后依然具备显著优势。"
+            )
+            explanation_en = (
+                f"Stability-weighted robust analysis strongly confirms raw likelihood verdict: [{robust_top_model}] ({robust_top_prob*100:.1f}%) "
+                f"maintains dominant confidence after filtering potential downside volatility."
+            )
+
+        return {
+            "top_model": robust_top_model,
+            "top_probability": robust_top_prob,
+            "runner_up_model": robust_runner_up,
+            "runner_up_probability": robust_runner_up_prob,
+            "is_verdict_flipped": is_flipped,
+            "raw_top_model": top_raw_model,
+            "raw_top_probability": round(float(top_raw_prob), 4),
+            "posteriors": robust_post,
+            "probe_breakdown": probe_breakdown,
+            "explanation_zh": explanation_zh,
+            "explanation_en": explanation_en
         }
 
     def _log_likelihoods_to_posteriors(self, log_likelihoods: Dict[str, float]) -> Dict[str, float]:
