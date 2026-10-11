@@ -113,7 +113,8 @@ class LikelihoodEvaluator:
 
         # 1. Parse all user submissions
         parsed = []
-        for item in submissions:
+        validation_warnings = []
+        for idx_sub, item in enumerate(submissions):
             pid = item.get("probe_id")
             raw = item.get("raw_text", "")
             probe = get_probe(pid)
@@ -121,12 +122,29 @@ class LikelihoodEvaluator:
                 raise ValueError(f"Unknown probe ID: {pid}")
             
             parse_res = probe.parse(raw)
+            suggested_probe_id = None
+            if not parse_res["is_valid"]:
+                from statllm.probes import ALL_PROBES
+                for alt_pid, alt_probe in ALL_PROBES.items():
+                    if alt_pid != pid:
+                        alt_res = alt_probe.parse(raw)
+                        if alt_res.get("is_valid", False):
+                            suggested_probe_id = alt_pid
+                            break
+                validation_warnings.append({
+                    "submission_index": idx_sub,
+                    "probe_id": pid,
+                    "suggested_probe_id": suggested_probe_id,
+                    "message": f"Input for probe '{pid}' could not be parsed into valid elements." + (f" Detected match for probe '{suggested_probe_id}'." if suggested_probe_id else "")
+                })
+
             parsed.append({
                 "probe_id": pid,
                 "raw_text": raw,
                 "parsed_tokens": parse_res["parsed_tokens"],
                 "is_valid": parse_res["is_valid"],
                 "strictly_complied": parse_res["strictly_complied"],
+                "suggested_probe_id": suggested_probe_id,
                 "traits": parse_res.get("traits", {}),
                 "element_vocab_size": probe.element_vocab_size,
                 "expected_length": probe.expected_length
@@ -378,7 +396,9 @@ class LikelihoodEvaluator:
             "entropy": round(entropy, 4),
             "positional_lambda": round(lam, 3),
             "sample_count": len(parsed),
-            "unique_probes_tested": len(set(r["probe_id"] for r in parsed))
+            "unique_probes_tested": len(set(r["probe_id"] for r in parsed)),
+            "has_invalid_submissions": len(validation_warnings) > 0,
+            "validation_warnings": validation_warnings
         }
 
     def _log_likelihoods_to_posteriors(self, log_likelihoods: Dict[str, float]) -> Dict[str, float]:

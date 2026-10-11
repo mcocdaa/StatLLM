@@ -213,6 +213,10 @@ const I18N = {
     comp_codeblock: "△ 代码块包装",
     stat_n1_label: "有效探针数: ",
     stat_n2_label: "总回答轮次: ",
+    warn_mismatch_title: "输入格式未匹配当前题目警示",
+    warn_mismatch_desc: "第 {row} 行输入无法被题目【{current}】解析（全无效 Token 导致各模型吻合度归零）。系统检测到该内容符合【{suggested}】。",
+    warn_no_match: "未知探针格式",
+    btn_switch_reeval: "一键切换为【{suggested}】并重新判定",
 
     theory_badge: "统计指纹与贝叶斯推断数学原理",
     theory_title: "StatLLM: 基于离散阵列探针与贝叶斯似然的大语言模型黑盒指纹归因",
@@ -422,6 +426,10 @@ const I18N = {
     comp_codeblock: "△ Wrapped in Codeblock",
     stat_n1_label: "Valid Probes: ",
     stat_n2_label: "Total Responses: ",
+    warn_mismatch_title: "Probe Input Mismatch Warning",
+    warn_mismatch_desc: "Input in Row {row} failed parsing under [{current}] (invalid tokens cause fitness to drop to near zero). Detected match for [{suggested}].",
+    warn_no_match: "Unknown probe format",
+    btn_switch_reeval: "Switch to [{suggested}] & Re-evaluate",
 
     theory_badge: "METHODOLOGY & STATISTICAL FORMULATION",
     theory_title: "StatLLM: Black-Box Model Attribution via Discrete Array Probes and Bayesian Likelihood",
@@ -649,7 +657,7 @@ function applyLanguage(lang) {
     if (outputTipEl) outputTipEl.textContent = t("output_tip");
 
     const select = row.querySelector(".row-probe-select");
-    const currentProbeId = select ? select.value : "arr_int_big5";
+    const currentProbeId = select ? select.value : "arr_pseudo_cvc5";
     if (select) {
       select.innerHTML = buildProbeOptionsHtml(currentProbeId);
     }
@@ -868,9 +876,96 @@ function buildProbeOptionsHtml(selectedProbeId) {
 }
 
 /**
+ * Smart Probe Format Auto-Detection
+ */
+function detectProbeFromText(rawText) {
+  if (!rawText || typeof rawText !== "string") return null;
+  const trimmed = rawText.trim();
+  if (!trimmed.includes("[") || !trimmed.includes("]")) return null;
+
+  // 1. 3-letter pseudo words like ["vab", "fim", "jod", "kiv", "pob"]
+  if (/\[\s*"(?:[a-z]{3})"\s*,\s*"(?:[a-z]{3})"/i.test(trimmed)) {
+    return "arr_pseudo_cvc5";
+  }
+  // 2. Single uppercase letters like ["M", "X", "R", "A", "K"]
+  if (/\[\s*"[A-Z]"\s*,\s*"[A-Z]"/i.test(trimmed)) {
+    return "arr_letter5";
+  }
+  // 3. Binary bit stream like [0, 1, 1, 0, 1, 0, 0, 1]
+  if (/\[\s*[01]\s*,\s*[01]\s*,\s*[01]\s*,/i.test(trimmed)) {
+    return "arr_bit8";
+  }
+  // 4. Coin flips ["正", "反"] or ["H", "T"]
+  if (/(?:正|反|["']H["']|["']T["'])/.test(trimmed)) {
+    return "arr_coin10";
+  }
+  // 5. RPS moves
+  if (/(?:石头|剪刀|布|Rock|Scissors|Paper)/i.test(trimmed)) {
+    return "arr_rps5";
+  }
+  // 6. Colors
+  if (/(?:红|橙|黄|绿|青|蓝|紫|Red|Orange|Yellow|Green|Cyan|Blue|Purple)/i.test(trimmed)) {
+    return "arr_color5";
+  }
+  // 7. Grid walk directions ['U', 'D', 'L', 'R']
+  if (/\[\s*['"][UDLR]['"]\s*,\s*['"][UDLR]['"]/i.test(trimmed)) {
+    return "arr_grid_walk6";
+  }
+  // 8. Numerical arrays
+  const numMatch = trimmed.match(/\b\d+\b/g);
+  if (numMatch && numMatch.length >= 3) {
+    const nums = numMatch.map(Number);
+    if (nums.some(n => n >= 1000)) {
+      return "arr_int_big5";
+    }
+    if (nums.every(n => n >= 1 && n <= 6) && nums.length >= 5) {
+      return "arr_dice6";
+    }
+    if (nums.length === 5 && [1, 2, 3, 4, 5].every(n => nums.includes(n))) {
+      return "arr_perm5";
+    }
+    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+    if (nums.every(n => primes.includes(n))) {
+      return "arr_prime5";
+    }
+    if (nums.every(n => n >= 1 && n <= 100)) {
+      return "arr_int5";
+    }
+  }
+  return null;
+}
+
+function handleRowRawTextInput(textareaEl) {
+  const text = textareaEl.value;
+  const detected = detectProbeFromText(text);
+  if (!detected) return;
+  const row = textareaEl.closest(".submission-row");
+  if (!row) return;
+  const select = row.querySelector(".row-probe-select");
+  if (select && select.value !== detected) {
+    select.value = detected;
+    onProbeChange(select);
+    select.classList.add("ring-2", "ring-emerald-500");
+    setTimeout(() => select.classList.remove("ring-2", "ring-emerald-500"), 1200);
+  }
+}
+
+function autoFixProbeAndReeval(rowIndex, suggestedProbeId) {
+  const rows = document.querySelectorAll(".submission-row");
+  if (rows && rows[rowIndex]) {
+    const sel = rows[rowIndex].querySelector(".row-probe-select");
+    if (sel) {
+      sel.value = suggestedProbeId;
+      onProbeChange(sel);
+    }
+  }
+  executeEvaluation();
+}
+
+/**
  * Submissions Management (Full-Width, Left-Right Split, Bilingual, Larger Fonts)
  */
-function addSubmissionRow(probeId = "arr_int_big5", rawText = "") {
+function addSubmissionRow(probeId = "arr_pseudo_cvc5", rawText = "") {
   rowCounter++;
   const container = document.getElementById("submissions-list");
   if (!container) return;
@@ -928,7 +1023,7 @@ function addSubmissionRow(probeId = "arr_int_big5", rawText = "") {
       
       <div class="flex flex-col sm:flex-row gap-2.5 items-stretch mt-1.5 flex-1 min-h-0">
         <div class="w-full flex-1 flex flex-col min-h-0">
-          <textarea class="row-raw-text w-full h-full flex-1 min-h-[120px] bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-3.5 text-sm text-slate-900 dark:text-slate-100 font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition resize-none" placeholder="${t("output_placeholder")}">${rawText}</textarea>
+          <textarea oninput="handleRowRawTextInput(this)" class="row-raw-text w-full h-full flex-1 min-h-[120px] bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-3.5 text-sm text-slate-900 dark:text-slate-100 font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition resize-none" placeholder="${t("output_placeholder")}">${rawText}</textarea>
         </div>
         
         <div class="flex sm:flex-col gap-1.5 shrink-0 self-end sm:self-start">
@@ -992,7 +1087,7 @@ function deleteRow(btnEl) {
   row.remove();
   const remaining = document.querySelectorAll(".submission-row");
   if (remaining.length === 0) {
-    addSubmissionRow("arr_int_big5", "");
+    addSubmissionRow("arr_pseudo_cvc5", "");
   }
 }
 
@@ -1000,7 +1095,7 @@ function resetSubmissions() {
   const container = document.getElementById("submissions-list");
   if (!container) return;
   container.innerHTML = "";
-  addSubmissionRow("arr_int_big5", "");
+  addSubmissionRow("arr_pseudo_cvc5", "");
   const consentEl = document.getElementById("consent-checkbox");
   if (consentEl) {
     consentEl.checked = false;
@@ -1109,6 +1204,55 @@ function renderEvaluationResults(data) {
   document.getElementById("stat-entropy").innerText = `${evalRes.entropy} bit`;
   document.getElementById("stat-n1").innerText = evalRes.unique_probes_tested;
   document.getElementById("stat-n2").innerText = evalRes.sample_count;
+
+  // Render Mismatch Warning Banner if invalid submissions detected
+  const warnContainer = document.getElementById("mismatch-warning-container");
+  if (warnContainer) {
+    if (evalRes.has_invalid_submissions && evalRes.validation_warnings && evalRes.validation_warnings.length > 0) {
+      warnContainer.classList.remove("hidden");
+      const warningCardsHtml = evalRes.validation_warnings.map(w => {
+        const rowIdx = (w.submission_index !== undefined ? w.submission_index : 0) + 1;
+        const curProbe = PROBE_I18N[w.probe_id] ? (currentLang === "en" ? PROBE_I18N[w.probe_id].en_title : PROBE_I18N[w.probe_id].zh_title) : w.probe_id;
+        const sugProbe = w.suggested_probe_id && PROBE_I18N[w.suggested_probe_id] ? (currentLang === "en" ? PROBE_I18N[w.suggested_probe_id].en_title : PROBE_I18N[w.suggested_probe_id].zh_title) : (w.suggested_probe_id || t("warn_no_match"));
+
+        let desc = t("warn_mismatch_desc")
+          .replace("{row}", rowIdx)
+          .replace("{current}", curProbe)
+          .replace("{suggested}", sugProbe);
+
+        let fixBtnHtml = "";
+        if (w.suggested_probe_id) {
+          const btnLabel = t("btn_switch_reeval").replace("{suggested}", sugProbe);
+          fixBtnHtml = `
+            <button type="button" onclick="autoFixProbeAndReeval(${w.submission_index}, '${w.suggested_probe_id}')" class="mt-2.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xs transition cursor-pointer">
+              <span>⚡</span>
+              <span>${btnLabel}</span>
+            </button>
+          `;
+        }
+
+        return `
+          <div class="rounded-xl border border-rose-500/40 bg-rose-500/10 dark:border-rose-400/30 dark:bg-rose-950/40 p-4 transition-all duration-200">
+            <div class="flex items-start gap-3">
+              <div class="p-1.5 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              </div>
+              <div class="flex-1 space-y-1.5">
+                <h4 class="text-sm font-bold text-rose-900 dark:text-rose-200">${t("warn_mismatch_title")}</h4>
+                <p class="text-xs sm:text-sm text-rose-950/85 dark:text-rose-200/90 leading-relaxed font-sans">${desc}</p>
+                ${fixBtnHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      warnContainer.innerHTML = warningCardsHtml;
+    } else {
+      warnContainer.classList.add("hidden");
+      warnContainer.innerHTML = "";
+    }
+  }
 
   // Render Sample Size & Uncertainty Advisory Banner
   renderSampleAdvisory(evalRes);
