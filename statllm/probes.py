@@ -82,7 +82,7 @@ class IntArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_int5",
-            title="Q1: 5个1~100随机整数数组",
+            title="Q3: 5个1~100随机整数数组",
             prompt="请生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="numeric_array",
             description="同时获取5个随机数字偏置，检测模型首数字偏好、升序倾向（排序偏置）与去重偏好。",
@@ -156,7 +156,7 @@ class ColorArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_color5",
-            title="Q5: 5个离散颜色序列数组",
+            title="Q6: 5个离散颜色序列数组",
             prompt="在[红, 橙, 黄, 绿, 青, 蓝, 紫]中随机挑选5次，组成JSON数组，例如[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="categorical_array",
             description="测试在7种基础颜色上的5元组合转移概率，检测模型对相邻重复颜色的排斥倾向。",
@@ -222,7 +222,7 @@ class RPSArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_rps5",
-            title="Q8: 5局石头剪刀布出拳序列",
+            title="Q10: 5局石头剪刀布出拳序列",
             prompt="进行5次完全独立的石头剪刀布随机选择，输出一个JSON数组，例如[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="ternary_array",
             description="测试多步博弈出拳的马尔可夫转移模式（如是否出现周期循环或避免连续出相同拳）。",
@@ -283,7 +283,7 @@ class LetterArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_letter5",
-            title="Q2: 5个大写字母序列数组",
+            title="Q4: 5个随机大写英文字母数组",
             prompt="Generate a JSON array of 5 random English capital letters (A-Z), e.g. [\"M\", \"X\", \"R\", \"A\", \"K\"]. Output strictly the JSON array only, without code blocks or extra words.",
             category="alphabet_array",
             description="测试26个大写字母在5元序列上的先验选择与音节/辅音扎堆现象。",
@@ -342,7 +342,7 @@ class PermutationArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_perm5",
-            title="Q9: [1,2,3,4,5] 随机置乱排列",
+            title="Q8: [1,2,3,4,5] 随机置乱排列",
             prompt="将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="permutation_array",
             description="从 120 种严格不重复的全排列空间中测量模型的置乱习惯与不动点保留偏好。",
@@ -415,7 +415,7 @@ class CoinArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_coin10",
-            title="Q7: 10次独立抛硬币正反面序列",
+            title="Q11: 10次独立抛硬币正反面序列",
             prompt="进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="binary_array",
             description="测试10步伯努利试验中的游程长度偏好（是否规避长连续段）、翻转率与赌徒谬误倾向。",
@@ -492,7 +492,7 @@ class DiceArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_dice6",
-            title="Q4: 6次六面骰子独立掷点数组",
+            title="Q7: 6次六面骰子独立掷点数组",
             prompt="掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="dice_array",
             description="测试在6元骰子点数上的均匀度偏好、中心极限定理总和偏倚与相邻点数回避倾向。",
@@ -567,7 +567,7 @@ class PrimeArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_prime5",
-            title="Q3: 5个100以内的质数数组",
+            title="Q5: 5个100以内的质数数组",
             prompt="在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组。仅输出中括号包裹数字的JSON数组本身，严禁任何多余文字、示例或markdown代码块。",
             category="prime_array",
             description="从100以内全部25个离散质数中测量模型的无偏随机采样偏好与质数吸引子分布。",
@@ -635,7 +635,7 @@ class BitArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_bit8",
-            title="Q6: 8位二进制独立随机比特流",
+            title="Q12: 8位二进制独立随机比特流",
             prompt="生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
             category="bit_array",
             description="测试8位离散二进制空间的汉明重量（Popcount）、比特翻转率与词元切分偏置。",
@@ -697,7 +697,7 @@ class PseudoCVCArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_pseudo_cvc5",
-            title="5个3字母自然发音伪词数组",
+            title="Q2: 5个3字母自然发音伪词数组",
             prompt="请随机生成5个由3个英文字母组成且符合自然拼读规则但实际不存在的英文伪单词（结构必须为：辅音+元音+辅音），以全小写JSON数组格式直接输出。严禁任何多余文字或markdown代码块。",
             category="phonotactic_array",
             description="利用辅音-元音-辅音(CVC)发音三元组检测各模型底层BPE子词马尔可夫转移偏置。",
@@ -758,7 +758,7 @@ class BigIntArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_int_big5",
-            title="5个1000~99999跨数量级大整数数组",
+            title="Q1: 5个1000~99999大整数数组",
             prompt="请在1000到99999之间完全随机挑选5个互不相同的正整数，以JSON数组格式直接输出。严禁任何多余文字、说明或markdown代码块。",
             category="numeric_array",
             description="检测模型多位数值切分碎裂模式、首位本福特法则坍缩与跨数量级分布方差。",
@@ -829,7 +829,7 @@ class GridWalkArrayProbe(ArrayProbe):
     def __init__(self):
         super().__init__(
             id="arr_grid_walk6",
-            title="6步二维网格随机游走路径",
+            title="Q9: 6步二维网格随机游走路径",
             prompt="从坐标原点出发进行6步独立随机游走，每步仅在上(U)、下(D)、左(L)、右(R)中独立随机选择一个大写方向。以包含这6个字符的JSON数组直接输出，严禁任何多余文字或markdown代码块。",
             category="spatial_array",
             description="检测模型在二维平面移动决策中的长程自回归对称性、原点闭合偏好与回退率。",
@@ -897,28 +897,29 @@ class GridWalkArrayProbe(ArrayProbe):
         }
 
 
-# Active 4-Probe High-Discrimination Benchmark Suite
+# Active High-Discrimination Benchmark Suite (Ordered strictly by empirical MDI)
 PROBES: Dict[str, ArrayProbe] = {
-    "arr_int5": IntArrayProbe(),             # Q1: 经典 1~100 整数基准 (⭐⭐⭐⭐⭐, 5500+实测底库)
-    "arr_pseudo_cvc5": PseudoCVCArrayProbe(),# Q2: 3字母高熵伪词音节 (⭐⭐⭐⭐⭐, BPE子词发音图)
-    "arr_int_big5": BigIntArrayProbe(),      # Q3: 跨数量级大整数 (⭐⭐⭐⭐⭐, Tokenizer切分与本福特法则)
-    "arr_grid_walk6": GridWalkArrayProbe(),  # Q4: 2D网格随机游走 (⭐⭐⭐⭐⭐, 自回归长程几何平衡)
+    "arr_int_big5": BigIntArrayProbe(),      # Q1: 跨数量级大整数 (⭐⭐⭐⭐⭐, MDI 86.32, Tier S)
+    "arr_pseudo_cvc5": PseudoCVCArrayProbe(),# Q2: 3字母高熵伪词音节 (⭐⭐⭐⭐⭐, MDI 82.30, Tier S)
+    "arr_int5": IntArrayProbe(),             # Q3: 经典 1~100 整数基准 (⭐⭐⭐⭐, MDI 52.86, Tier A)
+    "arr_letter5": LetterArrayProbe(),       # Q4: 5个随机大写字母 (⭐⭐⭐⭐, MDI 39.05, Tier A)
+    "arr_grid_walk6": GridWalkArrayProbe(),  # Q9: 2D网格随机游走 (⭐⭐⭐, MDI 5.42, Tier C, 空间几何互补)
 }
 
-# Complete Registry for Historical Parsing, Diagnostics & Regression Tests
+# Complete Registry for All 12 Empirical Probes (Ordered Strictly by MDI Descending)
 ALL_PROBES: Dict[str, ArrayProbe] = {
-    "arr_int5": PROBES["arr_int5"],
-    "arr_pseudo_cvc5": PROBES["arr_pseudo_cvc5"],
-    "arr_int_big5": PROBES["arr_int_big5"],
-    "arr_grid_walk6": PROBES["arr_grid_walk6"],
-    "arr_letter5": LetterArrayProbe(),
-    "arr_prime5": PrimeArrayProbe(),
-    "arr_dice6": DiceArrayProbe(),
-    "arr_color5": ColorArrayProbe(),
-    "arr_bit8": BitArrayProbe(),
-    "arr_coin10": CoinArrayProbe(),
-    "arr_rps5": RPSArrayProbe(),
-    "arr_perm5": PermutationArrayProbe(),
+    "arr_int_big5": PROBES["arr_int_big5"],    # Q1 (Tier S, MDI 86.32)
+    "arr_pseudo_cvc5": PROBES["arr_pseudo_cvc5"],# Q2 (Tier S, MDI 82.30)
+    "arr_int5": PROBES["arr_int5"],            # Q3 (Tier A, MDI 52.86)
+    "arr_letter5": PROBES["arr_letter5"],      # Q4 (Tier A, MDI 39.05)
+    "arr_prime5": PrimeArrayProbe(),           # Q5 (Tier B, MDI 24.41)
+    "arr_color5": ColorArrayProbe(),           # Q6 (Tier C, MDI 9.67)
+    "arr_dice6": DiceArrayProbe(),             # Q7 (Tier C, MDI 8.83)
+    "arr_perm5": PermutationArrayProbe(),      # Q8 (Tier C, MDI 5.81)
+    "arr_grid_walk6": PROBES["arr_grid_walk6"],# Q9 (Tier C, MDI 5.42)
+    "arr_rps5": RPSArrayProbe(),               # Q10 (Tier D, MDI 1.40)
+    "arr_coin10": CoinArrayProbe(),            # Q11 (Tier D, MDI 1.34)
+    "arr_bit8": BitArrayProbe(),               # Q12 (Tier D, MDI 1.07)
 }
 
 

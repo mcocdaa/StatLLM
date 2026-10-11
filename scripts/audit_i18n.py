@@ -82,8 +82,8 @@ def audit():
 
         # Add multiple probe rows with English outputs
         print("3. Adding English probe rows (Int, Letter, Prime)...")
-        # Row 1: arr_int5
-        page.fill(".row-raw-text", "[17, 64, 92, 8, 41]")
+        # Row 1: arr_int_big5
+        page.fill(".row-raw-text", "[1700, 64000, 92000, 8000, 41000]")
         
         # Click Add Record for arr_letter5
         page.click("button:has-text('Add Probe Record')")

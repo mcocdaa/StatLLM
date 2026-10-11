@@ -31,13 +31,13 @@ function formatDisplayToken(tok) {
 const SUN_SVG = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
 const MOON_SVG = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`;
 
-// Bilingual dictionary for probes (Ordered by empirical discriminative power)
+// Bilingual dictionary for probes (Ordered strictly by empirical MDI discriminative power: Q1..Q12)
 const PROBE_I18N = {
-  arr_int5: {
-    zh_title: "Q1: 5个1~100随机整数数组",
-    en_title: "Q1: 5 Random Integers (1~100)",
-    zh_prompt: "请生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please generate a JSON array containing 5 random integers between 1 and 100, formatted as [12, 45, 78, 3, 99]. Output only the JSON array, with no other text or markdown codeblocks."
+  arr_int_big5: {
+    zh_title: "Q1: 5个1000~99999大整数数组",
+    en_title: "Q1: 5 Large Integers (1000~99999) Array",
+    zh_prompt: "请在1000到99999之间完全随机挑选5个互不相同的正整数，以JSON数组格式直接输出。严禁任何多余文字、说明或markdown代码块。",
+    en_prompt: "Please randomly pick 5 distinct positive integers between 1000 and 99999 and output as a JSON array. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_pseudo_cvc5: {
     zh_title: "Q2: 5个3字母自然发音伪词数组",
@@ -45,65 +45,65 @@ const PROBE_I18N = {
     zh_prompt: "请随机生成5个由3个英文字母组成且符合自然拼读规则但实际不存在的英文伪单词（结构必须为：辅音+元音+辅音），以全小写JSON数组格式直接输出。严禁任何多余文字或markdown代码块。",
     en_prompt: "Please randomly generate 5 pronounceable, non-existent English pseudo-words of exactly 3 letters (consonant-vowel-consonant structure). Output as a lowercase JSON array, with no other text or markdown codeblocks."
   },
-  arr_int_big5: {
-    zh_title: "Q3: 5个1000~99999大整数数组",
-    en_title: "Q3: 5 Large Integers (1000~99999) Array",
-    zh_prompt: "请在1000到99999之间完全随机挑选5个互不相同的正整数，以JSON数组格式直接输出。严禁任何多余文字、说明或markdown代码块。",
-    en_prompt: "Please randomly pick 5 distinct positive integers between 1000 and 99999 and output as a JSON array. Output only the JSON array, with no other text or markdown codeblocks."
-  },
-  arr_grid_walk6: {
-    zh_title: "Q4: 6步二维网格随机游走路径",
-    en_title: "Q4: 6-Step 2D Random Walk Array",
-    zh_prompt: "从坐标原点出发进行6步独立随机游走，每步仅在上(U)、下(D)、左(L)、右(R)中独立随机选择一个大写方向。以包含这6个字符的JSON数组直接输出，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate a 6-step independent random walk from the origin, choosing from ['U', 'D', 'L', 'R'] at each step. Output as a JSON array of 6 directional letters. Output only the JSON array, with no other text or markdown codeblocks."
+  arr_int5: {
+    zh_title: "Q3: 5个1~100随机整数数组",
+    en_title: "Q3: 5 Random Integers (1~100)",
+    zh_prompt: "请生成一个包含5个在1到100之间随机整数的JSON数组，格式如[12, 45, 78, 3, 99]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please generate a JSON array containing 5 random integers between 1 and 100, formatted as [12, 45, 78, 3, 99]. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_letter5: {
-    zh_title: "Q2: 5个随机大写英文字母数组",
-    en_title: "Q2: 5 Random Uppercase Letters Array",
+    zh_title: "Q4: 5个随机大写英文字母数组",
+    en_title: "Q4: 5 Random Uppercase Letters Array",
     zh_prompt: "请生成一个包含5个随机大写英文字母（A-Z）的JSON数组，例如[\"M\", \"X\", \"R\", \"A\", \"K\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please generate a JSON array of 5 random uppercase English letters (A-Z), formatted as [\"M\", \"X\", \"R\", \"A\", \"K\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_prime5: {
-    zh_title: "Q3: 5个100以内的质数数组",
-    en_title: "Q3: 5 Prime Numbers Under 100 Array",
+    zh_title: "Q5: 5个100以内的质数数组",
+    en_title: "Q5: 5 Prime Numbers Under 100 Array",
     zh_prompt: "在100以内的质数（素数）中随机挑选5个，输出一个包含5个质数的JSON数组。仅输出中括号包裹数字的JSON数组本身，严禁任何多余文字、示例或markdown代码块。",
     en_prompt: "Please randomly pick 5 prime numbers under 100 and output a JSON array of 5 integers. Output only the JSON array, with no other text, examples, or markdown codeblocks."
   },
-  arr_dice6: {
-    zh_title: "Q4: 6次六面骰子独立掷点数组",
-    en_title: "Q4: 6-Roll Standard 6-Sided Dice Array",
-    zh_prompt: "掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate rolling a standard 6-sided die 6 independent times and output a JSON array of 6 integers (1 to 6), e.g. [3, 6, 2, 1, 5, 4]. Output only the JSON array, with no other text or markdown codeblocks."
-  },
   arr_color5: {
-    zh_title: "Q5: 5个离散颜色序列数组",
-    en_title: "Q5: 5 Discrete Colors Array",
+    zh_title: "Q6: 5个离散颜色序列数组",
+    en_title: "Q6: 5 Discrete Colors Array",
     zh_prompt: "在[红, 橙, 黄, 绿, 青, 蓝, 紫]中随机挑选5次，组成JSON数组，例如[\"红\", \"蓝\", \"绿\", \"红\", \"紫\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please randomly choose 5 times from [Red, Orange, Yellow, Green, Cyan, Blue, Purple] to form a JSON array, e.g. [\"Red\", \"Blue\", \"Green\", \"Red\", \"Purple\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
-  arr_bit8: {
-    zh_title: "Q6: 8位二进制独立随机比特流",
-    en_title: "Q6: 8-Bit Random Binary Stream Array",
-    zh_prompt: "生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please generate a JSON array of 8 independent random binary bits (0 or 1), formatted as [0, 1, 1, 0, 1, 0, 0, 1]. Output only the JSON array, with no other text or markdown codeblocks."
+  arr_dice6: {
+    zh_title: "Q7: 6次六面骰子独立掷点数组",
+    en_title: "Q7: 6-Roll Standard 6-Sided Dice Array",
+    zh_prompt: "掷6次标准的六面骰子（点数1到6），输出一个包含6个点数的JSON数组，例如[3, 6, 2, 1, 5, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate rolling a standard 6-sided die 6 independent times and output a JSON array of 6 integers (1 to 6), e.g. [3, 6, 2, 1, 5, 4]. Output only the JSON array, with no other text or markdown codeblocks."
   },
-  arr_coin10: {
-    zh_title: "Q7: 10次独立抛硬币正反面序列",
-    en_title: "Q7: 10-Toss Bernoulli Coin Flip Array",
-    zh_prompt: "进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please simulate 10 independent random coin flips and output a JSON array of 10 items, where each element is strictly either \"H\" or \"T\", e.g. [\"H\", \"T\", \"H\", \"H\", \"T\", \"T\", \"H\", \"T\", \"H\", \"T\"]. Output only the JSON array, with no other text or markdown codeblocks."
+  arr_perm5: {
+    zh_title: "Q8: [1,2,3,4,5] 随机置乱排列",
+    en_title: "Q8: [1,2,3,4,5] Random Permutation Array",
+    zh_prompt: "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_grid_walk6: {
+    zh_title: "Q9: 6步二维网格随机游走路径",
+    en_title: "Q9: 6-Step 2D Random Walk Array",
+    zh_prompt: "从坐标原点出发进行6步独立随机游走，每步仅在上(U)、下(D)、左(L)、右(R)中独立随机选择一个大写方向。以包含这6个字符的JSON数组直接输出，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate a 6-step independent random walk from the origin, choosing from ['U', 'D', 'L', 'R'] at each step. Output as a JSON array of 6 directional letters. Output only the JSON array, with no other text or markdown codeblocks."
   },
   arr_rps5: {
-    zh_title: "Q8: 5局石头剪刀布出拳序列",
-    en_title: "Q8: 5-Round Rock-Paper-Scissors Array",
+    zh_title: "Q10: 5局石头剪刀布出拳序列",
+    en_title: "Q10: 5-Round Rock-Paper-Scissors Array",
     zh_prompt: "进行5次完全独立的石头剪刀布随机选择，输出一个JSON数组，例如[\"石头\", \"剪刀\", \"石头\", \"布\", \"剪刀\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
     en_prompt: "Please simulate 5 independent rounds of Rock-Paper-Scissors and output a JSON array of 5 moves from [\"Rock\", \"Scissors\", \"Paper\"], e.g. [\"Rock\", \"Scissors\", \"Paper\", \"Rock\", \"Scissors\"]. Output only the JSON array, with no other text or markdown codeblocks."
   },
-  arr_perm5: {
-    zh_title: "Q9: [1,2,3,4,5] 随机置乱排列",
-    en_title: "Q9: [1,2,3,4,5] Random Permutation Array",
-    zh_prompt: "将数字[1, 2, 3, 4, 5]完全随机打乱，输出一个打乱后的JSON数组，例如[3, 1, 5, 2, 4]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
-    en_prompt: "Please randomly shuffle the numbers [1, 2, 3, 4, 5] and output a JSON array, e.g. [3, 1, 5, 2, 4]. Each integer from 1 to 5 must appear exactly once. Output only the JSON array, with no other text or markdown codeblocks."
+  arr_coin10: {
+    zh_title: "Q11: 10次独立抛硬币正反面序列",
+    en_title: "Q11: 10-Toss Bernoulli Coin Flip Array",
+    zh_prompt: "进行10次完全独立的抛硬币随机试验，输出一个包含10个元素（仅限\"正\"或\"反\"）的JSON数组，例如[\"正\", \"反\", \"正\", \"正\", \"反\", \"反\", \"正\", \"反\", \"正\", \"反\"]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please simulate 10 independent random coin flips and output a JSON array of 10 items, where each element is strictly either \"H\" or \"T\", e.g. [\"H\", \"T\", \"H\", \"H\", \"T\", \"T\", \"H\", \"T\", \"H\", \"T\"]. Output only the JSON array, with no other text or markdown codeblocks."
+  },
+  arr_bit8: {
+    zh_title: "Q12: 8位二进制独立随机比特流",
+    en_title: "Q12: 8-Bit Random Binary Stream Array",
+    zh_prompt: "生成一个包含8个独立随机二进制比特（0或1）的JSON数组，例如[0, 1, 1, 0, 1, 0, 0, 1]。仅输出该JSON数组，严禁任何多余文字或markdown代码块。",
+    en_prompt: "Please generate a JSON array of 8 independent random binary bits (0 or 1), formatted as [0, 1, 1, 0, 1, 0, 0, 1]. Output only the JSON array, with no other text or markdown codeblocks."
   }
 };
 
@@ -649,7 +649,7 @@ function applyLanguage(lang) {
     if (outputTipEl) outputTipEl.textContent = t("output_tip");
 
     const select = row.querySelector(".row-probe-select");
-    const currentProbeId = select ? select.value : "arr_int5";
+    const currentProbeId = select ? select.value : "arr_int_big5";
     if (select) {
       select.innerHTML = buildProbeOptionsHtml(currentProbeId);
     }
@@ -842,13 +842,13 @@ function buildProbeOptionsHtml(selectedProbeId) {
 
   const list = (PROBES_DATA && PROBES_DATA.length > 0)
     ? PROBES_DATA
-    : Object.keys(PROBE_I18N).map(k => ({ id: k, is_recommended: ["arr_int5", "arr_pseudo_cvc5", "arr_int_big5", "arr_grid_walk6"].includes(k) }));
+    : Object.keys(PROBE_I18N).map(k => ({ id: k, is_recommended: ["arr_int_big5", "arr_pseudo_cvc5", "arr_int5", "arr_letter5", "arr_grid_walk6"].includes(k) }));
 
   list.forEach(p => {
     const isSel = p.id === selectedProbeId;
     const item = PROBE_I18N[p.id];
     const title = item ? (currentLang === "en" ? item.en_title : item.zh_title) : (p.title || p.id);
-    const isRecommended = p.is_recommended !== false && ["arr_int5", "arr_pseudo_cvc5", "arr_int_big5", "arr_grid_walk6"].includes(p.id);
+    const isRecommended = p.is_recommended !== false && ["arr_int_big5", "arr_pseudo_cvc5", "arr_int5", "arr_letter5", "arr_grid_walk6"].includes(p.id);
     const optStr = `<option value="${p.id}" ${isSel ? "selected" : ""}>${title}</option>`;
     if (isRecommended) {
       recOptions += optStr;
@@ -870,7 +870,7 @@ function buildProbeOptionsHtml(selectedProbeId) {
 /**
  * Submissions Management (Full-Width, Left-Right Split, Bilingual, Larger Fonts)
  */
-function addSubmissionRow(probeId = "arr_int5", rawText = "") {
+function addSubmissionRow(probeId = "arr_int_big5", rawText = "") {
   rowCounter++;
   const container = document.getElementById("submissions-list");
   if (!container) return;
@@ -992,7 +992,7 @@ function deleteRow(btnEl) {
   row.remove();
   const remaining = document.querySelectorAll(".submission-row");
   if (remaining.length === 0) {
-    addSubmissionRow("arr_int5", "");
+    addSubmissionRow("arr_int_big5", "");
   }
 }
 
@@ -1000,7 +1000,7 @@ function resetSubmissions() {
   const container = document.getElementById("submissions-list");
   if (!container) return;
   container.innerHTML = "";
-  addSubmissionRow("arr_int5", "");
+  addSubmissionRow("arr_int_big5", "");
   const consentEl = document.getElementById("consent-checkbox");
   if (consentEl) {
     consentEl.checked = false;
@@ -2222,7 +2222,7 @@ window.submitDirectContribution = submitDirectContribution;
  * ============================================================================
  */
 let currentMatrixData = null;
-let currentMatrixProbeId = "arr_int5";
+let currentMatrixProbeId = "arr_int_big5";
 
 /**
  * Modern Custom Dropdown System
