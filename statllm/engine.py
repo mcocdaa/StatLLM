@@ -536,12 +536,12 @@ class LikelihoodEvaluator:
             v_str_en = ", ".join(volatile_probes) if volatile_probes else "certain low-SNR probes"
             explanation_zh = (
                 f"原始最大似然推断中，各题目等权累加判定为 [{top_raw_model}] ({top_raw_prob*100:.1f}%)。"
-                f"但在稳健抗涨落分析中，检测到 [{v_str_zh}] 在核心候选对竞争中存在显著负轴下尾倒挂风险，其贡献被自适应降低；"
-                f"高信噪比探针主导了稳健推断，判定成功修正为 [{robust_top_model}] ({robust_top_prob*100:.1f}%)。"
+                f"但在稳健抗涨落分析中，检测到 [{v_str_zh}] 在两款核心模型对抗时存在显著负轴倒挂（<0%占比高，极易相互碰撞误判），系统自适应降低其权重；"
+                f"高信噪比探针（负轴倒挂率极低）主导了推断，判定成功修正为 [{robust_top_model}] ({robust_top_prob*100:.1f}%)。"
             )
             explanation_en = (
                 f"Raw likelihood favored [{top_raw_model}] ({top_raw_prob*100:.1f}%) with equal probe weights. "
-                f"In stability-weighted robust analysis, [{v_str_en}] exhibited significant downside tail risk between top contenders and was downweighted; "
+                f"In stability-weighted robust analysis, [{v_str_en}] exhibited significant downside inversion (<0 fraction) between top contenders and was downweighted; "
                 f"high-SNR probes dominated the evidence, successfully flipping the robust verdict to [{robust_top_model}] ({robust_top_prob*100:.1f}%)."
             )
         else:
