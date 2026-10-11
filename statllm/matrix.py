@@ -53,11 +53,46 @@ def get_probe_matrix(
     all_margins: List[float] = []
     all_win_rates: List[float] = []
 
+    full_counts = db.get_all_model_probe_counts()
+
     for mA in models:
         s_list = data[mA]
+        c_dict, tot = full_counts.get(mA, {}).get(probe_id, ({}, 0.0))
         posts_list = []
         for raw in s_list:
-            res = evaluator.evaluate([{"probe_id": probe_id, "raw_text": raw}], positional_lambda=0.25)
+            parse_res = probe.parse(raw)
+            tokens = parse_res.get("parsed_tokens", [])
+            traits = parse_res.get("traits", {})
+
+            # Subtract this test sample's counts for strict out-of-sample generalization evaluation
+            c_oos = dict(c_dict)
+            for idx, tok in enumerate(tokens):
+                t_str = str(tok)
+                c_oos[t_str] = max(0.0, c_oos.get(t_str, 0.0) - 1.0)
+                c_oos[f"pos:{idx}:{t_str}"] = max(0.0, c_oos.get(f"pos:{idx}:{t_str}", 0.0) - 1.0)
+                if probe_id == "arr_int_big5":
+                    if len(t_str) >= 2:
+                        c_oos[f"pref:{t_str[:2]}"] = max(0.0, c_oos.get(f"pref:{t_str[:2]}", 0.0) - 1.0)
+                        c_oos[f"pos_pref:{idx}:{t_str[:2]}"] = max(0.0, c_oos.get(f"pos_pref:{idx}:{t_str[:2]}", 0.0) - 1.0)
+                    if len(t_str) >= 1:
+                        c_oos[f"lead:{t_str[0]}"] = max(0.0, c_oos.get(f"lead:{t_str[0]}", 0.0) - 1.0)
+                elif probe_id == "arr_pseudo_cvc5" and len(t_str) == 3:
+                    c_oos[f"init:{t_str[0]}"] = max(0.0, c_oos.get(f"init:{t_str[0]}", 0.0) - 1.0)
+                    c_oos[f"vow:{t_str[1]}"] = max(0.0, c_oos.get(f"vow:{t_str[1]}", 0.0) - 1.0)
+                    c_oos[f"coda:{t_str[2]}"] = max(0.0, c_oos.get(f"coda:{t_str[2]}", 0.0) - 1.0)
+
+            if "has_duplicates" in traits:
+                c_oos[f"trait:has_dup_{traits['has_duplicates']}"] = max(0.0, c_oos.get(f"trait:has_dup_{traits['has_duplicates']}", 0.0) - 1.0)
+            if "is_sorted" in traits:
+                c_oos[f"trait:is_sorted_{traits['is_sorted']}"] = max(0.0, c_oos.get(f"trait:is_sorted_{traits['is_sorted']}", 0.0) - 1.0)
+            if "has_consecutive" in traits and traits["has_consecutive"] is not None:
+                c_oos[f"trait:consec_{traits['has_consecutive']}"] = max(0.0, c_oos.get(f"trait:consec_{traits['has_consecutive']}", 0.0) - 1.0)
+
+            m_oos = dict(full_counts)
+            m_oos[mA] = dict(full_counts.get(mA, {}))
+            m_oos[mA][probe_id] = (c_oos, max(1.0, tot - len(tokens)))
+
+            res = evaluator.evaluate([{"probe_id": probe_id, "raw_text": raw}], matrix=m_oos, positional_lambda=0.25)
             posts_list.append(res["posteriors"])
 
         matrix[mA] = {}

@@ -157,20 +157,52 @@ class Database:
 
             # Update token counts for each token in array
             for idx, tok in enumerate(parsed_tokens):
+                tok_str = str(tok)
                 cursor.execute("""
                 INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
                 VALUES (?, ?, ?, ?)
                 ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
                 weighted_count = weighted_count + ?
-                """, (model_name, probe_id, tok, float(weight), float(weight)))
+                """, (model_name, probe_id, tok_str, float(weight), float(weight)))
 
-                pos_tok = f"pos:{idx}:{tok}"
+                pos_tok = f"pos:{idx}:{tok_str}"
                 cursor.execute("""
                 INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
                 VALUES (?, ?, ?, ?)
                 ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
                 weighted_count = weighted_count + ?
                 """, (model_name, probe_id, pos_tok, float(weight), float(weight)))
+
+                # Sub-token features for arr_int_big5
+                if probe_id == "arr_int_big5":
+                    if len(tok_str) >= 2:
+                        pref_tok = f"pref:{tok_str[:2]}"
+                        pos_pref_tok = f"pos_pref:{idx}:{tok_str[:2]}"
+                        for ptok in (pref_tok, pos_pref_tok):
+                            cursor.execute("""
+                            INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
+                            VALUES (?, ?, ?, ?)
+                            ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
+                            weighted_count = weighted_count + ?
+                            """, (model_name, probe_id, ptok, float(weight), float(weight)))
+                    if len(tok_str) >= 1:
+                        lead_tok = f"lead:{tok_str[0]}"
+                        cursor.execute("""
+                        INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
+                        weighted_count = weighted_count + ?
+                        """, (model_name, probe_id, lead_tok, float(weight), float(weight)))
+
+                # Sub-token phonotactic features for arr_pseudo_cvc5
+                if probe_id == "arr_pseudo_cvc5" and len(tok_str) == 3:
+                    for feat_tok in (f"init:{tok_str[0]}", f"vow:{tok_str[1]}", f"coda:{tok_str[2]}"):
+                        cursor.execute("""
+                        INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
+                        weighted_count = weighted_count + ?
+                        """, (model_name, probe_id, feat_tok, float(weight), float(weight)))
 
             # Update sequence trait counts
             if traits:
@@ -191,6 +223,15 @@ class Database:
                     ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
                     weighted_count = weighted_count + ?
                     """, (model_name, probe_id, sort_tok, float(weight), float(weight)))
+
+                if "has_consecutive" in traits:
+                    consec_tok = f"trait:consec_{traits['has_consecutive']}"
+                    cursor.execute("""
+                    INSERT INTO token_counts (model_name, probe_id, token, weighted_count)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(model_name, probe_id, token) DO UPDATE SET
+                    weighted_count = weighted_count + ?
+                    """, (model_name, probe_id, consec_tok, float(weight), float(weight)))
 
                 if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
                     perm_tok = f"perm:{traits['canonical_perm']}"
@@ -236,14 +277,27 @@ class Database:
                 w = float(s.get("weight", 1.0))
                 tokens = s.get("parsed_tokens", [])
                 for idx, t in enumerate(tokens):
-                    token_deltas[(m, pid, str(t))] += w
-                    token_deltas[(m, pid, f"pos:{idx}:{t}")] += w
+                    tok_str = str(t)
+                    token_deltas[(m, pid, tok_str)] += w
+                    token_deltas[(m, pid, f"pos:{idx}:{tok_str}")] += w
+                    if pid == "arr_int_big5":
+                        if len(tok_str) >= 2:
+                            token_deltas[(m, pid, f"pref:{tok_str[:2]}")] += w
+                            token_deltas[(m, pid, f"pos_pref:{idx}:{tok_str[:2]}")] += w
+                        if len(tok_str) >= 1:
+                            token_deltas[(m, pid, f"lead:{tok_str[0]}")] += w
+                    elif pid == "arr_pseudo_cvc5" and len(tok_str) == 3:
+                        token_deltas[(m, pid, f"init:{tok_str[0]}")] += w
+                        token_deltas[(m, pid, f"vow:{tok_str[1]}")] += w
+                        token_deltas[(m, pid, f"coda:{tok_str[2]}")] += w
                 
                 traits = s.get("traits", {})
                 if "has_duplicates" in traits:
                     token_deltas[(m, pid, f"trait:has_dup_{traits['has_duplicates']}")] += w
                 if "is_sorted" in traits:
                     token_deltas[(m, pid, f"trait:is_sorted_{traits['is_sorted']}")] += w
+                if "has_consecutive" in traits:
+                    token_deltas[(m, pid, f"trait:consec_{traits['has_consecutive']}")] += w
                 if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
                     token_deltas[(m, pid, f"perm:{traits['canonical_perm']}")] += w
 
@@ -274,8 +328,20 @@ class Database:
                 except Exception:
                     continue
                 for idx, tok in enumerate(tokens):
-                    token_deltas[(m, pid, str(tok))] += w
-                    token_deltas[(m, pid, f"pos:{idx}:{tok}")] += w
+                    tok_str = str(tok)
+                    token_deltas[(m, pid, tok_str)] += w
+                    token_deltas[(m, pid, f"pos:{idx}:{tok_str}")] += w
+                    if pid == "arr_int_big5":
+                        if len(tok_str) >= 2:
+                            token_deltas[(m, pid, f"pref:{tok_str[:2]}")] += w
+                            token_deltas[(m, pid, f"pos_pref:{idx}:{tok_str[:2]}")] += w
+                        if len(tok_str) >= 1:
+                            token_deltas[(m, pid, f"lead:{tok_str[0]}")] += w
+                    elif pid == "arr_pseudo_cvc5" and len(tok_str) == 3:
+                        token_deltas[(m, pid, f"init:{tok_str[0]}")] += w
+                        token_deltas[(m, pid, f"vow:{tok_str[1]}")] += w
+                        token_deltas[(m, pid, f"coda:{tok_str[2]}")] += w
+
                 has_dup = len(tokens) != len(set(tokens))
                 token_deltas[(m, pid, f"trait:has_dup_{has_dup}")] += w
                 if pid == "arr_int5":
@@ -285,7 +351,23 @@ class Database:
                         token_deltas[(m, pid, f"trait:is_sorted_{is_sorted}")] += w
                     except Exception:
                         pass
-                if pid == "arr_perm5":
+                elif pid == "arr_int_big5":
+                    try:
+                        nums = [int(x) for x in tokens]
+                        is_sorted = (nums == sorted(nums)) or (nums == sorted(nums, reverse=True))
+                        token_deltas[(m, pid, f"trait:is_sorted_{is_sorted}")] += w
+                        has_consec = False
+                        for t in tokens:
+                            st = str(t)
+                            if len(st) >= 4:
+                                diffs = [int(st[i+1]) - int(st[i]) for i in range(len(st)-1)]
+                                if all(d == 1 for d in diffs) or all(d == -1 for d in diffs):
+                                    has_consec = True
+                                    break
+                        token_deltas[(m, pid, f"trait:consec_{has_consec}")] += w
+                    except Exception:
+                        pass
+                elif pid == "arr_perm5":
                     token_deltas[(m, pid, f"perm:{','.join(str(x) for x in tokens)}")] += w
 
             for (m, pid, tok), w in token_deltas.items():

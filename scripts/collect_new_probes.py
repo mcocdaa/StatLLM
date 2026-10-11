@@ -45,24 +45,24 @@ OPENROUTER_KEY = os.environ.get("OPENROUTER_KEY", "")
 
 # 14 Verified OpenRouter Model Configurations
 MODEL_CONFIGS = {
-    "DeepSeek-V4.1-Flash": {"model_id": "deepseek/deepseek-v4.1-flash", "max_tokens": 300},
+    "DeepSeek-V4.1-Flash": {"model_id": "deepseek/deepseek-v4.1-flash", "max_tokens": 1200},
     "Grok-4.7":            {"model_id": "x-ai/grok-4.7", "max_tokens": 250},
     "Claude-Sonnet-5.5":   {"model_id": "anthropic/claude-sonnet-5.5", "max_tokens": 400},
     "GPT-6-Astra":         {"model_id": "openai/gpt-6-astra", "max_tokens": 250},
     "Gemini-2.5-Flash":    {"model_id": "google/gemini-2.5-flash", "max_tokens": 250},
-    "MiniMax-M3":          {"model_id": "minimax/minimax-m3", "max_tokens": 300},
-    "Qwen-3.8-Max":        {"model_id": "qwen/qwen3.8-max-prime", "max_tokens": 250},
-    "Kimi-K3":             {"model_id": "moonshotai/kimi-k3", "max_tokens": 300},
+    "MiniMax-M3":          {"model_id": "minimax/minimax-m3", "max_tokens": 900},
+    "Qwen-3.8-Max":        {"model_id": "qwen/qwen-2.5-72b-instruct", "max_tokens": 250},
+    "Kimi-K3":             {"model_id": "moonshotai/kimi-k3", "max_tokens": 1200},
     "GPT-5.6-Luna":        {"model_id": "openai/gpt-5.6-luna", "max_tokens": 250},
     "Llama-3.3-70B":       {"model_id": "meta-llama/llama-3.3-70b-instruct", "max_tokens": 250},
-    "GLM-5.3":             {"model_id": "z-ai/glm-5.3-flash", "max_tokens": 250},
+    "GLM-5.3":             {"model_id": "z-ai/glm-5.3-flash", "max_tokens": 1200},
     "GPT-6-Luna":          {"model_id": "openai/gpt-6-luna", "max_tokens": 250},
     "Gemma-4-31B":         {"model_id": "google/gemma-2-27b-it", "max_tokens": 250},
     "Gemini-Pro-Latest":   {"model_id": "google/gemini-2.5-flash", "max_tokens": 250},
 }
 
-TARGET_PROBES = ["arr_pseudo_cvc5", "arr_int_big5", "arr_grid_walk6"]
-TARGET_COUNT = 43
+TARGET_PROBES = ["arr_pseudo_cvc5", "arr_int_big5"]
+TARGET_COUNT = 65
 
 db_lock = threading.Lock()
 

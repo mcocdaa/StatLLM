@@ -147,6 +147,14 @@ class LikelihoodEvaluator:
             raise ValueError("No baseline models found in database. Please seed the database first.")
 
         # 3. Compute joint log-likelihood for each model
+        # Compute reference baseline volume per probe so zero-sample models receive calibrated floor probabilities
+        probe_ref_tot = {}
+        for record in parsed:
+            p_id = record["probe_id"]
+            if p_id not in probe_ref_tot:
+                tots = [matrix[mod].get(p_id, ({}, 0.0))[1] for mod in model_names if matrix.get(mod, {}).get(p_id, ({}, 0.0))[1] > 0]
+                probe_ref_tot[p_id] = max(tots) if tots else 100.0
+
         log_likelihoods = {}
         for m in model_names:
             ll = 0.0
@@ -157,13 +165,55 @@ class LikelihoodEvaluator:
                 exp_len = record["expected_length"]
                 traits = record["traits"]
                 
-                counts_dict, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
+                counts_dict, raw_tot = matrix.get(m, {}).get(pid, ({}, 0.0))
+                tot = raw_tot if raw_tot > 0.0 else probe_ref_tot[pid]
                 
-                # Element-wise log likelihoods (interpolated with position)
+                # Element-wise log likelihoods (interpolated with position and hierarchical sub-features)
                 for idx, tok in enumerate(tokens):
-                    p = self.get_interpolated_token_prob(
-                        counts_dict, tot, tok, idx, v_size, exp_len, lam
-                    )
+                    tok_str = str(tok)
+                    if pid == "arr_int_big5":
+                        p_exact = self.get_interpolated_token_prob(
+                            counts_dict, tot, tok_str, idx, 90000, exp_len, lam
+                        )
+                        if len(tok_str) >= 2:
+                            pref = tok_str[:2]
+                            c_pref = counts_dict.get(f"pref:{pref}", 0.0)
+                            p_pref_glob = (c_pref + self.beta) / (tot + 90.0 * self.beta)
+                            c_pref_pos = counts_dict.get(f"pos_pref:{idx}:{pref}", 0.0)
+                            p_pref_pos = (c_pref_pos + self.beta) / ((tot / max(1, exp_len)) + 90.0 * self.beta)
+                            p_pref = (1.0 - lam) * p_pref_glob + lam * p_pref_pos
+                        else:
+                            p_pref = 1.0 / 90.0
+
+                        if len(tok_str) >= 1:
+                            lead = tok_str[0]
+                            c_lead = counts_dict.get(f"lead:{lead}", 0.0)
+                            p_lead = (c_lead + self.beta) / (tot + 9.0 * self.beta)
+                        else:
+                            p_lead = 1.0 / 9.0
+
+                        p = 0.25 * p_exact + 0.55 * p_pref + 0.20 * p_lead
+                    elif pid == "arr_pseudo_cvc5":
+                        p_exact = self.get_interpolated_token_prob(
+                            counts_dict, tot, tok_str, idx, 2205, exp_len, lam
+                        )
+                        if len(tok_str) == 3:
+                            c_init = counts_dict.get(f"init:{tok_str[0]}", 0.0)
+                            p_init = (c_init + self.beta) / (tot + 21.0 * self.beta)
+                            c_vow = counts_dict.get(f"vow:{tok_str[1]}", 0.0)
+                            p_vow = (c_vow + self.beta) / (tot + 5.0 * self.beta)
+                            c_coda = counts_dict.get(f"coda:{tok_str[2]}", 0.0)
+                            p_coda = (c_coda + self.beta) / (tot + 21.0 * self.beta)
+                            p_cvc = p_init * p_vow * p_coda
+                        else:
+                            p_cvc = 1.0 / 2205.0
+
+                        p = 0.40 * p_exact + 0.60 * p_cvc
+                    else:
+                        p = self.get_interpolated_token_prob(
+                            counts_dict, tot, tok_str, idx, v_size, exp_len, lam
+                        )
+
                     ll += math.log(max(p, 1e-12))
 
                 # Trait log-likelihoods normalized by sample mass (composite likelihood)
@@ -181,6 +231,11 @@ class LikelihoodEvaluator:
                     c_sort = counts_dict.get(sort_tok, 0.0)
                     p_sort = (c_sort + self.beta) / (sample_tot + 2.0 * self.beta)
                     ll += 0.5 * math.log(max(p_sort, 1e-12))
+                if "has_consecutive" in traits and traits["has_consecutive"] is not None:
+                    consec_tok = f"trait:consec_{traits['has_consecutive']}"
+                    c_consec = counts_dict.get(consec_tok, 0.0)
+                    p_consec = (c_consec + self.beta) / (sample_tot + 2.0 * self.beta)
+                    ll += 0.5 * math.log(max(p_consec, 1e-12))
                 if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
                     perm_tok = f"perm:{traits['canonical_perm']}"
                     c_perm = counts_dict.get(perm_tok, 0.0)
@@ -195,12 +250,23 @@ class LikelihoodEvaluator:
         for rec in parsed:
             n_tok = len(rec["parsed_tokens"])
             v_size = max(1, rec["element_vocab_size"])
-            null_ll += n_tok * math.log(1.0 / v_size)
+            p_id = rec["probe_id"]
+            if p_id == "arr_int_big5":
+                null_p = 0.25 * (1.0 / 90000.0) + 0.55 * (1.0 / 90.0) + 0.20 * (1.0 / 9.0)
+                null_ll += n_tok * math.log(null_p)
+            elif p_id == "arr_pseudo_cvc5":
+                null_p = 0.40 * (1.0 / 2205.0) + 0.60 * ((1.0 / 21.0) * (1.0 / 5.0) * (1.0 / 21.0))
+                null_ll += n_tok * math.log(null_p)
+            else:
+                null_ll += n_tok * math.log(1.0 / v_size)
             total_decisions += n_tok
             if "has_duplicates" in rec["traits"]:
                 null_ll += 0.5 * math.log(0.5)
                 total_decisions += 0.5
             if "is_sorted" in rec["traits"]:
+                null_ll += 0.5 * math.log(0.5)
+                total_decisions += 0.5
+            if "has_consecutive" in rec["traits"] and rec["traits"]["has_consecutive"] is not None:
                 null_ll += 0.5 * math.log(0.5)
                 total_decisions += 0.5
             if "canonical_perm" in rec["traits"] and rec["traits"]["canonical_perm"] != "INVALID":
