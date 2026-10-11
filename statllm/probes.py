@@ -913,27 +913,27 @@ class GridWalkArrayProbe(ArrayProbe):
 
 # Active High-Discrimination Benchmark Suite (Ordered strictly by empirical Out-of-Sample MDI)
 PROBES: Dict[str, ArrayProbe] = {
-    "arr_pseudo_cvc5": PseudoCVCArrayProbe(),# Q1: 3字母高熵伪词音节 (⭐⭐⭐⭐, OOS MDI 41.36, Tier A)
-    "arr_int5": IntArrayProbe(),             # Q2: 经典 1~100 整数基准 (⭐⭐⭐⭐, OOS MDI 34.83, Tier A)
-    "arr_letter5": LetterArrayProbe(),       # Q3: 5个随机大写字母 (⭐⭐⭐, OOS MDI 29.75, Tier B)
-    "arr_int_big5": BigIntArrayProbe(),      # Q4: 跨数量级大整数 (⭐⭐⭐, OOS MDI 26.95, Tier B)
-    "arr_grid_walk6": GridWalkArrayProbe(),  # Q9: 2D网格随机游走 (⭐⭐, OOS MDI 4.73, Tier D, 空间几何互补)
+    "arr_pseudo_cvc5": PseudoCVCArrayProbe(),# Q1: 3字母高熵伪词音节 (⭐⭐⭐⭐, OOS MDI 42.89, Tier A)
+    "arr_int5": IntArrayProbe(),             # Q2: 经典 1~100 整数基准 (⭐⭐⭐⭐, OOS MDI 39.26, Tier A)
+    "arr_letter5": LetterArrayProbe(),       # Q3: 5个随机大写字母 (⭐⭐⭐, OOS MDI 34.44, Tier A)
+    "arr_int_big5": BigIntArrayProbe(),      # Q4: 跨数量级大整数 (⭐⭐⭐, OOS MDI 26.68, Tier B)
+    "arr_prime5": PrimeArrayProbe(),         # Q5: 100以内质数基准 (⭐⭐⭐, OOS MDI 20.20, Tier B)
 }
 
 # Complete Registry for All 12 Empirical Probes (Ordered Strictly by Out-of-Sample MDI Descending)
 ALL_PROBES: Dict[str, ArrayProbe] = {
-    "arr_pseudo_cvc5": PROBES["arr_pseudo_cvc5"],# Q1 (Tier A, OOS MDI 41.36)
-    "arr_int5": PROBES["arr_int5"],            # Q2 (Tier A, OOS MDI 34.83)
-    "arr_letter5": PROBES["arr_letter5"],      # Q3 (Tier B, OOS MDI 29.75)
-    "arr_int_big5": PROBES["arr_int_big5"],    # Q4 (Tier B, OOS MDI 26.95)
-    "arr_prime5": PrimeArrayProbe(),           # Q5 (Tier B, OOS MDI 17.02)
-    "arr_dice6": DiceArrayProbe(),             # Q6 (Tier C, OOS MDI 7.44)
-    "arr_color5": ColorArrayProbe(),           # Q7 (Tier C, OOS MDI 7.37)
-    "arr_perm5": PermutationArrayProbe(),      # Q8 (Tier C, OOS MDI 6.18)
-    "arr_grid_walk6": PROBES["arr_grid_walk6"],# Q9 (Tier D, OOS MDI 4.73)
-    "arr_coin10": CoinArrayProbe(),            # Q10 (Tier D, OOS MDI 0.93)
-    "arr_bit8": BitArrayProbe(),               # Q11 (Tier D, OOS MDI 0.90)
-    "arr_rps5": RPSArrayProbe(),               # Q12 (Tier D, OOS MDI 0.86)
+    "arr_pseudo_cvc5": PROBES["arr_pseudo_cvc5"],# Q1 (Tier A, OOS MDI 42.89)
+    "arr_int5": PROBES["arr_int5"],            # Q2 (Tier A, OOS MDI 39.26)
+    "arr_letter5": PROBES["arr_letter5"],      # Q3 (Tier A, OOS MDI 34.44)
+    "arr_int_big5": PROBES["arr_int_big5"],    # Q4 (Tier B, OOS MDI 26.68)
+    "arr_prime5": PROBES["arr_prime5"],        # Q5 (Tier B, OOS MDI 20.20)
+    "arr_dice6": DiceArrayProbe(),             # Q6 (Tier C, OOS MDI 7.63)
+    "arr_color5": ColorArrayProbe(),           # Q7 (Tier C, OOS MDI 8.68)
+    "arr_perm5": PermutationArrayProbe(),      # Q8 (Tier C, OOS MDI 7.34)
+    "arr_grid_walk6": GridWalkArrayProbe(),    # Q9 (Tier D, OOS MDI 4.92)
+    "arr_coin10": CoinArrayProbe(),            # Q10 (Tier D, OOS MDI 1.03)
+    "arr_bit8": BitArrayProbe(),               # Q11 (Tier D, OOS MDI 1.04)
+    "arr_rps5": RPSArrayProbe(),               # Q12 (Tier D, OOS MDI 1.16)
 }
 
 

@@ -156,6 +156,9 @@ class LikelihoodEvaluator:
                 probe_ref_tot[p_id] = max(tots) if tots else 100.0
 
         log_likelihoods = {}
+        model_decision_diffs = {m: [] for m in model_names}
+        model_decision_weights = {m: [] for m in model_names}
+
         for m in model_names:
             ll = 0.0
             for record in parsed:
@@ -167,6 +170,15 @@ class LikelihoodEvaluator:
                 
                 counts_dict, raw_tot = matrix.get(m, {}).get(pid, ({}, 0.0))
                 tot = raw_tot if raw_tot > 0.0 else probe_ref_tot[pid]
+                
+                # Determine null baseline probability for tokens of this probe
+                if pid == "arr_int_big5":
+                    null_tok_p = 0.25 * (1.0 / 90000.0) + 0.55 * (1.0 / 90.0) + 0.20 * (1.0 / 9.0)
+                elif pid == "arr_pseudo_cvc5":
+                    null_tok_p = 0.40 * (1.0 / 2205.0) + 0.60 * ((1.0 / 21.0) * (1.0 / 5.0) * (1.0 / 21.0))
+                else:
+                    null_tok_p = 1.0 / max(1, v_size)
+                null_tok_ll = math.log(max(null_tok_p, 1e-12))
                 
                 # Element-wise log likelihoods (interpolated with position and hierarchical sub-features)
                 for idx, tok in enumerate(tokens):
@@ -214,7 +226,10 @@ class LikelihoodEvaluator:
                             counts_dict, tot, tok_str, idx, v_size, exp_len, lam
                         )
 
-                    ll += math.log(max(p, 1e-12))
+                    item_ll = math.log(max(p, 1e-12))
+                    ll += item_ll
+                    model_decision_diffs[m].append(item_ll - null_tok_ll)
+                    model_decision_weights[m].append(1.0)
 
                 # Trait log-likelihoods normalized by sample mass (composite likelihood)
                 sample_tot = counts_dict.get("trait:has_dup_True", 0.0) + counts_dict.get("trait:has_dup_False", 0.0)
@@ -225,60 +240,53 @@ class LikelihoodEvaluator:
                     dup_tok = f"trait:has_dup_{traits['has_duplicates']}"
                     c_dup = counts_dict.get(dup_tok, 0.0)
                     p_dup = (c_dup + self.beta) / (sample_tot + 2.0 * self.beta)
-                    ll += 0.5 * math.log(max(p_dup, 1e-12))
+                    trait_ll = math.log(max(p_dup, 1e-12))
+                    ll += 0.5 * trait_ll
+                    model_decision_diffs[m].append(trait_ll - math.log(0.5))
+                    model_decision_weights[m].append(0.5)
+
                 if "is_sorted" in traits:
                     sort_tok = f"trait:is_sorted_{traits['is_sorted']}"
                     c_sort = counts_dict.get(sort_tok, 0.0)
                     p_sort = (c_sort + self.beta) / (sample_tot + 2.0 * self.beta)
-                    ll += 0.5 * math.log(max(p_sort, 1e-12))
+                    trait_ll = math.log(max(p_sort, 1e-12))
+                    ll += 0.5 * trait_ll
+                    model_decision_diffs[m].append(trait_ll - math.log(0.5))
+                    model_decision_weights[m].append(0.5)
+
                 if "has_consecutive" in traits and traits["has_consecutive"] is not None:
                     consec_tok = f"trait:consec_{traits['has_consecutive']}"
                     c_consec = counts_dict.get(consec_tok, 0.0)
                     p_consec = (c_consec + self.beta) / (sample_tot + 2.0 * self.beta)
-                    ll += 0.5 * math.log(max(p_consec, 1e-12))
+                    trait_ll = math.log(max(p_consec, 1e-12))
+                    ll += 0.5 * trait_ll
+                    model_decision_diffs[m].append(trait_ll - math.log(0.5))
+                    model_decision_weights[m].append(0.5)
+
                 if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
                     perm_tok = f"perm:{traits['canonical_perm']}"
                     c_perm = counts_dict.get(perm_tok, 0.0)
                     p_perm = (c_perm + self.beta) / (sample_tot + 120.0 * self.beta)
-                    ll += 0.8 * math.log(max(p_perm, 1e-12))
+                    trait_ll = math.log(max(p_perm, 1e-12))
+                    ll += 0.8 * trait_ll
+                    model_decision_diffs[m].append(trait_ll - math.log(1.0 / 120.0))
+                    model_decision_weights[m].append(0.8)
 
             log_likelihoods[m] = ll
 
         # 4. Compute independent fitness (open-world calibrated confidence against null baseline)
-        total_decisions = 0.0
-        null_ll = 0.0
-        for rec in parsed:
-            n_tok = len(rec["parsed_tokens"])
-            v_size = max(1, rec["element_vocab_size"])
-            p_id = rec["probe_id"]
-            if p_id == "arr_int_big5":
-                null_p = 0.25 * (1.0 / 90000.0) + 0.55 * (1.0 / 90.0) + 0.20 * (1.0 / 9.0)
-                null_ll += n_tok * math.log(null_p)
-            elif p_id == "arr_pseudo_cvc5":
-                null_p = 0.40 * (1.0 / 2205.0) + 0.60 * ((1.0 / 21.0) * (1.0 / 5.0) * (1.0 / 21.0))
-                null_ll += n_tok * math.log(null_p)
-            else:
-                null_ll += n_tok * math.log(1.0 / v_size)
-            total_decisions += n_tok
-            if "has_duplicates" in rec["traits"]:
-                null_ll += 0.5 * math.log(0.5)
-                total_decisions += 0.5
-            if "is_sorted" in rec["traits"]:
-                null_ll += 0.5 * math.log(0.5)
-                total_decisions += 0.5
-            if "has_consecutive" in rec["traits"] and rec["traits"]["has_consecutive"] is not None:
-                null_ll += 0.5 * math.log(0.5)
-                total_decisions += 0.5
-            if "canonical_perm" in rec["traits"] and rec["traits"]["canonical_perm"] != "INVALID":
-                null_ll += 0.8 * math.log(1.0 / 120.0)
-                total_decisions += 0.8
-
-        d_factor = max(1.0, total_decisions)
         independent_fitness = {}
-        for m, ll in log_likelihoods.items():
-            mean_diff = (ll - null_ll) / d_factor
+        for m in model_names:
+            diffs = np.array(model_decision_diffs[m], dtype=np.float64)
+            weights = np.array(model_decision_weights[m], dtype=np.float64)
+            W = np.sum(weights)
+            mean_diff = (np.sum(diffs * weights) / W) if W > 0 else 0.0
             fit = 1.0 / (1.0 + math.exp(-2.5 * mean_diff))
             independent_fitness[m] = round(fit, 4)
+
+        sample_m = model_names[0] if model_names else ""
+        d_factor = sum(model_decision_weights[sample_m]) if sample_m else 1.0
+        null_ll = (log_likelihoods[sample_m] - sum(w * d for w, d in zip(model_decision_weights[sample_m], model_decision_diffs[sample_m]))) if sample_m else 0.0
 
         # 5. Compute closed-world posterior probabilities via Log-Sum-Exp
         posteriors = self._log_likelihoods_to_posteriors(log_likelihoods)
@@ -291,7 +299,10 @@ class LikelihoodEvaluator:
             ci_post_68,
             model_stats
         ) = self._compute_confidence_intervals(
-            parsed, matrix, model_names, lam=lam
+            parsed, matrix, model_names, lam=lam,
+            model_decision_diffs=model_decision_diffs,
+            model_decision_weights=model_decision_weights,
+            independent_fitness=independent_fitness
         )
 
         # 7. Diagnostics (Ranked by Independent Fitness)
@@ -383,10 +394,13 @@ class LikelihoodEvaluator:
         parsed_records: List[Dict[str, Any]],
         matrix: Dict[str, Dict[str, Tuple[Dict[str, float], float]]],
         model_names: List[str],
-        lam: float = 0.5
-    ) -> Tuple[Dict[str, List[float]], Dict[str, List[float]]]:
+        lam: float = 0.5,
+        model_decision_diffs: Optional[Dict[str, List[float]]] = None,
+        model_decision_weights: Optional[Dict[str, List[float]]] = None,
+        independent_fitness: Optional[Dict[str, float]] = None
+    ) -> Tuple[Dict[str, List[float]], Dict[str, List[float]], Dict[str, List[float]], Dict[str, List[float]], Dict[str, Any]]:
         """
-        Computes rigorous finite-sample 95% Confidence Intervals for each model.
+        Computes rigorous finite-sample Confidence Intervals for each model.
         
         Accounts for:
         1. Token-level & trait observation variance in the test sample (finite sequence length);
@@ -394,94 +408,47 @@ class LikelihoodEvaluator:
         
         Guarantees:
         - Never collapses to zero-width point estimate on n=1 or short prompts;
-        - Lower bound <= Point Estimate <= Upper bound holds strictly;
+        - Lower bound <= Point Estimate <= Upper bound holds strictly (mathematically guaranteed);
         - Naturally tightens as more probes/tokens are provided.
         """
-        decision_items = []
-        for rec in parsed_records:
-            pid = rec["probe_id"]
-            tokens = rec["parsed_tokens"]
-            v_size = max(1, rec["element_vocab_size"])
-            exp_len = rec.get("expected_length", len(tokens))
-            null_t_ll = math.log(1.0 / v_size)
-            
-            for idx, tok in enumerate(tokens):
-                decision_items.append({
-                    "probe_id": pid,
-                    "tok": tok,
-                    "idx": idx,
-                    "v_size": v_size,
-                    "exp_len": exp_len,
-                    "type": "token",
-                    "weight": 1.0,
-                    "null_ll": null_t_ll
-                })
-            
-            traits = rec.get("traits", {})
-            if "has_duplicates" in traits:
-                decision_items.append({
-                    "probe_id": pid,
-                    "val": f"trait:has_dup_{traits['has_duplicates']}",
-                    "v_size": 2,
-                    "type": "trait",
-                    "weight": 0.5,
-                    "null_ll": math.log(0.5)
-                })
-            if "is_sorted" in traits:
-                decision_items.append({
-                    "probe_id": pid,
-                    "val": f"trait:is_sorted_{traits['is_sorted']}",
-                    "v_size": 2,
-                    "type": "trait",
-                    "weight": 0.5,
-                    "null_ll": math.log(0.5)
-                })
-            if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
-                decision_items.append({
-                    "probe_id": pid,
-                    "val": f"perm:{traits['canonical_perm']}",
-                    "v_size": 120,
-                    "type": "trait",
-                    "weight": 0.8,
-                    "null_ll": math.log(1.0 / 120.0)
-                })
-
         ci_fit_95 = {}
         ci_fit_68 = {}
         ci_post_95 = {}
         ci_post_68 = {}
         model_stats = {}
         
+        tested_probes = set(r["probe_id"] for r in parsed_records)
+
         for m in model_names:
-            diffs = []
-            weights = []
-            tot_ref = 0.0
-            
-            for item in decision_items:
-                pid = item["probe_id"]
-                counts_dict, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
-                tot_ref += tot
-                w = item["weight"]
-                
-                if item["type"] == "token":
-                    p = self.get_interpolated_token_prob(
-                        counts_dict, tot, item["tok"], item["idx"], item["v_size"], item["exp_len"], lam
-                    )
-                    item_ll = math.log(max(p, 1e-12))
-                else:
-                    sample_tot = counts_dict.get("trait:has_dup_True", 0.0) + counts_dict.get("trait:has_dup_False", 0.0)
-                    if sample_tot <= 0.0:
-                        sample_tot = tot / max(1, item.get("exp_len", 5))
-                    c_trait = counts_dict.get(item["val"], 0.0)
-                    p = (c_trait + self.beta) / (sample_tot + item["v_size"] * self.beta)
-                    item_ll = math.log(max(p, 1e-12))
-                
-                d = (item_ll - item["null_ll"])
-                diffs.append(d)
-                weights.append(w)
-            
-            diffs = np.array(diffs, dtype=np.float64)
-            weights = np.array(weights, dtype=np.float64)
+            if model_decision_diffs is not None and m in model_decision_diffs and len(model_decision_diffs[m]) > 0:
+                diffs = np.array(model_decision_diffs[m], dtype=np.float64)
+                weights = np.array(model_decision_weights[m], dtype=np.float64)
+            else:
+                # Fallback calculation if not precomputed
+                diffs_list = []
+                weights_list = []
+                for rec in parsed_records:
+                    pid = rec["probe_id"]
+                    tokens = rec["parsed_tokens"]
+                    v_size = max(1, rec["element_vocab_size"])
+                    exp_len = rec.get("expected_length", len(tokens))
+                    counts_dict, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
+                    
+                    if pid == "arr_int_big5":
+                        null_tok_p = 0.25 * (1.0 / 90000.0) + 0.55 * (1.0 / 90.0) + 0.20 * (1.0 / 9.0)
+                    elif pid == "arr_pseudo_cvc5":
+                        null_tok_p = 0.40 * (1.0 / 2205.0) + 0.60 * ((1.0 / 21.0) * (1.0 / 5.0) * (1.0 / 21.0))
+                    else:
+                        null_tok_p = 1.0 / v_size
+                    null_tok_ll = math.log(max(null_tok_p, 1e-12))
+
+                    for idx, tok in enumerate(tokens):
+                        p = self.get_interpolated_token_prob(counts_dict, tot, str(tok), idx, v_size, exp_len, lam)
+                        diffs_list.append(math.log(max(p, 1e-12)) - null_tok_ll)
+                        weights_list.append(1.0)
+                diffs = np.array(diffs_list, dtype=np.float64)
+                weights = np.array(weights_list, dtype=np.float64)
+
             W = np.sum(weights)
             if W <= 0:
                 ci_fit_95[m] = [0.0, 1.0]
@@ -490,12 +457,11 @@ class LikelihoodEvaluator:
                 ci_post_68[m] = [0.0, 1.0]
                 model_stats[m] = {"standard_error": 0.0, "mean_delta_ll": 0.0, "delta_ll": 0.0, "ref_samples": 0, "df": 0}
                 continue
-            
+
             mean_d = np.sum(diffs * weights) / W
             var_d = np.sum(weights * (diffs - mean_d)**2) / max(1.0, W - 1.0)
-            
+
             # Reference baseline effective sample size across tested probes
-            tested_probes = set(r["probe_id"] for r in parsed_records)
             ref_sample_counts = []
             for pid in tested_probes:
                 cd, t = matrix.get(m, {}).get(pid, ({}, 0.0))
@@ -506,28 +472,34 @@ class LikelihoodEvaluator:
                 ref_sample_counts.append(s_tot)
             avg_tot = float(np.mean(ref_sample_counts)) if ref_sample_counts else 10.0
             ref_var = 1.0 / max(3.0, avg_tot)
-            
+
             se = math.sqrt(var_d / W + ref_var)
             df = max(2, int(round(W - 1)))
-            
+
             # 95% Confidence Interval (2 sigma, tail bounds)
             t_crit_95 = 1.96 + 2.5 / df
             low_d_95 = mean_d - t_crit_95 * se
             high_d_95 = mean_d + t_crit_95 * se
             fit_low_95 = 1.0 / (1.0 + math.exp(-2.5 * low_d_95))
             fit_high_95 = 1.0 / (1.0 + math.exp(-2.5 * high_d_95))
-            
+
             # 68% Confidence Interval (1 sigma, core central mass)
             t_crit_68 = 1.00 + 0.8 / df
             low_d_68 = mean_d - t_crit_68 * se
             high_d_68 = mean_d + t_crit_68 * se
             fit_low_68 = 1.0 / (1.0 + math.exp(-2.5 * low_d_68))
             fit_high_68 = 1.0 / (1.0 + math.exp(-2.5 * high_d_68))
-            
-            ci_fit_95[m] = [round(float(fit_low_95), 4), round(float(fit_high_95), 4)]
-            ci_fit_68[m] = [round(float(fit_low_68), 4), round(float(fit_high_68), 4)]
-            ci_post_95[m] = [round(max(0.0, float(fit_low_95 * 0.9)), 4), round(min(1.0, float(fit_high_95 * 1.05)), 4)]
-            ci_post_68[m] = [round(max(0.0, float(fit_low_68 * 0.95)), 4), round(min(1.0, float(fit_high_68 * 1.02)), 4)]
+
+            fit_val = independent_fitness.get(m, round(1.0 / (1.0 + math.exp(-2.5 * mean_d)), 4)) if independent_fitness else round(1.0 / (1.0 + math.exp(-2.5 * mean_d)), 4)
+            c68_low = min(round(float(fit_low_68), 4), fit_val)
+            c68_high = max(round(float(fit_high_68), 4), fit_val)
+            c95_low = min(round(float(fit_low_95), 4), c68_low)
+            c95_high = max(round(float(fit_high_95), 4), c68_high)
+
+            ci_fit_68[m] = [c68_low, c68_high]
+            ci_fit_95[m] = [c95_low, c95_high]
+            ci_post_95[m] = [round(max(0.0, float(c95_low * 0.9)), 4), round(min(1.0, float(c95_high * 1.05)), 4)]
+            ci_post_68[m] = [round(max(0.0, float(c68_low * 0.95)), 4), round(min(1.0, float(c68_high * 1.02)), 4)]
 
             model_stats[m] = {
                 "standard_error": round(float(se), 4),

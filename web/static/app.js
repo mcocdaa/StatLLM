@@ -842,13 +842,13 @@ function buildProbeOptionsHtml(selectedProbeId) {
 
   const list = (PROBES_DATA && PROBES_DATA.length > 0)
     ? PROBES_DATA
-    : Object.keys(PROBE_I18N).map(k => ({ id: k, is_recommended: ["arr_int_big5", "arr_pseudo_cvc5", "arr_int5", "arr_letter5", "arr_grid_walk6"].includes(k) }));
+    : Object.keys(PROBE_I18N).map(k => ({ id: k, is_recommended: ["arr_pseudo_cvc5", "arr_int5", "arr_letter5", "arr_int_big5", "arr_prime5"].includes(k) }));
 
   list.forEach(p => {
     const isSel = p.id === selectedProbeId;
     const item = PROBE_I18N[p.id];
     const title = item ? (currentLang === "en" ? item.en_title : item.zh_title) : (p.title || p.id);
-    const isRecommended = p.is_recommended !== false && ["arr_int_big5", "arr_pseudo_cvc5", "arr_int5", "arr_letter5", "arr_grid_walk6"].includes(p.id);
+    const isRecommended = p.is_recommended !== false && ["arr_pseudo_cvc5", "arr_int5", "arr_letter5", "arr_int_big5", "arr_prime5"].includes(p.id);
     const optStr = `<option value="${p.id}" ${isSel ? "selected" : ""}>${title}</option>`;
     if (isRecommended) {
       recOptions += optStr;
