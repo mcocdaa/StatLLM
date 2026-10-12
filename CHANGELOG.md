@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-10-12
+
+### Added
+- **Stability-Weighted Robust Attribution Diagnostic**: Novel adaptive likelihood weighting algorithm ($w_j = 0.35 \cdot S_{\text{global}} + 0.65 \cdot S_{\text{contest}}$) based on empirical downside inversion rate ($P(\Delta < 0)$) to suppress single-sample distillation outliers and shared prefix collisions.
+- **Precomputed 12-Probe Empirical Stability Matrix**: `statllm/stability_data.py` storing 156 model-pair quantile spreads and downside inversion risks.
+- **Dedicated Robust Attribution Interface**: Distinct card contrasting Raw MLE baseline against Robust Adjusted verdict with mechanistic collision diagnostics and full per-probe weight breakdown table.
+- **Tail Inversion Warning Badge**: Dynamic warning badge on the Raw MLE card alerting users when single-sample volatility inversion is detected.
+- **Strict Anti-Cache Deployment**: Server-side `Cache-Control: no-cache, no-store, must-revalidate` and client script version query (`app.js?v=20261012b`) ensuring instant update delivery across all browsers.
+
+### Changed
+- **Disambiguated Raw Baseline from Robust Verdict**: Card 1 re-anchored as "Raw Empirical Fitness (MLE)" to decouple empirical observation from the weighted robust verdict.
+
+---
+
 ## [0.1.1] - 2026-10-09
 
 ### Fixed
