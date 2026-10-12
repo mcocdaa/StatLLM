@@ -166,7 +166,9 @@ const I18N = {
     modal_submit_contribute: "提交入库",
     eval_btn: "开始判定",
 
-    verdict_title: "判定结果",
+    verdict_title: "原始经验吻合度分析 (Raw MLE)",
+    verdict_flip_hint: "⚠️ 存在倒挂风险 · 最终结论见下方稳健归因",
+    verdict_confirmed_hint: "✓ 与稳健归因一致",
     stat_margin_label: "吻合度优势: ",
     stat_entropy_label: "不确定性: ",
     advisory_title: "统计学提示：当前样本量与置信区间范围",
@@ -400,7 +402,9 @@ const I18N = {
     modal_submit_contribute: "Submit Sample",
     eval_btn: "Run Attribution",
 
-    verdict_title: "Verdict",
+    verdict_title: "Raw Empirical Fitness (MLE)",
+    verdict_flip_hint: "⚠️ Tail Inversion Risk: See Robust Verdict Below",
+    verdict_confirmed_hint: "✓ Confirmed by Robust Verdict",
     stat_margin_label: "Fit Margin: ",
     stat_entropy_label: "Entropy: ",
     advisory_title: "Statistical Advisory: Sample Size & Confidence Interval Span",
@@ -1246,6 +1250,20 @@ function renderEvaluationResults(data) {
   document.getElementById("stat-entropy").innerText = `${evalRes.entropy} bit`;
   document.getElementById("stat-n1").innerText = evalRes.unique_probes_tested;
   document.getElementById("stat-n2").innerText = evalRes.sample_count;
+
+  const flipBadge = document.getElementById("verdict-flip-badge");
+  if (flipBadge && evalRes.robust_attribution) {
+    flipBadge.classList.remove("hidden");
+    if (evalRes.robust_attribution.is_verdict_flipped) {
+      flipBadge.textContent = t("verdict_flip_hint");
+      flipBadge.className = "text-xs px-2.5 py-0.5 rounded-full font-sans font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30";
+    } else {
+      flipBadge.textContent = t("verdict_confirmed_hint");
+      flipBadge.className = "text-xs px-2.5 py-0.5 rounded-full font-sans font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30";
+    }
+  } else if (flipBadge) {
+    flipBadge.classList.add("hidden");
+  }
 
   // Render Mismatch Warning Banner if invalid submissions detected
   const warnContainer = document.getElementById("mismatch-warning-container");
