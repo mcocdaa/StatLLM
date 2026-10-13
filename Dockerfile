@@ -21,4 +21,4 @@ RUN pip install --no-cache-dir --no-build-isolation --no-deps -e .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "web.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn web.app:app --host 0.0.0.0 --port 8000 --workers ${WEB_CONCURRENCY:-2}"]

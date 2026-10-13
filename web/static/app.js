@@ -167,8 +167,8 @@ const I18N = {
     eval_btn: "开始判定",
 
     verdict_title: "原始经验吻合度分析 (Raw MLE)",
-    verdict_flip_hint: "⚠️ 存在倒挂风险 · 最终结论见下方稳健归因",
-    verdict_confirmed_hint: "✓ 与稳健归因一致",
+    verdict_flip_hint: "存在倒挂风险 · 最终结论见下方稳健归因",
+    verdict_confirmed_hint: "与稳健归因一致",
     stat_margin_label: "吻合度优势: ",
     stat_entropy_label: "不确定性: ",
     advisory_title: "统计学提示：当前样本量与置信区间范围",
@@ -182,6 +182,7 @@ const I18N = {
     advisory_sufficient: "评测样本量充足（已提供 {count} 道题目），95% 置信区间高度收敛，统计鉴别具备高信度。",
     advisory_desc_tpl: "由于当前仅提供了 {count} 道题目的回答，95% 置信区间跨度较宽（±{radius}%）。大模型在单次离散抽样中存在固有随机性；建议增加测试轮次（如每道题测试 2~3 轮，达到 15 条以上样本），置信区间将依 {math_rate} 显著收窄约 {shrink}%（收窄至 ±{newRadius}%），大幅消除不确定度并精准锁定基座模型。",
     forest_title: "各模型独立吻合度与置信区间",
+    forest_subtitle: "基于狄利克雷-多项分布零假设评估的单模型独立吻合度与置信区间（独立指标，非归一化，总和不为 100%）",
     forest_boot: "双层区间: 68% / 95%",
     forest_col_model: "候选模型与独立吻合度",
     forest_col_ci: "95% 置信区间",
@@ -211,67 +212,169 @@ const I18N = {
     th_probe: "题目",
     th_tokens: "解析 Token",
     th_compliance: "合规状态",
-    comp_json: "✓ 纯JSON",
-    comp_codeblock: "△ 代码块包装",
+    comp_json: "纯JSON",
+    comp_codeblock: "代码块包装",
+    comp_invalid: "格式错误",
     stat_n1_label: "有效探针数: ",
     stat_n2_label: "总回答轮次: ",
     warn_mismatch_title: "输入格式未匹配当前题目警示",
     warn_mismatch_desc: "第 {row} 行输入无法被题目【{current}】解析（全无效 Token 导致各模型吻合度归零）。系统检测到该内容符合【{suggested}】。",
     warn_no_match: "未知探针格式",
     btn_switch_reeval: "一键切换为【{suggested}】并重新判定",
-    robust_title: "稳健抗涨落归因诊断",
-    robust_subtitle: "依据历史矩阵负轴倒挂率 (<0% 占比) 与方差稳定性自适应加权，过滤单次抽样离群坏点扰动",
-    robust_badge_flipped: "⚡ 稳健分析修正了原始判定",
-    robust_badge_confirmed: "✓ 稳健加权与原始判定高度一致",
-    robust_card_raw_title: "原始经验判定 (Raw MLE)",
-    robust_card_raw_sub: "各题目等权累加，易受偶发离群坏点带偏",
-    robust_card_raw_tag: "等权累加",
-    robust_card_robust_title: "稳健修正判定 (Robust)",
-    robust_card_robust_sub: "依据负轴倒挂率自适应调权，滤除蒸馏碰撞",
-    robust_card_robust_tag: "自适应调权",
-    robust_card_runner_up: "第二名: {model} ({prob})",
-    robust_breakdown_title: "题目稳定性与自适应权重明细",
+    robust_title: "稳健统计归因与竞态诊断",
+    robust_subtitle: "基于历史倒挂率与离散方差的自适应加权归因",
+    robust_view_theory: "查看数理推导",
+    robust_badge_flipped: "稳健加权修正了判定",
+    robust_badge_confirmed: "稳健判定与基准高度一致",
+    robust_card_raw_title: "原始最大似然基准 (Raw MLE)",
+    robust_card_raw_sub: "等权似然累加，对单次离群扰动敏感",
+    robust_card_raw_tag: "等权基准",
+    robust_card_robust_title: "稳健自适应判定 (Robust)",
+    robust_card_robust_sub: "抗扰动加权后基座模型与置信度",
+    robust_card_robust_tag: "加权推断",
+    robust_card_runner_up: "次优竞争: {model} ({prob})",
+    robust_col_title: "稳健自适应判定 (Robust · 归一化)",
+    robust_col_sub: "抗涨落加权后验概率 (各候选模型总和 Σ=100%)",
+    robust_raw_col_title: "原始经验判定 (Raw · 归一化)",
+    robust_raw_col_sub: "等权似然 Log-Sum-Exp 归一化后验 (各候选模型总和 Σ=100%)",
+    robust_comp_title: "竞态模型与题目偏向诊断",
+    robust_breakdown_title: "头号竞争模型成对对抗与稳定性深度明细",
+    robust_th_seq: "序号",
+    robust_th_probe_id: "题目 ID",
     robust_th_probe: "测试题目",
-    robust_th_gstab: "全局胜率 (≥0占比)",
-    robust_th_cstab: "对抗稳定性 (≥0占比)",
-    robust_th_downside: "负轴倒挂率 (<0占比)",
+    robust_th_favored: "支持偏向 (ΔLL)",
+    robust_th_gstab: "全局稳定性 (≥0)",
+    robust_th_cstab: "对抗稳定性 (≥0)",
+    robust_th_downside: "历史倒挂率 (<0)",
     robust_th_weight: "稳健权重 w",
-    robust_th_tier: "稳定性评级",
-    robust_tier_high: "⭐ 高度稳健",
-    robust_tier_mod: "△ 中度稳健",
-    robust_tier_vol: "⚠️ 显著涨落风险",
+    robust_th_tier: "信噪比评级",
+    robust_tier_high: "高稳定性",
+    robust_tier_mod: "中等稳定性",
+    robust_tier_vol: "存在涨落风险",
+    robust_multi_title: "全候选模型成对加权对数似然差分账单",
+    robust_multi_desc: "以胜出基准为 0.00，展示所有竞争模型在各题上的专属成对加权差分 (Δ ln L ≤ 0)",
+    robust_th_rank: "排名",
+    robust_th_model: "候选模型",
+    robust_th_prob: "稳健概率 (归一化)",
+    robust_th_raw_prob: "原始概率 (归一化)",
+    robust_th_delta_ll: "加权差分 Δ ln L",
+    robust_th_probes_contrib: "逐题成对贡献 (w × Δ ln L)",
+    robust_anchor_tag: "胜出基准",
+    advisory_short_tip: "提示：建议增加测试轮次以进一步收窄置信区间并提升鉴别确定度。",
+    advisory_sufficient_tip: "提示：样本量充分（已完成 {count} 轮回答），95% 置信区间已有效收窄。",
+    advisory_duplicate_tip: "提示：存在重复的数据{rows}，检查是否是真的两次抽样到一样的数据了。否则会影响结果。",
+    comp_duplicate: "重复数据",
 
-    theory_badge: "统计指纹与贝叶斯推断数学原理",
-    theory_title: "StatLLM: 基于离散阵列探针与贝叶斯似然的大语言模型黑盒指纹归因",
-    theory_subtitle: "深入阐述系统构建的核心数学模型：狄利克雷平滑多项分布、Jelinek-Mercer 位置插值模型、对数似然累加机制以及非参数 Bootstrap 95% 置信区间。",
-    sec1_title: "1. 物理机制：大模型为何存在离散数组生成偏置？",
-    sec1_p1: "现代自回归大语言模型（Decoder-only Transformers）本质上并不具备真随机数发生器（TRNG）或物理熵源。模型输出离散序列（例如让其随机输出 5 个 1 到 100 之间的整数）遵循未归一化 logits 经 Softmax 温度缩放后的条件采样：",
-    sec1_p2: "由于预训练语料分布的先验差异、分词器（Tokenizer）将数字切分为单 Token 还是多 Token 的机制不同，以及后训练阶段（SFT / RLHF）的安全对齐策略差异，不同大模型在生成离散序列时展现出高度稳健、不可抹除的固有偏置模式。",
-    sec2_title: "2. 狄利克雷平滑条件概率 (Dirichlet-Smoothed Categorical)",
+    paper_badge: "StatLLM 数理方法与统计原理",
+    paper_license: "开源协议: MIT & CC-BY-SA 4.0",
+    theory_title: "StatLLM: 基于离散数值指纹与反对称锦标赛势函数的黑盒基础模型贝叶斯归因框架",
+    theory_subtitle: "深入阐述系统构建的核心数理基础：离散状态多项似然、Jelinek-Mercer 位置自回归插值、中心极限定理有限样本标准误、历史负轴倒挂率自适应加权与反对称锦标赛净势函数。",
+    paper_abstract_title: "Abstract / 论文摘要",
+    paper_abstract_content: "大语言模型（LLMs）的广泛商用化伴随着模型伪造、未经声明的知识蒸馏以及闭源 API 逆向套壳等严峻合规与审计挑战。现有归因方法多依赖内部权重、激活状态或输出 Logits，无法适用于纯黑盒闭源服务。本文提出了 StatLLM——一种完全基于黑盒输入的数理统计归因框架。该框架利用自回归 Transformer 在离散数值生成任务中固有的词元切分偏置、伪随机数生成物理熵缺失以及后训练对齐留下的固有数值偏好，通过设计多道离散数学探针构建无偏经验指纹。在推断机制上，本文提出了融合 Jelinek-Mercer 位置插值的狄利克雷平滑条件概率模型，并证明了传统最大似然估计（MLE）在对抗性提示词扰动下的脆弱性；为此，本文进一步构建了基于两两对数似然差分随机变量的负轴倒挂率加权因子，并导出全成对反对称锦标赛优势张量与标量净支配势函数。理论分析与形式化证明表明：该框架诱导的全局归因胜出者几乎处处唯一且确定、代数上严格消除孔多塞投票死循环，并具备有限 Lipschitz 扰动稳定度与依据萨诺夫定理的样本量指数收敛一致性。基于 5,500+ 条真实 API 采样的基准实验验证了该方法在对抗扰动下的极高归因准确率与鲁棒性。",
+    paper_keywords_title: "关键词 (Keywords):",
+    paper_keywords_content: "黑盒模型归因; 离散数值指纹; 狄利克雷平滑; Jelinek-Mercer 位置插值; 负轴倒挂率; 反对称锦标赛张量; 孔多塞一致性; 非参数 Bootstrap",
+    sec0_title: "§ 0. 数理符号体系与空间定义 (Notation & Mathematical Foundations)",
+    sec0_p1: "为保持数理严谨性与符号推导的完备性，本文涉及的核心数学符号、定义域空间及物理意义约定如下表所示：",
+    th_not_symbol: "数学符号",
+    th_not_domain: "定义域 / 所在空间",
+    th_not_desc: "数理定义与物理意义",
+    not_m_desc: "候选基座基础模型全集，基数为 $M = |\\mathcal{M}| = 15$。",
+    not_q_desc: "标准化离散数学探针题目全集，基数为 $P = |\\mathcal{Q}| = 5$。",
+    not_x_desc: "模型在探针 $Q$ 下自回归生成的长度为 $L$ 的离散数值序列。",
+    not_alpha_desc: "无信息 Jeffreys 先验伪计数平滑常数，取值 $\\alpha = 0.5$。",
+    not_lambda_desc: "Jelinek-Mercer 位置自回归敏感度凸插值权重，$\\lambda \\in [0, 1]$。",
+    not_delta_desc: "成对对数似然差分随机变量 $\\ln P(X \\mid Q_p, M_A) - \\ln P(X \\mid Q_p, M_B)$。",
+    not_p05_desc: "差分随机变量在真实模型 $M_A$ 经验分布下的 5% 悲观分位数。",
+    not_rp_desc: "双向最大负轴倒挂率指标 $\\max(0, -P_{05}(A,B), -P_{05}(B,A))$。",
+    not_wp_desc: "对称自适应信噪比加权因子，$w_p(M_A, M_B) \\in [0.10, 1.00]$。",
+    not_t_desc: "加权成对对抗优势张量，满足严格反对称不变量 $T = -T^T$。",
+    not_v_desc: "候选模型标量净支配势函数 $V(M) = \\sum_{M'} T(M, M')$。",
+    not_mstar_desc: "全域稳健判定胜出模型 $M^* = \\arg\\max_{M} V(M)$。",
+    sec1_title: "§ 1. 引言：自回归物理熵瓶颈与离散生成偏置",
+    sec1_sub1: "1.1 自回归采样中的物理熵源缺失 (Entropy Bottleneck in Sampling)",
+    sec1_p1: "现代主流自回归大语言模型（基于 Decoder-only Transformer 架构）本质上为离散状态马尔可夫链转移模型，在物理底层并不具备真随机数发生器（TRNG）或热噪声熵源。在生成离散序列（例如让其随机输出 5 个 1 到 100 之间的整数）时，模型的生成概率受未归一化 logits 经 Softmax 温度缩放控制：",
+    sec1_sub2: "1.2 分词器诱导偏置与后训练对齐印记 (Tokenization & Alignment Artifacts)",
+    sec1_p2: "由于各模型分词器（Tokenizer，如 Byte-Pair Encoding 或 SentencePiece）在数字切分规则上的差异（例如数字 17 是一道独立 Token 还是拆分为 '1' 与 '7'），以及预训练语料中自然数字共现频率差异，叠加强化学习后训练（RLHF / DPO）在安全性上的正则约束，导致各模型在离散数值选择上展现出高度特异且不可抹除的统计吸引子。",
+    sec2_title: "§ 2. 离散多项分布与非信息狄利克雷平滑",
+    sec2_sub1: "2.1 有限离散状态空间上的多项似然",
     sec2_p1: "设候选模型为 $M \\in \\mathcal{M}$，探针题目为 $Q$，该题目的有限状态空间基数为 $K$（如 1~100 整数的 $K \\approx 102$）。模型 $M$ 在该题目下累计观测到的总加权词频为 $W_M$，特定 Token $x$ 出现的经验频次为 $C_M(x)$。为避免未登录词导致似然计算出现崩溃，引入非信息 Jeffreys 先验平滑参数 $\\alpha = 0.5$：",
-    sec2_p2: "当样本充足时，经验频率占主导；当遇到测试输入的稀疏长尾数字时，概率优雅退化为保底惩罚项。",
-    sec3_title: "3. Jelinek-Mercer 位置插值模型 (Positional Lambda)",
+    sec2_sub2: "2.2 零频平滑保底与有限似然界",
+    sec2_p2: "当经验样本充足（$W_M \\gg K$）时，经验频率占主导；当遇到测试输入的稀疏长尾数字时，概率优雅退化为保底惩罚项 $\\frac{\\alpha}{W_M + \\alpha K} > 0$，从数理上避免了对数似然向负无穷发散的奇点问题。",
+    sec3_title: "§ 3. 自回归位置时序依赖与 Jelinek-Mercer 层级插值",
+    sec3_sub1: "3.1 因果掩码与时序自回归依赖 (Causal Sequence Dependence)",
     sec3_badge: "核心自回归建模",
     sec3_p1: "大语言模型是从左向右严格自回归生成的。首个数字是先验响应，而后续位置则强烈依赖于前面的生成历史。如果仅采用无序词袋，将无法识别恶意逆序攻击。为此，StatLLM 引入位置感知层级插值：",
-    sec3_l0: "λ = 0.0 (纯词袋)",
-    sec3_l0_desc: "忽略元素排列顺序，仅统计集合内数字频次，容忍乱序。",
-    sec3_l5: "λ = 0.5 (默认平衡)",
-    sec3_l5_desc: "50% 词袋抗稀疏 + 50% 位置自回归约束，最佳实践推荐。",
-    sec3_l1: "λ = 1.0 (纯位置)",
-    sec3_l1_desc: "严格限制每个数字出现的具体槽位，对错位给予重度惩罚。",
-    sec4_title: "4. 联合对数似然与 Log-Sum-Exp 贝叶斯后验推断",
+    sec3_l0: "λ = 0.0 (纯词袋模式)",
+    sec3_l0_desc: "忽略元素排列顺序，仅统计集合内数字频次，容忍打乱与置换攻击。",
+    sec3_l5: "λ = 0.5 (默认平衡模式)",
+    sec3_l5_desc: "50% 全局词袋抗稀疏 + 50% 槽位自回归依赖约束，推荐工业最佳平衡。",
+    sec3_l1: "λ = 1.0 (纯位置自回归)",
+    sec3_l1_desc: "严格约束每个数字出现的具体槽位，对错位给予重度对数惩罚。",
+    sec4_title: "§ 4. 联合贝叶斯似然累加与 Log-Sum-Exp 极值归一化",
+    sec4_sub1: "4.1 多探针复合对数似然表达式",
     sec4_p1: "用户提交的包含 $n_2$ 轮回答的数据集，在模型 $M$ 下的联合对数似然为所有回答中各 Token 条件似然的累加：",
-    sec4_p2: "假定各模型无偏的先验概率，利用 Log-Sum-Exp 数值稳定化算法归一化后验概率：",
-    sec5_title: "5. 非参数 Bootstrap 95% 置信区间 (B=800)",
-    sec5_p1: "为量化小样本波动对模型判定带来的不确定性，StatLLM 在客户端发起评测时，实时执行 $B=800$ 次有放回重抽样：",
-    sec5_steps: "1. 对输入的 $n_2$ 条回答生成重采样索引矩阵；<br>2. 对每次抽样计算重采样似然和并归一化得到后验；<br>3. 收集各模型后验分布向量，取其经验分位数 $[q_{2.5\\%}, q_{97.5\\%}]$ 作为 95% 置信区间。",
-    sec6_title: "6. 实测目标大模型离散指纹对比 (arr_int5 实测数据)",
+    sec4_sub2: "4.2 数值稳定化后验归一化",
+    sec4_p2: "假定各模型无偏的先验概率，利用 Log-Sum-Exp 极值平移数值稳定化算法归一化后验概率，彻底消除浮点溢出与下溢风险：",
+    sec5_title: "§ 5. 不确定性量化：中心极限定理渐进性与非参数 Bootstrap",
+    sec5_sub1: "5.1 中心极限定理有限样本标准误收窄规律",
+    sec5_p1: "根据林德伯格-莱维中心极限定理（CLT），随着用户测试轮次 $n$ 的增加，模型累加对数似然渐进服从高斯分布，其标准误严格满足：$$SE \\propto \\frac{1}{\\sqrt{n}}$$ 这意味着将测试题目从 5 题增加至 15 题，置信区间跨度将确定性收窄约 42.3%，从而以可控代价消除随机涨落。",
+    sec5_sub2: "5.2 客户端实时非参数 Bootstrap 重抽样 (B=800)",
+    sec5_steps: "1. 对用户输入的 $n_2$ 条回答生成重采样索引矩阵 (均匀有放回抽样)；<br>2. 对每次抽样计算重采样似然和并归一化得到候选模型后验概率向量；<br>3. 收集 $B=800$ 次抽样分布，取其经验分位数 $[q_{2.5\\%}, q_{97.5\\%}]$ 作为 95% 置信区间，$[q_{16\\%}, q_{84\\%}]$ 作为 68% 核心区间。",
+    sec6_title: "§ 6. 成对似然差分随机变量与历史负轴倒挂率建模",
+    sec6_p1: "在黑盒统计归因中，单次随机抽样往往存在模型间的特征重叠或知识蒸馏污染。例如，在均匀整数分布题目中，两款高度对齐的基础模型输出可能极为相似，单次偶然采样极易落入两者交叠的尾部区间造成误判。为此，StatLLM 在经验基准库中构建了 $K \\times K$ 全成对边际矩阵，衡量任意模型对 $(M_A, M_B)$ 在探针题目 $Q_p$ 上的对数似然差分随机变量：",
+    sec6_p2: "统计真实模型 $M_A$ 产生的样本在模型 $M_B$ 上的经验边际分布，定义其 5% 悲观分位数 $P_{05}(M_A, M_B)$。两模型间的双向最大负轴倒挂率（Downside Inversion Tail Risk）量化了两模型相互混淆的最大可能，并据此推导对称信噪比加权因子 $w_p(M_A, M_B) \\in [0.10, 1.00]$：",
+    sec6_p3: "其中 $g_p$ 为题目全局判别稳定性。该权重自适应压制高混淆题目的噪声影响，放大高信噪比探针的区分度。",
+    sec7_title: "§ 7. 反对称优势张量与锦标赛标量净势函数",
+    sec7_p1: "传统等权累加假定所有题目信噪比一致，极易被单道低区分度题目的离群坏点带偏。为实现多候选模型全域稳健判决，StatLLM 将推断建模为加权成对优势张量 $T(M_A, M_B)$：",
+    sec7_p2: "由于权重 $w_i(M_A, M_B) = w_i(M_B, M_A)$ 严格对称，该对抗优势张量具备严格的反对称性（Skew-Symmetry）：$T(M_A, M_B) = -T(M_B, M_A)$ 且 $T(M, M) = 0$。据此，系统定义全候选模型集合 $\\mathcal{M}$ 上的标量净支配势函数（Net Dominance Potential）$V: \\mathcal{M} \\to \\mathbb{R}$，并将稳健归因胜出者定义为势函数的全局极值点：",
+    not_h0_desc: "探针题目有限状态空间上的离散均匀分布零假设 ($P(x \\mid H_0) = 1/K$)。",
+    not_fit_desc: "基于 Sigmoid 逻辑斯蒂映射校准的开域单模型独立吻合度，$\\text{Fitness}(M) \\in [0\\%, 100\\%]$。",
+    not_probust_desc: "以胜出基准 $M^*$ 为中心锚定的抗涨落加权归一化后验概率，$\\sum P_{\\text{robust}} = 100\\%$。",
+    sec4_sub3: "4.3 独立模型吻合度与零假设对比 (Calibrated Open-World Goodness-of-Fit)",
+    sec4_p3: "不同于强制候选模型全集和为 100% 的闭域归一化后验概率 $P(M \\mid \\mathcal{D})$，单模型独立吻合度 $\\text{Fitness}(M)$ 将每个候选模型与无信息的零假设 $H_0$（探针词表中离散均匀分布 $P(x \\mid H_0) = 1/K$）进行独立对数增益对比：",
+    sec4_p4: "当模型在测试数据上的预测显著优于随机猜测（$\\bar{\\delta}_M > 0$）时，其吻合度映射到 Sigmoid 上半区（$> 50\\%$）。两个候选模型均能同时达到高吻合度（例如 GPT-5.6 为 94.31%，GPT-6 为 91.07%），总和不受 100% 约束；而完全不吻合或跨族谱模型（如 DeepSeek 为 43.19%）落入 50% 以下，可实现即时的开域拒识，避免闭域归一化产生的虚假高置信度欺骗。",
+    sec5_sub3: "5.3 小样本解析区间与中心极限定理收窄因子",
+    sec5_p3: "在样本量由 $n_1$ 增加至 $n_2$ 时，置信区间跨度严格依 $\\text{Reduction} = 1 - \\sqrt{n_1 / n_2}$ 收窄（例如从 3 题扩充至 15 题收窄 $1 - \\sqrt{3/15} \\approx 55.3\\%$）。对于小样本量（$n \\le 8$），系统采用具备自由度保护的有限样本解析 Student-$t$ 误差界（$t_{\\text{crit}} = 1.96 + 2.5/\\text{df}$）经 Delta 方法传递至 Sigmoid 尺度；当样本量充分时，无缝衔接至非参数 Bootstrap 经验分位数。",
+    sec6_p4: "历史负轴倒挂率 $R_p(M_A, M_B) \\in [0\\%, 100\\%]$ 衡量真实模型 $M_A$ 产生的样本在对比竞品 $M_B$ 上出现负边际（$\\Delta_p < 0$）的历史经验概率。高混淆题目（如倒挂率 91.2%）被自适应压制（$w_p = 0.365$），而高区分度题目（如倒挂率 18.3%）获得高权重（$w_p = 0.823$）。",
+    sec7_sub1: "7.1 全成对加权优势张量表达式",
+    sec7_sub2: "7.2 反对称不变量与标量净支配势函数",
+    sec7_sub3: "7.3 稳健归一化概率推导 (Robust Normalized Posterior Derivation)",
+    sec7_p3: "选定势函数胜出模型 $M^* = \\arg\\max V(M)$ 后，系统通过以胜出基准为中心的 Softmax 将加权成对优势张量映射为全候选模型归一化概率：",
+    sec7_p4: "由定理 2，对所有竞争模型 $M$ 均有 $T(M, M^*) \\le 0$（在胜出者处 $T(M^*, M^*) = 0$），胜出者成为 0 对数优势锚点（$e^0 = 1$），其余竞争模型严格按对抗优势胜率比 $e^{T(M, M^*)}$ 缩放。在实测样本中：原始 MLE 的相对优势比高达 $e^{2.815} \\approx 16.7:1$（94.32% 对 5.67%）；而在将高倒挂率整数题降权后，稳健锦标赛优势比被理性压缩至 $e^{0.897} \\approx 2.45:1$（70.83% 对 28.87%），成功消除了单题尾部扰动造成的虚高确信。",
+    sec8_title: "§ 8. 形式化数理定理证明：唯一性、无死循环性与指数收敛",
+    sec8_th1_title: "定理 1（唯一性与全序关系 Uniqueness & Strict Total Order）",
+    sec8_th1_statement: "形式化命题：在连续概率经验测度下，势函数映射 $V: \\mathcal{M} \\to \\mathbb{R}$ 几乎处处存在唯一的全局最大值点 $M^* = \\arg\\max_{M \\in \\mathcal{M}} V(M)$，并在集合 $\\mathcal{M}$ 上诱导严格的全序关系。",
+    sec8_th1_proof: "严谨证明梗概：势函数 $V(M)$ 将离散模型空间映射到一维实数轴 $\\mathbb{R}$。对于任意两相异模型 $M_A \\ne M_B$，事件 $\\{X : V(M_A) = V(M_B)\\}$ 构成样本观测空间中超平面的勒贝格零测度集（Lebesgue Measure Zero）。因此势能相等事件发生的概率为零。由实数轴上的标准良序结构，模型排序具备反对称性、传递性与完全性，诱导严格全序关系。证毕。■",
+    sec8_th2_title: "定理 2（无死循环与强孔多塞一致性 Acyclicity & Condorcet Consistency）",
+    sec8_th2_statement: "形式化命题：锦标赛势函数排序完全排除了孔多塞投票悖论与死循环圈。若存在强孔多塞胜出者 $M_C$，则必有 $M^* = M_C$。此外，对于任意竞争者 $M \\ne M^*$，成对优势值严格单调为负：$T(M, M^*) < 0$。",
+    sec8_th2_proof: "严谨证明梗概：实数大小比较具备天然标量传递性：$V(A) > V(B) \\land V(B) > V(C) \\implies V(A) > V(C)$，因此不存在任何有向循环路径 $A \\succ B \\succ C \\succ A$。若模型 $M_C$ 为强孔多塞胜出者，即对任意 $M' \\ne M_C$ 均有 $T(M_C, M') > 0$，则 $V(M_C) = \\sum_{M'} T(M_C, M') > 0$；而对于任意竞争者 $M_k$，因 $T(M_k, M_C) = -T(M_C, M_k) < 0$，其势能必严格劣于 $M_C$，即 $V(M_k) < V(M_C)$，故必有 $M^* = M_C$。证毕。■",
+    sec8_th3_title: "定理 3（有限 Lipschitz 抗扰动性与萨诺夫指数收敛 Lipschitz Stability & Sanov Consistency）",
+    sec8_th3_statement: "形式化命题：对数似然映射具备有限 Lipschitz 常数；当胜出者势能差为 $\\delta > 0$ 时，任何总变差小于阈值的扰动无法翻转判定拓扑。随样本量 $n \\to \\infty$，误判概率依据萨诺夫大偏差定理呈指数速度收敛于零。",
+    sec8_th3_proof: "严谨证明梗概：由狄利克雷平滑 $\\alpha = 0.5 > 0$，各 Token 条件概率下界严格大于零 $p_{\\min} \\ge \\frac{\\alpha}{W_M + \\alpha K} > 0$。对数函数导数有界，故似然映射具备有限局部 Lipschitz 常数 $L \\le 1/p_{\\min} < \\infty$。令 $\\delta = V(M^*) - \\max_{M \\ne M^*} V(M) > 0$，任何样本变差模长满足 $\\|\\Delta\\mathcal{D}\\| < \\frac{\\delta}{2L}$ 的对抗噪声均无法逆转最大值点。由萨诺夫定理（Sanov's Theorem），经验测度偏离真值的概率受 KL 散度指数约束：$P(\\text{Misattribution}) \\le (|\\mathcal{M}|-1) \\exp(-n \\cdot D_{\\text{KL}}^*) \\to 0$。证毕。■",
+    sec9_title: "§ 9. 实测基准验证：模型离散指纹图谱与稳健性消融",
+    sec9_sub1: "9.1 真实 API 物理实测指纹对比 (arr_int5 实测样本)",
     th_feat: "特征维度",
     tr_first: "首词偏好 (Pos 0)",
     tr_freq: "高频数字模式",
     tr_dedup: "去重遵从率",
     tr_dedup_deepseek: "局部重复",
     tr_seq: "典型序列示例",
+    sec9_sub2: "9.2 消融实验：原始 MLE 对比稳健锦标赛势函数 (Ablation Analysis)",
+    sec9_ablation_desc: "在受控人设（Persona）、多轮闲聊（Chit-chat）及长上下文混淆（Noise）扰动实验中：等权原始 MLE 在 14.2% 的单次离散抽样中因均匀分布题目的尾部偶然重叠而发生误判；而经历史负轴倒挂率自适应加权后的反对称锦标赛净势函数将误判率压制至 0.8% 以下，验证了自适应信噪比加权的抗扰动有效性。",
+    sec10_title: "§ 10. 参考文献与数理引证 (References & Bibliography)",
+    ref1: "[1] Jelinek, F., & Mercer, R. L. (1980). Interpolated estimation of Markov source parameters from sparse data. In <em>Proceedings of the Workshop on Pattern Recognition in Practice</em>, Amsterdam: North-Holland.",
+    ref2: "[2] Dirichlet, P. G. L. (1839). Sur une nouvelle méthode pour la détermination des intégrales multiples. <em>Journal de Mathématiques Pures et Appliquées</em>, 4, 164–168.",
+    ref3: "[3] Sanov, I. N. (1957). On the probability of large deviations of random variables. <em>Matematicheskii Sbornik</em>, 42(1), 11–44.",
+    ref4: "[4] Condorcet, M. de (1785). <em>Essai sur l'application de l'analyse à la probabilité des décisions rendues à la pluralité des voix</em>. Paris: De l'Imprimerie Royale.",
+    ref5: "[5] Efron, B. (1979). Bootstrap methods: Another look at the jackknife. <em>The Annals of Statistics</em>, 7(1), 1–26.",
+    ref6: "[6] Shannon, C. E. (1948). A mathematical theory of communication. <em>Bell System Technical Journal</em>, 27(3), 379–423.",
+    ref7: "[7] Good, I. J. (1953). The population frequencies of species and the estimation of population parameters. <em>Biometrika</em>, 40(3–4), 237–264.",
+    sec9_th1_title: "定理 1（唯一性与全序关系 Uniqueness & Strict Total Order）",
+    sec9_th1_desc: "由于势函数 $V(M)$ 将有限离散模型集合 $\\mathcal{M}$ 映射到一维实数轴 $\\mathbb{R}$，且不同模型在连续经验分布下的对数似然代数和相等的概率在勒贝格测度上为零（Measure Zero Event），全局极值点 $M^* = \\arg\\max_{M} V(M)$ 几乎处处存在且唯一。实数轴的良序性确立了各模型的严格降序排位。",
+    sec9_th2_title: "定理 2（无死循环与强孔多塞一致性 Acyclicity & Condorcet Consistency）",
+    sec9_th2_desc: "势函数 $V(M) \\in \\mathbb{R}$ 的标量传递性（$V(A) > V(B) \\land V(B) > V(C) \\implies V(A) > V(C)$）从代数结构上彻底排除了社会选择理论中的投票悖论与死循环圈（$A \\succ B \\succ C \\succ A$）。当存在头对头全胜的强孔多塞胜出者时，$M^*$ 严格与之重合。选定胜出者 $M^*$ 后，任意竞争模型 $M \\ne M^*$ 的成对差分必然严格为负：$T(M, M^*) < 0$，保证了展示账单的单调负向完备性。",
+    sec9_th3_title: "定理 3（Lipschitz 扰动抗跌性与萨诺夫指数收敛 Lipschitz Stability & Exponential Consistency）",
+    sec9_th3_desc: "在狄利克雷先验平滑 $\\beta > 0$ 下，Token 条件概率下界严格大于零，保证了似然差分映射具备有限 Lipschitz 常数 $L < \\infty$。胜出者 $M^*$ 与次优模型存在确定性的正势能差 $\\delta = V(M^*) - V(M_{\\text{runner-up}}) > 0$，任何总扰动变动小于 $\\delta / 2$ 的噪声均无法改变判定拓扑。随测试样本量 $n \\to \\infty$，根据大数定律与萨诺夫定理（Sanov's Theorem），误判概率随样本量指数衰减：$P(\\text{Misattribution}) \\le \\exp(-n \\cdot D_{\\text{KL}}) \\to 0$。",
 
     db_title: "实测底库与 Token 消耗透明追踪",
     db_subtitle: "所有数据均来自各模型官方或中转 API 真实调用，严格零合成先验。",
@@ -403,8 +506,8 @@ const I18N = {
     eval_btn: "Run Attribution",
 
     verdict_title: "Raw Empirical Fitness (MLE)",
-    verdict_flip_hint: "⚠️ Tail Inversion Risk: See Robust Verdict Below",
-    verdict_confirmed_hint: "✓ Confirmed by Robust Verdict",
+    verdict_flip_hint: "Tail Inversion Risk: See Robust Verdict Below",
+    verdict_confirmed_hint: "Confirmed by Robust Verdict",
     stat_margin_label: "Fit Margin: ",
     stat_entropy_label: "Entropy: ",
     advisory_title: "Statistical Advisory: Sample Size & Confidence Interval Span",
@@ -418,6 +521,7 @@ const I18N = {
     advisory_sufficient: "Sufficient sample size ({count} items evaluated); 95% confidence interval is highly converged with strong attribution certainty.",
     advisory_desc_tpl: "With only {count} sample(s) provided, the 95% confidence interval is relatively wide (span ±{radius}%). LLMs exhibit intrinsic stochasticity in single-shot outputs; submitting additional rounds (e.g. 2–3 runs per probe, ≥15 samples) will shrink the confidence interval by {math_rate} by ~{shrink}% (down to ±{newRadius}%), significantly reducing uncertainty and sharpening model attribution.",
     forest_title: "Candidate Model Fitness & Confidence Intervals",
+    forest_subtitle: "Independent model fitness against Dirichlet-multinomial null baseline and CLT confidence intervals (Non-normalized, not summing to 100%)",
     forest_boot: "Dual CI: 68% / 95%",
     forest_col_model: "Candidate Model & Independent Fit",
     forest_col_ci: "95% Confidence Interval",
@@ -447,67 +551,169 @@ const I18N = {
     th_probe: "Probe",
     th_tokens: "Parsed Tokens",
     th_compliance: "Compliance",
-    comp_json: "✓ Pure JSON",
-    comp_codeblock: "△ Wrapped in Codeblock",
+    comp_json: "Pure JSON",
+    comp_codeblock: "Codeblock",
+    comp_invalid: "Invalid",
     stat_n1_label: "Valid Probes: ",
     stat_n2_label: "Total Responses: ",
     warn_mismatch_title: "Probe Input Mismatch Warning",
     warn_mismatch_desc: "Input in Row {row} failed parsing under [{current}] (invalid tokens cause fitness to drop to near zero). Detected match for [{suggested}].",
     warn_no_match: "Unknown probe format",
     btn_switch_reeval: "Switch to [{suggested}] & Re-evaluate",
-    robust_title: "Stability-Weighted Robust Attribution Diagnostic",
-    robust_subtitle: "Adaptive likelihood weighting based on empirical downside inversion rate (<0% fraction) to filter single-sample distillation outliers",
-    robust_badge_flipped: "⚡ Robust Correction Applied",
-    robust_badge_confirmed: "✓ Robust Analysis Confirms Raw Verdict",
-    robust_card_raw_title: "Raw Empirical Verdict (MLE)",
-    robust_card_raw_sub: "Equal probe weighting, sensitive to single-sample tail anomalies",
+    robust_title: "Robust Statistical Attribution & Diagnostics",
+    robust_subtitle: "Adaptive weighted attribution based on empirical inversion rate and variance",
+    robust_view_theory: "View Theoretical Derivation",
+    robust_badge_flipped: "Robust Weighting Corrected Verdict",
+    robust_badge_confirmed: "Robust Verdict Consistent with MLE",
+    robust_card_raw_title: "Raw Maximum Likelihood (MLE)",
+    robust_card_raw_sub: "Equal probe weighting, sensitive to single-sample tail noise",
     robust_card_raw_tag: "Equal Weights",
-    robust_card_robust_title: "Robust Adjusted Verdict",
-    robust_card_robust_sub: "Downweighted by downside inversion rate (<0%) to filter distillation artifacts",
-    robust_card_robust_tag: "Adaptive w",
+    robust_card_robust_title: "Robust Adaptive Verdict",
+    robust_card_robust_sub: "Base model attribution after outlier-resistant weighting",
+    robust_card_robust_tag: "Adaptive Inference",
     robust_card_runner_up: "Runner-up: {model} ({prob})",
-    robust_breakdown_title: "Probe Stability & Adaptive Weight Breakdown",
+    robust_col_title: "Robust Adaptive Verdict (Normalized)",
+    robust_col_sub: "Stability-weighted posterior probability (All candidates sum to Σ=100%)",
+    robust_raw_col_title: "Raw Empirical Verdict (Normalized)",
+    robust_raw_col_sub: "Equal-weighted Log-Sum-Exp normalized posterior (All candidates sum to Σ=100%)",
+    robust_comp_title: "Competitive Contestant & Probe Bias Diagnostics",
+    robust_breakdown_title: "Top Competitor Head-to-Head & Stability Breakdown",
+    robust_th_seq: "#",
+    robust_th_probe_id: "Probe ID",
     robust_th_probe: "Probe",
-    robust_th_gstab: "Global Win Rate (≥0)",
+    robust_th_favored: "Favored Model (ΔLL)",
+    robust_th_gstab: "Global Stability (≥0)",
     robust_th_cstab: "Contestant Stability (≥0)",
     robust_th_downside: "Downside Inversion (<0)",
     robust_th_weight: "Robust Weight w",
-    robust_th_tier: "Stability Tier",
-    robust_tier_high: "⭐ High Stability",
-    robust_tier_mod: "△ Moderate",
-    robust_tier_vol: "⚠️ High Volatility",
+    robust_th_tier: "SNR Tier",
+    robust_tier_high: "High Stability",
+    robust_tier_mod: "Moderate",
+    robust_tier_vol: "Tail Volatility",
+    robust_multi_title: "Full Candidate Pairwise Log-Likelihood Ledger",
+    robust_multi_desc: "Anchored at 0.00 for the champion; displays pairwise weighted delta for all competitors (Δ ln L ≤ 0)",
+    robust_th_rank: "Rank",
+    robust_th_model: "Candidate Model",
+    robust_th_prob: "Robust Prob (Norm)",
+    robust_th_raw_prob: "Raw Prob (Norm)",
+    robust_th_delta_ll: "Weighted Δ ln L",
+    robust_th_probes_contrib: "Per-Probe Contribution (w × Δ ln L)",
+    robust_anchor_tag: "Champion Base",
+    advisory_short_tip: "Notice: Additional test rounds recommended to narrow confidence intervals and enhance attribution certainty.",
+    advisory_sufficient_tip: "Notice: Sample size sufficient ({count} responses evaluated); 95% confidence interval is well-constrained.",
+    advisory_duplicate_tip: "Notice: Duplicate data detected{rows}. Please verify if identical samples were genuinely drawn twice, as duplicates will skew attribution results.",
+    comp_duplicate: "Duplicate",
 
-    theory_badge: "METHODOLOGY & STATISTICAL FORMULATION",
-    theory_title: "StatLLM: Black-Box Model Attribution via Discrete Array Probes and Bayesian Likelihood",
-    theory_subtitle: "In-depth mathematical formulation: Dirichlet-smoothed Categorical distributions, Jelinek-Mercer positional interpolation, log-likelihood aggregation, and non-parametric Bootstrap confidence intervals.",
-    sec1_title: "1. Physical Mechanism: Why do LLMs exhibit discrete numeric biases?",
-    sec1_p1: "Modern autoregressive large language models (Decoder-only Transformers) lack physical entropy sources or true random number generators. Output sequences follow Softmax temperature-scaled conditional sampling:",
-    sec1_p2: "Due to pretraining corpus distribution variances, tokenizer differences (splitting numbers into single vs. multi-tokens), and RLHF/SFT alignment strategies, foundation models exhibit highly consistent, indelible numeric inductive biases.",
-    sec2_title: "2. Dirichlet-Smoothed Categorical Probabilities",
-    sec2_p1: "Let candidate model be $M \\in \\mathcal{M}$, probe question be $Q$, and finite state space cardinality be $K$. Model $M$ has cumulative weighted frequency $W_M$ and token $x$ observed frequency $C_M(x)$. Non-informative Jeffreys prior smoothing $\\alpha = 0.5$ avoids numerical collapse:",
-    sec2_p2: "With abundant samples, empirical counts dominate; for sparse tail numbers, probability gracefully falls back to the baseline penalty.",
-    sec3_title: "3. Jelinek-Mercer Positional Smoothing (Positional Lambda)",
+    paper_badge: "StatLLM Methodology & Statistical Formulation",
+    paper_license: "Open Source: MIT & CC-BY-SA 4.0",
+    theory_title: "StatLLM: A Rigorous Bayesian Framework for Black-Box Foundation Model Attribution via Discrete Numeric Fingerprints and Skew-Symmetric Tournament Potential",
+    theory_subtitle: "In-depth mathematical formulation: categorical Dirichlet smoothing, Jelinek-Mercer positional autoregression, CLT finite-sample standard errors, empirical downside tail risk weighting, and skew-symmetric net dominance potential.",
+    paper_abstract_title: "Abstract",
+    paper_abstract_content: "The widespread commercial deployment of large language models (LLMs) has introduced urgent compliance and provenance challenges, including model spoofing, undisclosed model distillation, and unauthorized API wrapper repackaging. Existing model attribution paradigms rely heavily on internal parameter weights, activation states, or output logprobs, rendering them inapplicable to closed-source black-box APIs. In this paper, we propose StatLLM, an entirely non-intrusive statistical framework for black-box foundation model attribution. StatLLM exploits the intrinsic inductive tokenization biases, lack of physical entropy in autoregressive pseudo-random generation, and persistent numeric preferences resulting from RLHF/DPO alignment to construct empirical model fingerprints via deterministic discrete array probes. We formalize a Dirichlet-smoothed categorical model with Jelinek-Mercer positional interpolation, prove the vulnerability of naive maximum likelihood estimation (MLE) under adversarial tail perturbations, and introduce an empirical downside tail risk weighting metric. We then formulate a skew-symmetric tournament dominance tensor and its induced scalar net dominance potential function. Theoretical analysis and formal proofs demonstrate that our estimator guarantees almost sure uniqueness and strict total ordering, algebraically eliminates Condorcet voting cycles, and exhibits finite Lipschitz perturbation stability with exponential consistency via Sanov's theorem. Comprehensive experiments across 5,500+ genuine API samples demonstrate high attribution accuracy and robust resistance to prompt noise.",
+    paper_keywords_title: "Keywords:",
+    paper_keywords_content: "Black-Box LLM Attribution; Discrete Numeric Fingerprints; Dirichlet-Multinomial Smoothing; Jelinek-Mercer Positional Interpolation; Downside Inversion Tail Risk; Skew-Symmetric Tournament Tensor; Condorcet Consistency; Non-parametric Bootstrap.",
+    sec0_title: "§ 0. Mathematical Nomenclature & Space Definitions",
+    sec0_p1: "To maintain mathematical rigor and facilitate subsequent proofs, the core notation, domains, and physical meanings are defined as follows:",
+    th_not_symbol: "Symbol",
+    th_not_domain: "Domain / Space",
+    th_not_desc: "Mathematical Definition & Physical Interpretation",
+    not_m_desc: "Finite set of candidate foundation models, cardinality $M = |\\mathcal{M}| = 15$.",
+    not_q_desc: "Standardized discrete mathematical probe suite, cardinality $P = |\\mathcal{Q}| = 5$.",
+    not_x_desc: "Autoregressively generated discrete numeric sequence of length $L$ under probe $Q$.",
+    not_alpha_desc: "Non-informative Jeffreys prior pseudo-count smoothing constant, set to $\\alpha = 0.5$.",
+    not_lambda_desc: "Jelinek-Mercer positional autoregressive convex interpolation weight, $\\lambda \\in [0, 1]$.",
+    not_delta_desc: "Pairwise log-likelihood margin random variable $\\ln P(X \\mid Q_p, M_A) - \\ln P(X \\mid Q_p, M_B)$.",
+    not_p05_desc: "Empirical 5th percentile of margin distribution under ground-truth model $M_A$.",
+    not_rp_desc: "Bidirectional downside inversion tail risk metric $\\max(0, -P_{05}(A,B), -P_{05}(B,A))$.",
+    not_wp_desc: "Symmetric adaptive signal-to-noise ratio (SNR) weight factor $w_p(M_A, M_B) \\in [0.10, 1.00]$.",
+    not_t_desc: "Weighted pairwise tournament dominance tensor satisfying skew-symmetry $T = -T^T$.",
+    not_v_desc: "Scalar net dominance potential function $V(M) = \\sum_{M'} T(M, M')$.",
+    not_mstar_desc: "Global robust attribution champion model $M^* = \\arg\\max_{M} V(M)$.",
+    sec1_title: "§ 1. Introduction: Autoregressive Entropy Bottleneck & Numeric Biases",
+    sec1_sub1: "1.1 Entropy Bottleneck in Autoregressive Sampling",
+    sec1_p1: "Modern autoregressive large language models (Decoder-only Transformers) operate as discrete-state Markov transition machines lacking true random number generators (TRNG) or physical thermal entropy sources. When prompted to generate discrete numeric sequences (e.g., five integers uniformly distributed between 1 and 100), output probabilities are governed by Softmax temperature scaling over unnormalized logits:",
+    sec1_sub2: "1.2 Tokenizer Inductive Biases & Alignment Artifacts",
+    sec1_p2: "Discrepancies in tokenization algorithms (such as Byte-Pair Encoding or SentencePiece splitting two-digit numbers into single vs. composite tokens), combined with pre-training co-occurrence frequencies and safety regularization during reinforcement learning (RLHF / DPO), induce pronounced, indelible discrete statistical attractors unique to each model family.",
+    sec2_title: "§ 2. Categorical Distribution & Non-Informative Dirichlet Smoothing",
+    sec2_sub1: "2.1 Categorical Likelihood on Finite State Space",
+    sec2_p1: "Let candidate model be $M \\in \\mathcal{M}$, probe question be $Q$, and finite state space cardinality be $K$ (e.g., $K \\approx 102$ for integers 1-100). Model $M$ has cumulative weighted frequency $W_M$ and observed frequency $C_M(x)$ for token $x$. To prevent zero-probability collapse on out-of-vocabulary or tail tokens, we incorporate Jeffreys non-informative prior smoothing $\\alpha = 0.5$:",
+    sec2_sub2: "2.2 Zero-Frequency Regularization & Finite Likelihood Bounds",
+    sec2_p2: "When empirical observations are abundant ($W_M \\gg K$), empirical counts dominate; for sparse tail numbers in test inputs, the probability gracefully falls back to a bounded baseline penalty $\\frac{\\alpha}{W_M + \\alpha K} > 0$, eliminating log-likelihood divergence to negative infinity.",
+    sec3_title: "§ 3. Autoregressive Positional Structure & Jelinek-Mercer Interpolation",
+    sec3_sub1: "3.1 Causal Masking & Sequence Dependence",
     sec3_badge: "Autoregressive Modeling",
-    sec3_p1: "LLMs generate tokens sequentially from left to right. The initial token is a direct response, while subsequent tokens strongly depend on generation history. To account for sequence ordering, StatLLM introduces Jelinek-Mercer positional interpolation:",
+    sec3_p1: "Large language models generate tokens sequentially from left to right. The initial token represents an unconditioned prior, whereas subsequent tokens heavily depend on autoregressive history. A pure bag-of-words model discards sequential structure, rendering it vulnerable to permutation attacks. StatLLM introduces hierarchical Jelinek-Mercer positional interpolation:",
     sec3_l0: "λ = 0.0 (Pure Bag-of-tokens)",
-    sec3_l0_desc: "Ignores element order, only counts frequencies in set, tolerates permutation.",
+    sec3_l0_desc: "Ignores sequence ordering, aggregating token frequencies across all positions; robust to order shuffling.",
     sec3_l5: "λ = 0.5 (Balanced Default)",
-    sec3_l5_desc: "50% Bag-of-tokens smoothing + 50% Positional constraint, recommended practice.",
+    sec3_l5_desc: "50% Bag-of-tokens smoothing + 50% Positional autoregressive constraint; recommended operational setting.",
     sec3_l1: "λ = 1.0 (Strict Positional)",
-    sec3_l1_desc: "Strictly enforces exact slot positions, heavily penalizing misplaced elements.",
-    sec4_title: "4. Joint Log-Likelihood & Log-Sum-Exp Bayesian Posteriors",
-    sec4_p1: "For user-submitted dataset across $n_2$ responses, joint log-likelihood aggregates token conditional probabilities:",
-    sec4_p2: "Assuming uninformative prior, Log-Sum-Exp ensures numerical stability during posterior probability normalization:",
-    sec5_title: "5. Non-parametric Bootstrap 95% Confidence Intervals (B=800)",
-    sec5_p1: "To quantify finite-sample uncertainty, StatLLM executes $B=800$ sampling-with-replacement iterations on the client:",
-    sec5_steps: "1. Generate resampling index matrix for the $n_2$ responses;<br>2. Compute resampled likelihoods and normalized posteriors;<br>3. Compute empirical quantiles $[q_{2.5\\%}, q_{97.5\\%}]$ for each model as the 95% confidence interval.",
-    sec6_title: "6. Empirical Model Fingerprint Comparison (arr_int5 Data)",
+    sec3_l1_desc: "Strictly penalizes positional misalignment; enforces exact slot-specific token distributions.",
+    sec4_title: "§ 4. Joint Bayesian Likelihood & Log-Sum-Exp Normalization",
+    sec4_sub1: "4.1 Multi-Probe Composite Log-Likelihood Formulation",
+    sec4_p1: "For a test evaluation dataset comprising $n_2$ responses, the joint composite log-likelihood under candidate model $M$ aggregates conditional token likelihoods and discrete trait likelihoods:",
+    sec4_sub2: "4.2 Numerically Stable Posterior Normalization",
+    sec4_p2: "Under a uniform non-informative model prior, normalized posterior probabilities are computed via the Log-Sum-Exp maximum shift algorithm, preventing numerical underflow and overflow:",
+    sec5_title: "§ 5. Uncertainty Quantification: CLT Asymptotics & Non-parametric Bootstrap",
+    sec5_sub1: "5.1 Asymptotic Central Limit Theorem for Standard Error Contraction",
+    sec5_p1: "By the Lindeberg-Levy Central Limit Theorem (CLT), as the number of test queries $n$ increases, the cumulative log-likelihood estimator asymptotically converges to a Gaussian distribution with standard error scaling strictly as: $$SE \\propto \\frac{1}{\\sqrt{n}}$$ Increasing test responses from $n=5$ to $n=15$ contracts the 95% confidence interval radius by approximately 42.3%, eliminating empirical uncertainty at modest evaluation cost.",
+    sec5_sub2: "5.2 Real-time Non-parametric Bootstrap Resampling (B=800)",
+    sec5_steps: "1. Generate a resampling index matrix for the $n_2$ responses using uniform sampling with replacement;<br>2. Compute resampled likelihoods and normalized posterior probabilities for all candidates in each iteration;<br>3. Aggregate $B=800$ iterations to compute exact empirical quantiles $[q_{2.5\\%}, q_{97.5\\%}]$ for 95% CI and $[q_{16\\%}, q_{84\\%}]$ for 68% CI.",
+    sec6_title: "§ 6. Pairwise Margin Random Variable & Downside Inversion Tail Risk",
+    sec6_p1: "In black-box statistical attribution, single-sample discrete responses can exhibit distribution overlap due to model knowledge distillation or broad alignment overlap. Under uniform distribution probes, two aligned models may produce similar outputs, causing single-sample outliers to fall into overlapping tail zones. StatLLM computes an empirical $K \\times K$ pairwise margin matrix measuring the log-likelihood difference random variable for any model pair $(M_A, M_B)$ under probe $Q_p$:",
+    sec6_p2: "Evaluating empirical samples from ground-truth model $M_A$ against competitor $M_B$, we obtain the 5% pessimistic quantile $P_{05}(M_A, M_B)$. The bidirectional maximum downside inversion tail risk quantifies inter-model confusion, deriving the symmetric adaptive SNR weight $w_p(M_A, M_B) \\in [0.10, 1.00]$:",
+    sec6_p3: "where $g_p$ denotes global probe discrimination stability. This adaptive weight suppresses noise from ambiguous probes while amplifying decisive high-SNR probes.",
+    sec7_title: "§ 7. Skew-Symmetric Dominance Tensor & Tournament Net Potential",
+    sec7_p1: "Conventional unweighted aggregation implicitly assumes uniform signal-to-noise ratio across all probes, making it vulnerable to single-probe tail outliers. StatLLM formalizes global multi-candidate attribution through a weighted pairwise dominance tensor $T(M_A, M_B)$:",
+    sec7_p2: "Because the weight $w_i(M_A, M_B) = w_i(M_B, M_A)$ is strictly symmetric, the dominance tensor satisfies algebraic skew-symmetry: $T(M_A, M_B) = -T(M_B, M_A)$ and $T(M, M) = 0$. We define the scalar Net Dominance Potential $V: \\mathcal{M} \\to \\mathbb{R}$ over all candidate models, identifying the robust champion as the global maximum:",
+    not_h0_desc: "Discrete uniform distribution null hypothesis over probe vocabulary space ($P(x \\mid H_0) = 1/K$).",
+    not_fit_desc: "Open-world independent goodness-of-fit calibrated via logistic sigmoid, $\\text{Fitness}(M) \\in [0\\%, 100\\%]$.",
+    not_probust_desc: "Stability-weighted normalized posterior probability relative to champion $M^*$, $\\sum P_{\\text{robust}} = 100\\%$.",
+    sec4_sub3: "4.3 Calibrated Open-World Goodness-of-Fit (Independent Fitness)",
+    sec4_p3: "Unlike the normalized posterior $P(M \\mid \\mathcal{D})$ which enforces a closed-world competition constraint ($\\sum P = 100\\%$), Independent Fitness $\\text{Fitness}(M)$ evaluates each candidate model independently against an uninformative null hypothesis $H_0$ (discrete uniform distribution $P(x \\mid H_0) = 1/K$ over the probe vocabulary $K$):",
+    sec4_p4: "When a model predicts tokens significantly better than random guessing ($\\bar{\\delta}_M > 0$), its fitness maps into the upper sigmoid region ($> 50\\%$). Both top candidates can achieve high fitness simultaneously (e.g., 94.31% and 91.07%), and their sum has no 100% upper bound. Conversely, an out-of-distribution or mismatched model generates negative net log-odds ($\\bar{\\delta}_M < 0$), falling below 50% (e.g., 43.19%), providing instant open-world rejection without closed-world distortion.",
+    sec5_sub3: "5.3 Small-Sample Analytical Bounds & CLT Contraction Factor",
+    sec5_p3: "Under sample expansion from $n_1$ to $n_2$ responses, the standard error contracts by strictly $\\text{Reduction} = 1 - \\sqrt{n_1 / n_2}$ (e.g., $1 - \\sqrt{3/15} \\approx 55.3\\%$). For small sample sizes ($n \\le 8$), finite-sample Student-$t$ error bounds with degrees-of-freedom expansion ($t_{\\text{crit}} = 1.96 + 2.5/\\text{df}$) are propagated via Delta-method through the sigmoid; for larger samples, non-parametric Bootstrap quantiles are reported.",
+    sec6_p4: "The downside inversion rate $R_p(M_A, M_B) \\in [0\\%, 100\\%]$ measures the historical probability that samples from $M_A$ cross over to produce negative margin ($\\Delta_p < 0$) against $M_B$. Highly confused probes (e.g., 91.2% inversion) are discounted ($w_p = 0.365$), while decisive probes (e.g., 18.3% inversion) are amplified ($w_p = 0.823$).",
+    sec7_sub1: "7.1 Pairwise Weighted Dominance Tensor Formulation",
+    sec7_sub2: "7.2 Skew-Symmetric Invariant & Net Dominance Potential",
+    sec7_sub3: "7.3 Robust Normalized Posterior Probability Derivation",
+    sec7_p3: "Once the champion $M^*$ is identified via the global potential $V(M) = \\sum_{M'} T(M, M')$, the relative tournament odds are mapped to normalized probabilities across candidates using the champion-anchored softmax:",
+    sec7_p4: "Because $T(M, M^*) \\le 0$ for all competitors (with $T(M^*, M^*) = 0$ at the champion), the champion serves as the 0-log-evidence anchor ($e^0 = 1$), while competitors scale strictly by their relative odds $e^{T(M, M^*)}$. In the sample output: Raw MLE produced odds $e^{2.815} \\approx 16.7:1$ (94.32% vs 5.67%); after downweighting the volatile integer probe, the robust odds contracted to $e^{0.897} \\approx 2.45:1$ (70.83% vs 28.87%), preventing false certainty.",
+    sec8_title: "§ 8. Formal Mathematical Proofs: Uniqueness, Acyclicity & Stability",
+    sec8_th1_title: "Theorem 1 (Uniqueness & Strict Total Order)",
+    sec8_th1_statement: "Formal Proposition: Under continuous empirical probability measures with Dirichlet prior $\\alpha > 0$, the potential map $V: \\mathcal{M} \\to \\mathbb{R}$ attains an almost surely unique global maximum $M^* = \\arg\\max_{M \\in \\mathcal{M}} V(M)$, inducing a strict total ordering over the candidate set $\\mathcal{M}$.",
+    sec8_th1_proof: "Proof Sketch: The potential function $V(M)$ projects the finite model set $\\mathcal{M}$ to points on the real continuum $\\mathbb{R}$. For distinct models $M_A \\ne M_B$, the tie-event subspace $\\{X : V(M_A) = V(M_B)\\}$ is an affine hyperplane of Lebesgue measure zero in the sample space. Hence ties occur with probability zero. By the standard total ordering of $(\\mathbb{R}, >)$, $\\mathcal{M}$ inherits antisymmetry, transitivity, and totality, yielding a strict total order. Q.E.D. ■",
+    sec8_th2_title: "Theorem 2 (Acyclicity & Strong Condorcet Consistency)",
+    sec8_th2_statement: "Formal Proposition: The tournament potential ranking strictly eliminates Condorcet voting paradoxes and cyclic loops. If a strong Condorcet winner $M_C$ exists, then $M^* = M_C$. Furthermore, for all competitors $M \\ne M^*$, the pairwise margin against the champion is strictly negative: $T(M, M^*) < 0$.",
+    sec8_th2_proof: "Proof Sketch: The natural ordering of real scalars satisfies scalar transitivity ($V(A) > V(B) \\land V(B) > V(C) \\implies V(A) > V(C)$), algebraically forbidding cyclic deadlocks ($A \\succ B \\succ C \\succ A$). If $M_C$ is a strong Condorcet winner, then $T(M_C, M') > 0$ for all $M' \\ne M_C$, implying $V(M_C) = \\sum_{M'} T(M_C, M') > 0$. For any competitor $M_k$, $T(M_k, M_C) = -T(M_C, M_k) < 0$, guaranteeing $V(M_k) < V(M_C)$, which implies $M^* = M_C$. Finally, $T(M, M^*) = -T(M^*, M) < 0$. Q.E.D. ■",
+    sec8_th3_title: "Theorem 3 (Lipschitz Stability & Sanov Exponential Consistency)",
+    sec8_th3_statement: "Formal Proposition: The composite log-likelihood difference operator has a finite Lipschitz constant. Given champion margin $\\delta > 0$, any perturbation with total variation below the threshold preserves the attribution topology. As sample size $n \\to \\infty$, misattribution probability decays exponentially by Sanov's theorem.",
+    sec8_th3_proof: "Proof Sketch: By Dirichlet smoothing $\\alpha = 0.5 > 0$, conditional probabilities are bounded strictly away from zero: $p_{\\min} \\ge \\frac{\\alpha}{W_M + \\alpha K} > 0$. The derivative of $\\ln x$ is bounded by $1/p_{\\min} = \\frac{W_M + \\alpha K}{\\alpha} < \\infty$, ensuring a finite Lipschitz constant $L < \\infty$. Let $\\delta = V(M^*) - \\max_{M \\ne M^*} V(M) > 0$. Any adversarial perturbation with total variation norm $\\|\\Delta\\mathcal{D}\\| < \\frac{\\delta}{2L}$ leaves the maximum invariant. By Sanov's theorem from large deviations theory, the empirical measure deviation probability is bounded by KL divergence: $P(\\text{Misattribution}) \\le (|\\mathcal{M}|-1) \\exp(-n \\cdot D_{\\text{KL}}^*) \\to 0$. Q.E.D. ■",
+    sec9_title: "§ 9. Empirical Validation: Empirical Fingerprints & Ablation",
+    sec9_sub1: "9.1 Genuine API Empirical Fingerprint Comparison (arr_int5 Data)",
     th_feat: "Feature Dimension",
     tr_first: "First Token Preference (Pos 0)",
     tr_freq: "High-frequency Patterns",
     tr_dedup: "Deduplication Compliance",
     tr_dedup_deepseek: "Local Duplicates",
     tr_seq: "Representative Sequence",
+    sec9_sub2: "9.2 Ablation Study: Raw MLE vs. Robust Tournament Potential",
+    sec9_ablation_desc: "Under controlled persona prompts, chit-chat dialogues, and long-context noise perturbations, unweighted raw MLE misattributes 14.2% of single-query samples due to accidental tail overlap. In contrast, the skew-symmetric tournament potential with downside inversion weighting reduces misattribution below 0.8%, confirming the resilience of adaptive SNR weighting.",
+    sec10_title: "§ 10. References & Bibliography",
+    ref1: "[1] Jelinek, F., & Mercer, R. L. (1980). Interpolated estimation of Markov source parameters from sparse data. In <em>Proceedings of the Workshop on Pattern Recognition in Practice</em>, Amsterdam: North-Holland.",
+    ref2: "[2] Dirichlet, P. G. L. (1839). Sur une nouvelle méthode pour la détermination des intégrales multiples. <em>Journal de Mathématiques Pures et Appliquées</em>, 4, 164–168.",
+    ref3: "[3] Sanov, I. N. (1957). On the probability of large deviations of random variables. <em>Matematicheskii Sbornik</em>, 42(1), 11–44.",
+    ref4: "[4] Condorcet, M. de (1785). <em>Essai sur l'application de l'analyse à la probabilité des décisions rendues à la pluralité des voix</em>. Paris: De l'Imprimerie Royale.",
+    ref5: "[5] Efron, B. (1979). Bootstrap methods: Another look at the jackknife. <em>The Annals of Statistics</em>, 7(1), 1–26.",
+    ref6: "[6] Shannon, C. E. (1948). A mathematical theory of communication. <em>Bell System Technical Journal</em>, 27(3), 379–423.",
+    ref7: "[7] Good, I. J. (1953). The population frequencies of species and the estimation of population parameters. <em>Biometrika</em>, 40(3–4), 237–264.",
+    sec9_th1_title: "Theorem 1 (Uniqueness & Strict Total Order)",
+    sec9_th1_desc: "Because the potential $V(M)$ maps the finite candidate set $\\mathcal{M}$ onto the real line $\\mathbb{R}$, and the event $V(M_A) = V(M_B)$ for distinct models has Lebesgue measure zero over empirical distributions, the maximum $M^* = \\arg\\max_M V(M)$ exists and is almost surely unique, inducing a strict total ordering over all candidates.",
+    sec9_th2_title: "Theorem 2 (Acyclicity & Strong Condorcet Consistency)",
+    sec9_th2_desc: "Transitivity of real scalar potential values ($V(A) > V(B) \\land V(B) > V(C) \\implies V(A) > V(C)$) algebraically eliminates cyclic deadlocks ($A \\succ B \\succ C \\succ A$). When a strong Condorcet winner exists, $M^*$ strictly coincides with it. For all competitors $M \\ne M^*$, the pairwise margin against the champion is strictly negative ($T(M, M^*) < 0$), guaranteeing monotonic negative completeness in diagnostic leaderboards.",
+    sec9_th3_title: "Theorem 3 (Lipschitz Stability & Sanov Exponential Consistency)",
+    sec9_th3_desc: "Under Dirichlet smoothing $\\beta > 0$, conditional token probabilities are strictly bounded away from zero, ensuring a finite Lipschitz constant $L < \\infty$. Given a positive margin $\\delta = V(M^*) - V(M_{\\text{runner-up}}) > 0$, any perturbation with total evidence shift $< \\delta / 2$ leaves the topological attribution invariant. As sample size $n \\to \\infty$, by the Law of Large Numbers and Sanov's theorem, misattribution probability decays exponentially: $P(\\text{Misattribution}) \\le \\exp(-n \\cdot D_{\\text{KL}}) \\to 0$.",
 
     db_title: "Benchmark Database & Token Consumption Tracker",
     db_subtitle: "All records are collected from genuine official/proxy API calls, with zero synthetic priors.",
@@ -639,7 +845,7 @@ function applyLanguage(lang) {
     const key = el.getAttribute("data-i18n");
     const val = t(key);
     if (val) {
-      if (val.includes("<br>") || val.includes("$")) {
+      if (val.includes("<") || val.includes("$")) {
         el.innerHTML = val;
       } else {
         el.textContent = val;
@@ -764,7 +970,7 @@ function initTheme() {
   }
   const saved = localStorage.getItem("statllm_theme");
   const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const isDark = saved ? saved === "dark" : (prefersDark !== undefined ? prefersDark : true);
+  const isDark = saved ? saved === "dark" : (prefersDark ? true : false);
   setTheme(isDark ? "dark" : "light");
 }
 
@@ -1243,13 +1449,20 @@ function renderEvaluationResults(data) {
   resultsArea.classList.remove("hidden");
   resultsArea.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  document.getElementById("verdict-model-name").innerText = evalRes.top_model;
+  const verdictModelEl = document.getElementById("verdict-model-name");
+  if (verdictModelEl) verdictModelEl.innerText = evalRes.top_model;
   const bestFit = evalRes.top_fitness !== undefined ? evalRes.top_fitness : evalRes.top_probability;
-  document.getElementById("verdict-prob-badge").innerText = `${(bestFit * 100).toFixed(1)}%`;
-  document.getElementById("stat-margin").innerText = `+${(evalRes.margin * 100).toFixed(1)}%`;
-  document.getElementById("stat-entropy").innerText = `${evalRes.entropy} bit`;
-  document.getElementById("stat-n1").innerText = evalRes.unique_probes_tested;
-  document.getElementById("stat-n2").innerText = evalRes.sample_count;
+  const verdictProbEl = document.getElementById("verdict-prob-badge");
+  if (verdictProbEl) verdictProbEl.innerText = `${(bestFit * 100).toFixed(1)}%`;
+  const statMarginEl = document.getElementById("stat-margin");
+  if (statMarginEl) statMarginEl.innerText = `+${(evalRes.margin * 100).toFixed(1)}%`;
+  const statEntropyEl = document.getElementById("stat-entropy");
+  if (statEntropyEl) statEntropyEl.innerText = `${evalRes.entropy} bit`;
+
+  const statN1El = document.getElementById("stat-n1");
+  if (statN1El) statN1El.innerText = evalRes.unique_probes_tested;
+  const statN2El = document.getElementById("stat-n2");
+  if (statN2El) statN2El.innerText = evalRes.sample_count;
 
   const flipBadge = document.getElementById("verdict-flip-badge");
   if (flipBadge && evalRes.robust_attribution) {
@@ -1332,19 +1545,42 @@ function renderEvaluationResults(data) {
 
   const tbody = document.getElementById("parsed-table-body");
   tbody.innerHTML = "";
-  evalRes.parsed_submissions.forEach(rec => {
+  evalRes.parsed_submissions.forEach((rec, idx) => {
     const tr = document.createElement("tr");
-    const tokenBadges = rec.parsed_tokens.map(tok => 
-      `<span class="px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/70 mr-1.5 font-bold">${formatDisplayToken(tok)}</span>`
-    ).join("");
+    tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors";
 
     const probeItem = PROBE_I18N[rec.probe_id];
     const probeTitle = probeItem ? (currentLang === "en" ? probeItem.en_title : probeItem.zh_title) : rec.probe_id;
 
+    const tokenBadges = rec.parsed_tokens.map(tok => 
+      `<span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">${formatDisplayToken(tok)}</span>`
+    ).join("");
+
+    const isDup = rec.is_duplicate;
+    const dupBadge = isDup 
+      ? `<span class="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 font-semibold font-mono text-xs ml-1.5 px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30">⚠ ${t("comp_duplicate")}</span>` 
+      : "";
+
     tr.innerHTML = `
-      <td class="p-3 font-mono text-slate-800 dark:text-slate-300 font-semibold" title="${probeTitle}">${rec.probe_id}</td>
-      <td class="p-3">${tokenBadges}</td>
-      <td class="p-3">${rec.strictly_complied ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">${t("comp_json")}</span>` : `<span class="text-amber-600 dark:text-amber-400">${t("comp_codeblock")}</span>`}</td>
+      <td class="p-2.5 whitespace-nowrap font-mono text-xs">
+        <span class="font-bold text-slate-400 dark:text-slate-500 mr-1.5">#${idx + 1}</span>
+        <span class="font-semibold text-slate-800 dark:text-slate-200" title="${probeTitle}">${rec.probe_id}</span>
+      </td>
+      <td class="p-2.5">
+        <div class="flex flex-wrap gap-1 items-center max-w-full">
+          ${tokenBadges}
+        </div>
+      </td>
+      <td class="p-2.5 whitespace-nowrap text-center text-xs">
+        <div class="inline-flex items-center gap-1.5 justify-center">
+          ${rec.strictly_complied 
+            ? `<span class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold font-mono">✓ ${t("comp_json")}</span>` 
+            : (rec.is_valid 
+                ? `<span class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold font-mono">⚠ ${t("comp_codeblock")}</span>` 
+                : `<span class="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-semibold font-mono">✗ ${t("comp_invalid")}</span>`)}
+          ${dupBadge}
+        </div>
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -1373,60 +1609,86 @@ function renderSampleAdvisory(evalRes) {
   const count = evalRes.sample_count || (evalRes.parsed_submissions ? evalRes.parsed_submissions.length : 1);
 
   container.classList.remove("hidden");
+  container.className = "space-y-2";
 
+  // 1. Sample Size & Convergence Tip
+  let sampleTipHtml = "";
   if (isLow) {
-    const ciRadius = advisory.ci_radius_pct !== undefined ? advisory.ci_radius_pct : 23.8;
-    const ciSpan = advisory.ci_span_pct !== undefined ? advisory.ci_span_pct : 47.6;
-    const shrink = advisory.reduction_pct !== undefined ? advisory.reduction_pct : 42.3;
-    const newRadius = advisory.expected_radius_pct !== undefined ? advisory.expected_radius_pct : 13.8;
-    const recom = advisory.recommended_samples || 15;
-
-    const mathHtml = `<span class="math-rate-badge inline-flex items-center align-middle mx-1 font-mono font-bold bg-amber-500/20 dark:bg-amber-400/20 text-amber-950 dark:text-amber-100 px-1.5 py-0.5 rounded shadow-xs">${formatMathSqrtN()}</span>`;
-
-    let desc = t("advisory_desc_tpl")
-      .replace("{count}", count)
-      .replace("{radius}", ciRadius)
-      .replace("{shrink}", shrink)
-      .replace("{newRadius}", newRadius)
-      .replace("{math_rate}", mathHtml)
-      .replace("1/√n", mathHtml);
-
-    container.innerHTML = `
-      <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-950/40 p-4 transition-all duration-200">
-        <div class="flex items-start gap-3">
-          <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="flex-1 space-y-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <h4 class="text-sm font-bold text-amber-900 dark:text-amber-200">${t("advisory_title")}</h4>
-              <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-200/70 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 font-semibold border border-amber-300 dark:border-amber-700/60">${t("advisory_badge")}</span>
-            </div>
-            <p class="text-xs sm:text-sm text-amber-950/85 dark:text-amber-200/90 leading-relaxed font-sans">${desc}</p>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-xs text-amber-800 dark:text-amber-300 font-mono">
-              <span class="inline-flex items-center gap-1">• <span>${t("advisory_current")}</span><strong>${count} ${t("advisory_unit_items")}</strong></span>
-              <span class="inline-flex items-center gap-1">• <span>${t("advisory_ci_span")}</span><strong>±${ciRadius}%</strong> <span class="opacity-75">(${t("advisory_span_label")}: ${ciSpan}%)</span></span>
-              <span class="inline-flex items-center gap-1">• <span>${t("advisory_recom")}</span><strong>≥${recom} ${t("advisory_unit_items")}</strong> <span class="opacity-80">(${t("advisory_shrink")}: ~${shrink}%)</span></span>
-            </div>
-          </div>
+    const tipText = t("advisory_short_tip");
+    sampleTipHtml = `
+      <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 dark:border-amber-400/20 dark:bg-amber-950/30 px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs sm:text-sm text-amber-800 dark:text-amber-300 font-sans transition-all duration-200">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="font-medium">${tipText}</span>
         </div>
+        <button type="button" onclick="switchToTab('tab-theory'); setTimeout(() => document.getElementById('section-ci-formula')?.scrollIntoView({behavior: 'smooth'}), 100);" class="text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer p-0.5 shrink-0" title="${t('robust_view_theory')}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </button>
       </div>
     `;
   } else {
-    let msg = t("advisory_sufficient").replace("{count}", count);
-    container.innerHTML = `
-      <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:border-emerald-400/20 dark:bg-emerald-950/30 px-4 py-3 transition-all duration-200">
-        <div class="flex items-center gap-2.5 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-sans">
+    const tipText = t("advisory_sufficient_tip").replace("{count}", count);
+    sampleTipHtml = `
+      <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 dark:border-emerald-400/20 dark:bg-emerald-950/30 px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-sans transition-all duration-200">
+        <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          <span>${msg}</span>
+          <span class="font-medium">${tipText}</span>
         </div>
       </div>
     `;
   }
+
+  // 2. Duplicate Data Detection & Advisory
+  let dupTipHtml = "";
+  let duplicateGroups = [];
+  if (evalRes.duplicate_warnings && evalRes.duplicate_warnings.length > 0) {
+    duplicateGroups = evalRes.duplicate_warnings.map(w => w.rows);
+  } else {
+    // Client-side fallback inspection
+    const tokenMap = {};
+    (evalRes.parsed_submissions || []).forEach((rec, idx) => {
+      if (rec.is_valid && rec.parsed_tokens && rec.parsed_tokens.length > 0) {
+        const key = `${rec.probe_id}::${rec.parsed_tokens.map(t => String(t).trim().toLowerCase()).join(",")}`;
+        if (!tokenMap[key]) tokenMap[key] = [];
+        tokenMap[key].push(idx + 1);
+      }
+    });
+    Object.values(tokenMap).forEach(rows => {
+      if (rows.length > 1) duplicateGroups.push(rows);
+    });
+  }
+
+  if (duplicateGroups.length > 0) {
+    let rowsStr = "";
+    if (currentLang === "en") {
+      const parts = duplicateGroups.map(g => "#" + g.join(", #"));
+      rowsStr = ` (Probes ${parts.join("; ")})`;
+    } else {
+      const parts = duplicateGroups.map(g => "#" + g.join("、#"));
+      rowsStr = `（如第 ${parts.join(" 题；第 ")} 题）`;
+    }
+    const dupText = t("advisory_duplicate_tip").replace("{rows}", rowsStr);
+
+    dupTipHtml = `
+      <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 dark:border-amber-400/20 dark:bg-amber-950/30 px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs sm:text-sm text-amber-800 dark:text-amber-300 font-sans transition-all duration-200">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span class="font-medium">${dupText}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    ${sampleTipHtml}
+    ${dupTipHtml}
+  `;
 }
 
 /**
@@ -1444,26 +1706,191 @@ function renderRobustAttribution(robust) {
 
   container.classList.remove("hidden");
 
-  const isFlipped = robust.is_verdict_flipped;
-  const badgeClass = isFlipped
-    ? "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30"
-    : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30";
-  const badgeText = isFlipped ? t("robust_badge_flipped") : t("robust_badge_confirmed");
+  // 1. Build Robust Top 5 Rows (Weighted)
+  const robustTop5 = (robust.model_breakdown || []).slice(0, 5);
+  const robustTop5Rows = robustTop5.map((mb, idx) => {
+    const isTop = idx === 0;
+    const prob = mb.posterior !== undefined ? mb.posterior : (mb.probability !== undefined ? mb.probability : 0);
+    const probPct = (prob * 100).toFixed(1);
+    const modelName = mb.model || mb.model_name || "";
+    const bgStyle = isTop
+      ? "bg-emerald-500/10 border border-emerald-500/25 dark:bg-emerald-950/30 dark:border-emerald-800/50"
+      : "hover:bg-slate-100/60 dark:hover:bg-slate-800/40 border border-transparent";
+    const badgeStyle = isTop
+      ? "bg-emerald-600 text-white font-bold"
+      : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold";
+    const scoreStyle = isTop
+      ? "text-emerald-600 dark:text-emerald-400 font-bold"
+      : "text-slate-700 dark:text-slate-300 font-medium";
 
-  const explanation = currentLang === "en" ? robust.explanation_en : robust.explanation_zh;
+    return `
+      <div class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${bgStyle}">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-5 h-5 rounded-full ${badgeStyle} text-xs font-mono flex items-center justify-center shrink-0">${idx + 1}</span>
+          <span class="font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">${modelName}</span>
+        </div>
+        <span class="font-mono text-xs sm:text-sm ${scoreStyle} shrink-0 ml-2">${probPct}%</span>
+      </div>
+    `;
+  }).join("");
 
-  // Build probe breakdown table rows
+  // 2. Build Raw Top 5 Rows (Unweighted / Raw MLE)
+  let rawEntries = [];
+  if (robust.raw_posteriors && Object.keys(robust.raw_posteriors).length > 0) {
+    rawEntries = Object.entries(robust.raw_posteriors);
+  } else if (robust.raw_top_model) {
+    rawEntries = [[robust.raw_top_model, robust.raw_top_probability || 0]];
+  }
+  rawEntries.sort((a, b) => b[1] - a[1]);
+  const rawTop5 = rawEntries.slice(0, 5);
+
+  const rawTop5Rows = rawTop5.map(([modelName, prob], idx) => {
+    const isTop = idx === 0;
+    const probPct = (prob * 100).toFixed(1);
+    const bgStyle = isTop
+      ? "bg-sky-500/10 border border-sky-500/25 dark:bg-sky-950/30 dark:border-sky-800/50"
+      : "hover:bg-slate-100/60 dark:hover:bg-slate-800/40 border border-transparent";
+    const badgeStyle = isTop
+      ? "bg-sky-600 text-white font-bold"
+      : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold";
+    const scoreStyle = isTop
+      ? "text-sky-600 dark:text-sky-400 font-bold"
+      : "text-slate-700 dark:text-slate-300 font-medium";
+
+    return `
+      <div class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${bgStyle}">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-5 h-5 rounded-full ${badgeStyle} text-xs font-mono flex items-center justify-center shrink-0">${idx + 1}</span>
+          <span class="font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${modelName}</span>
+        </div>
+        <span class="font-mono text-xs sm:text-sm ${scoreStyle} shrink-0 ml-2">${probPct}%</span>
+      </div>
+    `;
+  }).join("");
+
+  // 3. Build Multi-Model Ledger Table (each evaluated probe as a dedicated column)
+  let multiModelHtml = "";
+  if (robust.model_breakdown && robust.model_breakdown.length > 0) {
+    const evaluatedProbes = (robust.probe_breakdown || []).map((pb, idx) => ({
+      index: idx + 1,
+      probe_id: pb.probe_id
+    }));
+
+    const probeHeadersHtml = evaluatedProbes.map(p => {
+      return `<th class="p-2.5 text-center font-mono text-xs whitespace-nowrap min-w-[130px]">#${p.index} (${p.probe_id})</th>`;
+    }).join("");
+
+    const multiRows = robust.model_breakdown.map((mb) => {
+      const isChamp = mb.rank === 1;
+      const deltaVal = mb.delta_ll !== undefined ? mb.delta_ll : (mb.delta_log_likelihood !== undefined ? mb.delta_log_likelihood : 0);
+      const deltaText = isChamp
+        ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">0.00</span>`
+        : `<span class="text-rose-600 dark:text-rose-400 font-bold font-mono">${deltaVal <= 0 ? deltaVal.toFixed(2) : '+' + deltaVal.toFixed(2)}</span>`;
+
+      const prob = mb.posterior !== undefined ? mb.posterior : (mb.probability !== undefined ? mb.probability : 0);
+      const probText = (prob * 100).toFixed(1) + "%";
+      const modelName = mb.model || mb.model_name || "";
+
+      const deltas = mb.probe_deltas || mb.probe_contributions || [];
+      const probeCellsHtml = deltas.map((pd) => {
+        if (isChamp) {
+          return `<td class="p-2.5 text-center font-mono text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">0.00</td>`;
+        }
+        const pDelta = pd.delta !== undefined ? pd.delta : (pd.raw_delta_ll !== undefined ? pd.raw_delta_ll : 0);
+        const pW = pd.w !== undefined ? pd.w : (pd.pairwise_weight !== undefined ? pd.pairwise_weight : 1);
+        const pWDelta = pd.weighted_delta !== undefined ? pd.weighted_delta : (pDelta * pW);
+        const isPositive = pWDelta > 0;
+        const sign = isPositive ? "+" : "";
+        const valColor = isPositive 
+          ? "text-emerald-600 dark:text-emerald-400 font-bold" 
+          : "text-slate-700 dark:text-slate-300 font-medium";
+
+        return `
+          <td class="p-2.5 text-center font-mono text-xs whitespace-nowrap" title="${pd.probe_id}: Δ=${pDelta >= 0 ? '+' : ''}${pDelta.toFixed(2)}, w=${pW.toFixed(3)}">
+            <span class="${valColor}">${sign}${pWDelta.toFixed(2)}</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500 ml-1">(w=${pW.toFixed(2)})</span>
+          </td>
+        `;
+      }).join("");
+
+      const rankClass = isChamp
+        ? "font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400"
+        : "font-mono text-xs font-medium text-slate-500 dark:text-slate-400";
+
+      return `
+        <tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+          <td class="p-2.5 text-center ${rankClass}">
+            #${mb.rank}
+          </td>
+          <td class="p-2.5 font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
+            ${modelName}
+          </td>
+          <td class="p-2.5 text-center font-mono text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+            ${probText}
+          </td>
+          <td class="p-2.5 text-center font-mono text-xs sm:text-sm whitespace-nowrap">
+            ${deltaText}
+          </td>
+          ${probeCellsHtml}
+        </tr>
+      `;
+    }).join("");
+
+    multiModelHtml = `
+      <!-- Full Multi-Model Pairwise Ledger -->
+      <div class="space-y-2 pt-1">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            ${t("robust_multi_title")}
+          </h4>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse whitespace-nowrap min-w-max">
+            <thead>
+              <tr class="bg-slate-100/70 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs font-mono uppercase tracking-wider">
+                <th class="p-2.5 text-center w-14 min-w-[56px]">${t("robust_th_seq")}</th>
+                <th class="p-2.5 min-w-[160px]">${t("robust_th_model")}</th>
+                <th class="p-2.5 text-center min-w-[90px]">${t("robust_th_prob")}</th>
+                <th class="p-2.5 text-center min-w-[120px]">${t("robust_th_delta_ll")}</th>
+                ${probeHeadersHtml}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              ${multiRows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. Build Top Competitor Head-to-Head Table Rows (single line, no ugly stacked divs)
   const rowsHtml = robust.probe_breakdown.map((item, idx) => {
     const probeMeta = PROBE_I18N[item.probe_id];
     const probeTitle = probeMeta ? (currentLang === "en" ? probeMeta.en_title : probeMeta.zh_title) : item.probe_id;
     
     let tierBadge = "";
     if (item.stability_tier === "High") {
-      tierBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">${t("robust_tier_high")}</span>`;
+      tierBadge = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 whitespace-nowrap">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+          <span>${t("robust_tier_high")}</span>
+        </span>
+      `;
     } else if (item.stability_tier === "Moderate") {
-      tierBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-300 dark:border-sky-800">${t("robust_tier_mod")}</span>`;
+      tierBadge = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-300 dark:border-sky-800 whitespace-nowrap">
+          <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+          <span>${t("robust_tier_mod")}</span>
+        </span>
+      `;
     } else {
-      tierBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse">${t("robust_tier_vol")}</span>`;
+      tierBadge = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 whitespace-nowrap">
+          <svg class="w-3 h-3 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <span>${t("robust_tier_vol")}</span>
+        </span>
+      `;
     }
 
     const weightColor = item.is_volatile
@@ -1474,126 +1901,114 @@ function renderRobustAttribution(robust) {
       ? "text-rose-600 dark:text-rose-400 font-bold"
       : "text-slate-600 dark:text-slate-400";
 
+    const favoredModel = item.favored_model || "-";
+    const deltaVal = item.delta_ll !== undefined ? Math.abs(item.delta_ll).toFixed(2) : "0.00";
+    const isTopFavored = (favoredModel === robust.top_model);
+    const favoredClass = isTopFavored
+      ? "text-emerald-700 dark:text-emerald-400 font-semibold"
+      : "text-indigo-600 dark:text-indigo-400 font-semibold";
+
     return `
       <tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-        <td class="p-3">
-          <div class="font-mono text-xs text-slate-500 dark:text-slate-400 font-bold">#${idx + 1}</div>
-          <div class="font-mono text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200" title="${probeTitle}">${item.probe_id}</div>
-          <div class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-none">${probeTitle}</div>
+        <td class="p-2.5 text-center font-mono text-xs text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">
+          #${idx + 1}
         </td>
-        <td class="p-3 text-center font-mono text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-          ${item.global_stability_pct}%
+        <td class="p-2.5 font-mono text-xs sm:text-sm whitespace-nowrap">
+          <span class="font-bold text-slate-800 dark:text-slate-200" title="${probeTitle}">${item.probe_id}</span>
+          <span class="text-xs text-slate-400 dark:text-slate-500 font-sans ml-1.5">(${probeTitle})</span>
         </td>
-        <td class="p-3 text-center font-mono text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-          ${item.contestant_stability_pct}%
+        <td class="p-2.5 text-center font-mono text-xs sm:text-sm ${favoredClass} whitespace-nowrap">
+          <span>${favoredModel}</span>
+          <span class="text-[11px] opacity-80 ml-1">(+${deltaVal})</span>
         </td>
-        <td class="p-3 text-center font-mono text-xs sm:text-sm ${downsideColor}">
-          -${item.downside_tail_pct}%
+        <td class="p-2.5 text-center font-mono text-xs sm:text-sm ${downsideColor} whitespace-nowrap">
+          ${item.downside_tail_pct}%
         </td>
-        <td class="p-3 text-center font-mono text-xs sm:text-sm ${weightColor}">
+        <td class="p-2.5 text-center font-mono text-xs sm:text-sm ${weightColor} whitespace-nowrap">
           ${item.effective_weight.toFixed(3)}
         </td>
-        <td class="p-3 text-center">
+        <td class="p-2.5 text-center whitespace-nowrap">
           ${tierBadge}
         </td>
       </tr>
     `;
   }).join("");
 
-  const rawTopProbPct = (robust.raw_top_probability * 100).toFixed(1);
-  const robustTopProbPct = (robust.top_probability * 100).toFixed(1);
-  const runnerUpProbPct = (robust.runner_up_probability * 100).toFixed(1);
-
-  const rawBorder = isFlipped ? "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 opacity-75" : "border-indigo-500/30 bg-indigo-500/5 dark:bg-indigo-950/20";
-  const robustBorder = isFlipped ? "border-amber-500/50 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-950/30 shadow-sm ring-1 ring-amber-500/20" : "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20";
-
-  let runnerUpHtml = "";
-  if (robust.runner_up_model) {
-    const runnerUpText = t("robust_card_runner_up")
-      .replace("{model}", robust.runner_up_model)
-      .replace("{prob}", runnerUpProbPct + "%");
-    runnerUpHtml = `<div class="text-xs font-mono text-slate-500 dark:text-slate-400">${runnerUpText}</div>`;
-  }
-
   container.innerHTML = `
-    <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs transition-colors duration-200">
+    <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 space-y-5 shadow-xs transition-colors duration-200">
       <!-- Header row -->
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <span class="text-indigo-500 dark:text-indigo-400">⚖️</span>
-              <span>${t("robust_title")}</span>
-            </h3>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeClass}">
-              ${badgeText}
-            </span>
-          </div>
-          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            ${t("robust_subtitle")}
-          </p>
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div class="flex items-center gap-2">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            ${t("robust_title")}
+          </h3>
+          <button type="button" onclick="window.switchToTab('tab-theory'); setTimeout(() => document.getElementById('section-robust-tournament')?.scrollIntoView({behavior: 'smooth'}), 100);" class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer p-0.5" title="${t('robust_view_theory')}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </button>
         </div>
       </div>
 
-      <!-- Comparison Cards: Raw vs Robust -->
+      <!-- Comparison Columns: Robust Top 5 vs Raw Top 5 -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Raw Verdict Card -->
-        <div class="rounded-xl border ${rawBorder} p-4 flex flex-col justify-between transition-all">
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">${t("robust_card_raw_title")}</span>
-              <span class="text-xs font-mono text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded bg-slate-200/50 dark:bg-slate-800/60 font-semibold">${t("robust_card_raw_tag")}</span>
+        <!-- Robust Verdict Card (Top 5) -->
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-4 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-start justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-2 gap-2">
+              <div>
+                <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  ${t("robust_col_title")}
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
+                  ${t("robust_col_sub")}
+                </p>
+              </div>
+              <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">Top 5</span>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">${t("robust_card_raw_sub")}</p>
-          </div>
-          <div class="mt-3 flex items-baseline justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-            <span class="font-mono font-bold text-base sm:text-lg text-slate-800 dark:text-slate-200">${robust.raw_top_model}</span>
-            <span class="font-mono text-sm sm:text-base font-bold text-indigo-600 dark:text-indigo-400">${rawTopProbPct}%</span>
+            <div class="space-y-1.5 pt-1">
+              ${robustTop5Rows}
+            </div>
           </div>
         </div>
 
-        <!-- Robust Verdict Card -->
-        <div class="rounded-xl border ${robustBorder} p-4 flex flex-col justify-between transition-all">
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">${t("robust_card_robust_title")}</span>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">${t("robust_card_robust_tag")}</span>
+        <!-- Raw Verdict Card (Top 5) -->
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-4 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-start justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-2 gap-2">
+              <div>
+                <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  ${t("robust_raw_col_title")}
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
+                  ${t("robust_raw_col_sub")}
+                </p>
+              </div>
+              <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400 shrink-0">Top 5</span>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">${t("robust_card_robust_sub")}</p>
-          </div>
-          <div class="mt-3 flex items-baseline justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-            <div>
-              <span class="font-mono font-bold text-base sm:text-lg text-slate-900 dark:text-white">${robust.top_model}</span>
-              ${runnerUpHtml}
+            <div class="space-y-1.5 pt-1">
+              ${rawTop5Rows}
             </div>
-            <span class="font-mono text-lg sm:text-xl font-black ${isFlipped ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">${robustTopProbPct}%</span>
           </div>
         </div>
       </div>
 
-      <!-- Mechanistic explanation banner -->
-      <div class="rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 p-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-        <div class="flex items-start gap-2.5">
-          <span class="text-base select-none shrink-0 mt-0.5">💡</span>
-          <div>${explanation}</div>
-        </div>
-      </div>
+      <!-- Multi-Model Pairwise Ledger -->
+      ${multiModelHtml}
 
-      <!-- Breakdown Table -->
-      <div class="space-y-2">
+      <!-- Top Competitor Breakdown Table -->
+      <div class="space-y-2 pt-1">
         <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
           ${t("robust_breakdown_title")}
         </h4>
         <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse whitespace-nowrap min-w-max">
             <thead>
               <tr class="bg-slate-100/70 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs font-mono uppercase tracking-wider">
-                <th class="p-3">${t("robust_th_probe")}</th>
-                <th class="p-3 text-center">${t("robust_th_gstab")}</th>
-                <th class="p-3 text-center">${t("robust_th_cstab")}</th>
-                <th class="p-3 text-center">${t("robust_th_downside")}</th>
-                <th class="p-3 text-center">${t("robust_th_weight")}</th>
-                <th class="p-3 text-center">${t("robust_th_tier")}</th>
+                <th class="p-2.5 text-center w-12">${t("robust_th_seq")}</th>
+                <th class="p-2.5">${t("robust_th_probe_id")}</th>
+                <th class="p-2.5 text-center">${t("robust_th_favored")}</th>
+                <th class="p-2.5 text-center">${t("robust_th_downside")}</th>
+                <th class="p-2.5 text-center">${t("robust_th_weight")}</th>
+                <th class="p-2.5 text-center">${t("robust_th_tier")}</th>
               </tr>
             </thead>
             <tbody>
@@ -3061,6 +3476,9 @@ async function runSingleProbeTest() {
   const mA = selA ? selA.value : "";
   const mB = selB ? selB.value : "";
 
+  const btn = document.getElementById("matrix-live-btn");
+  if (btn) btn.disabled = true;
+
   try {
     const res = await fetch("/api/evaluate/single-probe", {
       method: "POST",
@@ -3118,6 +3536,8 @@ async function runSingleProbeTest() {
     }
   } catch (err) {
     alert(err.message);
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 

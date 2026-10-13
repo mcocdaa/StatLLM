@@ -98,6 +98,8 @@ class LikelihoodEvaluator:
     def clear_cache(self):
         self._cached_matrix = None
         self._cached_models = None
+        self._cached_matrix_sig = None
+        self._cached_models_sig = None
 
     def evaluate(
         self,
@@ -154,14 +156,48 @@ class LikelihoodEvaluator:
                 "expected_length": probe.expected_length
             })
 
-        # 2. Load count table from database (with in-memory cache)
+        # Check for duplicate submissions across valid inputs
+        seen_token_keys = {}
+        for idx, rec in enumerate(parsed):
+            rec["is_duplicate"] = False
+            if rec["is_valid"] and rec["parsed_tokens"]:
+                norm_tokens = tuple(str(x).strip().lower() for x in rec["parsed_tokens"])
+                key = (rec["probe_id"], norm_tokens)
+                if key in seen_token_keys:
+                    rec["is_duplicate"] = True
+                    seen_token_keys[key].append(idx)
+                else:
+                    seen_token_keys[key] = [idx]
+
+        duplicate_warnings = []
+        for (pid, tokens), indices in seen_token_keys.items():
+            if len(indices) > 1:
+                duplicate_warnings.append({
+                    "probe_id": pid,
+                    "indices": indices,
+                    "rows": [i + 1 for i in indices],
+                    "tokens": list(tokens)
+                })
+
+        # 2. Load count table from database (with in-memory cache synchronized with db file state)
+        sig = self.db._get_db_signature() if hasattr(self.db, "_get_db_signature") else None
         if matrix is None:
-            if not hasattr(self, "_cached_matrix") or self._cached_matrix is None:
+            if (
+                not hasattr(self, "_cached_matrix")
+                or self._cached_matrix is None
+                or getattr(self, "_cached_matrix_sig", None) != sig
+            ):
                 self._cached_matrix = self.db.get_all_model_probe_counts()
+                self._cached_matrix_sig = sig
             matrix = self._cached_matrix
 
-        if not hasattr(self, "_cached_models") or self._cached_models is None:
+        if (
+            not hasattr(self, "_cached_models")
+            or self._cached_models is None
+            or getattr(self, "_cached_models_sig", None) != sig
+        ):
             self._cached_models = self.db.list_models()
+            self._cached_models_sig = sig
         models = self._cached_models
         model_names = [m["name"] for m in models] if models else list(matrix.keys())
 
@@ -412,6 +448,8 @@ class LikelihoodEvaluator:
             "unique_probes_tested": len(set(r["probe_id"] for r in parsed)),
             "has_invalid_submissions": len(validation_warnings) > 0,
             "validation_warnings": validation_warnings,
+            "has_duplicate_submissions": len(duplicate_warnings) > 0,
+            "duplicate_warnings": duplicate_warnings,
             "robust_attribution": robust_attribution
         }
 
@@ -487,48 +525,167 @@ class LikelihoodEvaluator:
                 sub_m_ll[m] = rec_ll
             submission_lls.append(sub_m_ll)
 
-        weights = []
-        probe_breakdown = []
+        # 1. Compute full K x K pairwise weighted tournament matrix
+        # T[mA][mB] = sum_i w_i(mA, mB) * (LL_i(mA) - LL_i(mB))
+        pairwise_weights = {}
         for s_idx, rec in enumerate(parsed_records):
             pid = rec["probe_id"]
             stab_entry = PROBE_STABILITY_DATA.get(pid, {})
             g_stab = float(stab_entry.get("global_stability", 0.85))
             pair_map = stab_entry.get("pairwise_p05", {})
-            
-            p05_12 = float(pair_map.get(top_raw_model, {}).get(runner_up_model, 0.0))
-            p05_21 = float(pair_map.get(runner_up_model, {}).get(top_raw_model, 0.0))
-            downside = max(0.0, -p05_12, -p05_21)
+            for mA in model_names:
+                for mB in model_names:
+                    if (s_idx, mA, mB) not in pairwise_weights:
+                        p05_ab = float(pair_map.get(mA, {}).get(mB, 0.0))
+                        p05_ba = float(pair_map.get(mB, {}).get(mA, 0.0))
+                        downside = max(0.0, -p05_ab, -p05_ba)
+                        c_stab = max(0.10, min(1.0, 1.0 - downside))
+                        w_pair = round(float(0.35 * g_stab + 0.65 * c_stab), 3)
+                        pairwise_weights[(s_idx, mA, mB)] = (w_pair, downside)
+                        pairwise_weights[(s_idx, mB, mA)] = (w_pair, downside)
+
+        T = {mA: {mB: 0.0 for mB in model_names} for mA in model_names}
+        for mA in model_names:
+            for mB in model_names:
+                if mA == mB:
+                    continue
+                tot_m = 0.0
+                for s_idx in range(len(parsed_records)):
+                    w_pair, _ = pairwise_weights.get((s_idx, mA, mB), (0.85, 0.0))
+                    tot_m += w_pair * (submission_lls[s_idx][mA] - submission_lls[s_idx][mB])
+                T[mA][mB] = tot_m
+
+        # 2. Borda / Net Dominance Potential: V(M) = sum_{mB} T[mA][mB]
+        V = {mA: sum(T[mA][mB] for mB in model_names) for mA in model_names}
+        sorted_v = sorted(V.items(), key=lambda x: -x[1])
+        robust_top_model = sorted_v[0][0]
+        robust_runner_up = sorted_v[1][0] if len(sorted_v) > 1 else robust_top_model
+
+        # 3. Relative delta against champion T[m][robust_top_model] <= 0
+        rel_deltas = {m: T[m][robust_top_model] for m in model_names}
+        max_d = max(rel_deltas.values())
+        exps = {m: math.exp(d - max_d) for m, d in rel_deltas.items()}
+        tot_e = sum(exps.values())
+        robust_post = {m: round(float(exps[m] / tot_e), 4) for m in model_names}
+        robust_top_prob = robust_post[robust_top_model]
+        robust_runner_up_prob = robust_post.get(robust_runner_up, 0.0)
+
+        is_flipped = (robust_top_model != top_raw_model)
+
+        # 4. Multi-model breakdown: all candidates ranked relative to champion
+        model_breakdown = []
+        for rank, (m, v_score) in enumerate(sorted_v, 1):
+            probe_contribs = []
+            for s_idx, rec in enumerate(parsed_records):
+                pid = rec["probe_id"]
+                w_pair, downside = pairwise_weights.get((s_idx, robust_top_model, m), (0.85, 0.0))
+                raw_d = submission_lls[s_idx][m] - submission_lls[s_idx][robust_top_model]
+                probe_contribs.append({
+                    "submission_index": s_idx,
+                    "probe_id": pid,
+                    "raw_delta_ll": round(float(raw_d), 3),
+                    "delta": round(float(raw_d), 3),
+                    "pairwise_weight": w_pair,
+                    "w": w_pair,
+                    "weighted_delta": round(float(w_pair * raw_d), 3),
+                    "downside_tail_pct": round(float(downside * 100), 1)
+                })
+            model_breakdown.append({
+                "rank": rank,
+                "model": m,
+                "model_name": m,
+                "delta_ll": round(float(rel_deltas[m]), 3),
+                "delta_log_likelihood": round(float(rel_deltas[m]), 3),
+                "net_potential": round(float(v_score), 2),
+                "posterior": robust_post[m],
+                "probability": robust_post[m],
+                "probe_contributions": probe_contribs,
+                "probe_deltas": probe_contribs
+            })
+
+        # 5. Build pairwise probe breakdown between champion and runner-up
+        probe_breakdown = []
+        pull_for_runner_up = []
+        support_for_top = []
+        for s_idx, rec in enumerate(parsed_records):
+            pid = rec["probe_id"]
+            w_pair, downside = pairwise_weights.get((s_idx, robust_top_model, robust_runner_up), (0.85, 0.0))
+            stab_entry = PROBE_STABILITY_DATA.get(pid, {})
+            g_stab = float(stab_entry.get("global_stability", 0.85))
             c_stab = max(0.10, min(1.0, 1.0 - downside))
-            
-            eff_weight = round(float(0.35 * g_stab + 0.65 * c_stab), 3)
-            weights.append(eff_weight)
-            
-            tier = "High" if eff_weight >= 0.80 else ("Moderate" if eff_weight >= 0.50 else "Volatile")
-            probe_breakdown.append({
+            tier = "High" if w_pair >= 0.80 else ("Moderate" if w_pair >= 0.50 else "Volatile")
+
+            ll_top = submission_lls[s_idx].get(robust_top_model, 0.0)
+            ll_run = submission_lls[s_idx].get(robust_runner_up, 0.0)
+            delta_ll = round(float(ll_top - ll_run), 3)
+
+            pb_item = {
                 "submission_index": s_idx,
                 "probe_id": pid,
                 "global_stability_pct": round(g_stab * 100, 1),
                 "contestant_stability_pct": round(c_stab * 100, 1),
-                "downside_tail_pct": round(downside * 100, 1),
-                "effective_weight": eff_weight,
+                "downside_tail_pct": round(float(downside * 100), 1),
+                "effective_weight": w_pair,
                 "stability_tier": tier,
-                "is_volatile": eff_weight < 0.60
-            })
+                "is_volatile": w_pair < 0.60,
+                "favored_model": robust_top_model if delta_ll >= 0 else robust_runner_up,
+                "delta_ll": delta_ll
+            }
+            probe_breakdown.append(pb_item)
 
-        robust_lls = {}
-        for m in model_names:
-            robust_lls[m] = sum(weights[i] * submission_lls[i][m] for i in range(len(parsed_records)))
+            diag_item = {
+                "submission_index": s_idx,
+                "probe_id": pid,
+                "delta_ll": delta_ll,
+                "effective_weight": w_pair,
+                "downside_tail_pct": pb_item["downside_tail_pct"]
+            }
+            if delta_ll < 0:
+                pull_for_runner_up.append(diag_item)
+            else:
+                support_for_top.append(diag_item)
 
-        max_r = max(robust_lls.values())
-        exps = {m: math.exp(ll - max_r) for m, ll in robust_lls.items()}
-        tot_e = sum(exps.values())
-        robust_post = {m: round(float(exps[m] / tot_e), 4) for m in model_names}
+        if pull_for_runner_up:
+            pull_pids = [f"#{p['submission_index']+1} ({p['probe_id']})" for p in pull_for_runner_up]
+            pull_str = ", ".join(pull_pids)
+            high_vol = [p for p in pull_for_runner_up if p["downside_tail_pct"] > 30]
+            if high_vol:
+                hv_names = ", ".join(f"#{p['submission_index']+1} ({p['probe_id']})" for p in high_vol)
+                max_down = max(p["downside_tail_pct"] for p in high_vol)
+                zh_comp = (
+                    f"次优模型 [{robust_runner_up}] 的概率主要来自题目 [{pull_str}]；"
+                    f"其中题目 [{hv_names}] 在历史矩阵中负轴倒挂率高达 {max_down}%（两模型特征重叠度高、单次抽样极易涨落），系统自适应压低了其权重。"
+                )
+                en_comp = (
+                    f"Runner-up [{robust_runner_up}] gained empirical support from probe(s) [{pull_str}]; "
+                    f"probe(s) [{hv_names}] has a historical downside inversion rate of {max_down}% between the two models and was adaptively downweighted."
+                )
+            else:
+                zh_comp = f"次优模型 [{robust_runner_up}] 在题目 [{pull_str}] 略占微弱优势，但区分幅度未达翻转阈值。"
+                en_comp = f"Runner-up [{robust_runner_up}] held a marginal lead on probe(s) [{pull_str}], but insufficient to alter the primary attribution."
+        else:
+            zh_comp = f"在测试的所有题目中，当前样本均一致偏向 [{robust_top_model}]，次优模型 [{robust_runner_up}] 未出现优势反向题。"
+            en_comp = f"Across all evaluated probes, empirical evidence consistently favored [{robust_top_model}] over [{robust_runner_up}]."
 
-        sorted_robust = sorted(robust_post.items(), key=lambda x: -x[1])
-        robust_top_model, robust_top_prob = sorted_robust[0]
-        robust_runner_up, robust_runner_up_prob = sorted_robust[1] if len(sorted_robust) > 1 else (robust_top_model, 0.0)
+        if support_for_top:
+            anchor = max(support_for_top, key=lambda x: x["delta_ll"])
+            zh_anchor = f" 核心支撑题为 #{anchor['submission_index']+1} ({anchor['probe_id']})（支持优势 ΔLL = +{anchor['delta_ll']:.2f}，历史倒挂率仅 {anchor['downside_tail_pct']}%，有效权重 {anchor['effective_weight']}），为 [{robust_top_model}] 锁定了稳健胜出优势。"
+            en_anchor = f" Decisive support came from probe #{anchor['submission_index']+1} ({anchor['probe_id']}) (margin ΔLL = +{anchor['delta_ll']:.2f}, inversion rate {anchor['downside_tail_pct']}%, weight {anchor['effective_weight']}), anchoring [{robust_top_model}]."
+        else:
+            zh_anchor = ""
+            en_anchor = ""
 
-        is_flipped = (robust_top_model != top_raw_model)
+        competitive_diagnostic = {
+            "top_model": robust_top_model,
+            "runner_up_model": robust_runner_up,
+            "top_probability": robust_top_prob,
+            "runner_up_probability": robust_runner_up_prob,
+            "margin_pct": round(float((robust_top_prob - robust_runner_up_prob) * 100), 1),
+            "pull_probes_for_runner_up": [p["probe_id"] for p in pull_for_runner_up],
+            "support_probes_for_top": [p["probe_id"] for p in support_for_top],
+            "diagnostic_zh": f"{zh_comp}{zh_anchor}".strip(),
+            "diagnostic_en": f"{en_comp}{en_anchor}".strip()
+        }
 
         if is_flipped:
             volatile_probes = [p["probe_id"] for p in probe_breakdown if p["is_volatile"]]
@@ -545,14 +702,8 @@ class LikelihoodEvaluator:
                 f"high-SNR probes dominated the evidence, successfully flipping the robust verdict to [{robust_top_model}] ({robust_top_prob*100:.1f}%)."
             )
         else:
-            explanation_zh = (
-                f"稳健抗涨落加权分析与原始最大似然推断高度一致，确认 [{robust_top_model}] ({robust_top_prob*100:.1f}%) "
-                f"在排除潜在长尾波动风险后依然具备显著优势。"
-            )
-            explanation_en = (
-                f"Stability-weighted robust analysis strongly confirms raw likelihood verdict: [{robust_top_model}] ({robust_top_prob*100:.1f}%) "
-                f"maintains dominant confidence after filtering potential downside volatility."
-            )
+            explanation_zh = competitive_diagnostic["diagnostic_zh"]
+            explanation_en = competitive_diagnostic["diagnostic_en"]
 
         return {
             "top_model": robust_top_model,
@@ -562,8 +713,11 @@ class LikelihoodEvaluator:
             "is_verdict_flipped": is_flipped,
             "raw_top_model": top_raw_model,
             "raw_top_probability": round(float(top_raw_prob), 4),
+            "raw_posteriors": {m: round(float(p), 4) for m, p in raw_posteriors.items()},
             "posteriors": robust_post,
+            "model_breakdown": model_breakdown,
             "probe_breakdown": probe_breakdown,
+            "competitive_diagnostic": competitive_diagnostic,
             "explanation_zh": explanation_zh,
             "explanation_en": explanation_en
         }

@@ -1,6 +1,6 @@
 services:
   statllm:
-    image: ghcr.io/mcocdaa/statllm:v0.2.0
+    image: ghcr.io/mcocdaa/statllm:v0.2.1
     build: .
     container_name: statllm-app
     restart: unless-stopped

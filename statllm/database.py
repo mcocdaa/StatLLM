@@ -4,6 +4,7 @@ StatLLM Database Manager.
 Maintains sample archives and weighted multi-token / sequence-trait frequency matrices.
 """
 
+import os
 import sqlite3
 import json
 from typing import Dict, Any, List, Tuple, Optional
@@ -13,17 +14,23 @@ from collections import defaultdict
 class Database:
     def __init__(self, db_path: str = "statllm.db"):
         self.db_path = db_path
+        self._cached_stats: Optional[Dict[str, Any]] = None
+        self._cached_token_usage: Optional[Dict[str, Any]] = None
+        self._cached_stats_sig: Optional[Tuple[int, int, int, int]] = None
+        self._cached_token_usage_sig: Optional[Tuple[int, int, int, int]] = None
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path, timeout=60.0)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA synchronous = NORMAL;")
         return conn
 
     def _init_db(self):
         """Initializes tables and indices."""
         with self._get_connection() as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA synchronous = NORMAL;")
             cursor = conn.cursor()
             
             # Models table
@@ -99,6 +106,28 @@ class Database:
 
             conn.commit()
 
+    def _get_db_signature(self) -> Tuple[int, int, int, int]:
+        """Returns physical disk state signature of DB and WAL files to detect cross-process writes."""
+        try:
+            st1 = os.stat(self.db_path)
+            wal_path = self.db_path + "-wal"
+            st2 = os.stat(wal_path) if os.path.exists(wal_path) else None
+            return (
+                st1.st_mtime_ns,
+                st1.st_size,
+                st2.st_size if st2 else 0,
+                st2.st_mtime_ns if st2 else 0
+            )
+        except Exception:
+            return (0, 0, 0, 0)
+
+    def invalidate_stats_cache(self):
+        """Invalidates in-memory cached statistics."""
+        self._cached_stats = None
+        self._cached_token_usage = None
+        self._cached_stats_sig = None
+        self._cached_token_usage_sig = None
+
     def add_model(self, name: str, display_name: str, provider: str = "", color: str = "#3b82f6"):
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -107,6 +136,7 @@ class Database:
             VALUES (?, ?, ?, ?)
             """, (name, provider, display_name, color))
             conn.commit()
+        self.invalidate_stats_cache()
 
     def list_models(self) -> List[Dict[str, Any]]:
         with self._get_connection() as conn:
@@ -252,6 +282,7 @@ class Database:
                     """, (model_name, probe_id, perm_tok, float(weight), float(weight)))
 
             conn.commit()
+            self.invalidate_stats_cache()
             return sample_id
 
     def add_samples_batch(self, samples_data: List[Dict[str, Any]]):
@@ -319,6 +350,7 @@ class Database:
                 """, (m, pid, tok, w, w))
 
             conn.commit()
+            self.invalidate_stats_cache()
 
     def rebuild_token_counts(self):
         """Rebuilds token_counts table from all valid samples in database."""
@@ -387,6 +419,7 @@ class Database:
                 weighted_count = weighted_count + ?
                 """, (m, pid, tok, w, w))
             conn.commit()
+            self.invalidate_stats_cache()
 
     def get_sample_count(self, model_name: str, probe_id: Optional[str] = None) -> int:
         """Returns the number of samples for a model and optional probe."""
@@ -444,9 +477,14 @@ class Database:
             cursor.execute("DELETE FROM token_counts")
             cursor.execute("DELETE FROM models")
             conn.commit()
+            self.invalidate_stats_cache()
 
     def get_stats(self) -> Dict[str, Any]:
-        """Returns statistics of database."""
+        """Returns statistics of database (cached in-memory, auto-refreshed on db change)."""
+        sig = self._get_db_signature()
+        if self._cached_stats is not None and getattr(self, "_cached_stats_sig", None) == sig:
+            return self._cached_stats
+
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM samples")
@@ -492,7 +530,7 @@ class Database:
             """)
             perturbation_breakdown = [dict(r) for r in cursor.fetchall()]
 
-            return {
+            res = {
                 "total_samples": total_samples,
                 "official_samples": official_samples,
                 "user_samples": user_samples,
@@ -501,9 +539,16 @@ class Database:
                 "token_usage": token_usage,
                 "perturbation_breakdown": perturbation_breakdown
             }
+            self._cached_stats = res
+            self._cached_stats_sig = sig
+            return res
 
     def get_token_usage_stats(self) -> Dict[str, Any]:
-        """Returns detailed breakdown of tokens consumed by model and perturbation."""
+        """Returns detailed breakdown of tokens consumed by model and perturbation (cached, auto-refreshed)."""
+        sig = self._get_db_signature()
+        if self._cached_token_usage is not None and getattr(self, "_cached_token_usage_sig", None) == sig:
+            return self._cached_token_usage
+
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -542,11 +587,14 @@ class Database:
             """)
             by_perturbation = [dict(r) for r in cursor.fetchall()]
 
-            return {
+            res = {
                 "overall": overall,
                 "by_model": by_model,
                 "by_perturbation": by_perturbation
             }
+            self._cached_token_usage = res
+            self._cached_token_usage_sig = sig
+            return res
 
     def get_all_samples(self) -> List[Dict[str, Any]]:
         """Returns all sample records ordered by ID."""

@@ -3,6 +3,7 @@ StatLLM Web API Application.
 """
 
 import os
+import asyncio
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -15,7 +16,7 @@ from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
 from statllm.probes import list_probes, get_probe
 from statllm.archive import export_archive_bundle, import_archive_bundle
-from statllm.matrix import get_probe_matrix, rank_probes_by_discrimination, warm_up_matrix_cache
+from statllm.matrix import get_probe_matrix, rank_probes_by_discrimination, warm_up_matrix_cache, clear_matrix_cache
 
 
 
@@ -197,20 +198,25 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
                         provider="Community",
                         color="#8b5cf6"
                     )
+                batch_samples = []
                 for parsed_rec in eval_res["parsed_submissions"]:
                     if parsed_rec["is_valid"]:
-                        db.add_sample(
-                            model_name=assigned_label,
-                            probe_id=parsed_rec["probe_id"],
-                            raw_text=parsed_rec["raw_text"],
-                            parsed_tokens=parsed_rec["parsed_tokens"],
-                            traits=parsed_rec.get("traits", {}),
-                            is_valid=parsed_rec["is_valid"],
-                            strictly_complied=parsed_rec["strictly_complied"],
-                            source_type="user",
-                            weight=0.2
-                        )
-                        saved_samples_count += 1
+                        batch_samples.append({
+                            "model_name": assigned_label,
+                            "probe_id": parsed_rec["probe_id"],
+                            "raw_text": parsed_rec["raw_text"],
+                            "parsed_tokens": parsed_rec["parsed_tokens"],
+                            "traits": parsed_rec.get("traits", {}),
+                            "is_valid": parsed_rec["is_valid"],
+                            "strictly_complied": parsed_rec["strictly_complied"],
+                            "source_type": "user",
+                            "weight": 0.2
+                        })
+                if batch_samples:
+                    db.add_samples_batch(batch_samples)
+                    saved_samples_count = len(batch_samples)
+                    evaluator.clear_cache()
+                    db.invalidate_stats_cache()
                 if assigned_label not in existing_models:
                     cluster_projector.fit()
 
@@ -256,6 +262,8 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
             source_type="user",
             weight=req.weight
         )
+        evaluator.clear_cache()
+        db.invalidate_stats_cache()
 
         return {
             "status": "success",
@@ -288,9 +296,12 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
             content = await request.body()
             if not content:
                 raise HTTPException(status_code=400, detail="Uploaded file is empty.")
-            res = import_archive_bundle(db, content, mode=mode)
-            # Re-fit cluster projector with new data
-            cluster_projector.fit()
+            # Execute heavy CPU & disk I/O in threadpool to prevent blocking the asyncio event loop
+            res = await asyncio.to_thread(import_archive_bundle, db, content, mode=mode)
+            await asyncio.to_thread(cluster_projector.fit)
+            evaluator.clear_cache()
+            db.invalidate_stats_cache()
+            clear_matrix_cache()
             return res
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))

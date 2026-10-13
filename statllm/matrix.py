@@ -13,6 +13,7 @@ from statllm.engine import LikelihoodEvaluator
 from statllm.probes import get_probe
 
 _MATRIX_CACHE: Dict[str, Dict[str, Any]] = {}
+_RANKING_CACHE: Optional[List[Dict[str, Any]]] = None
 
 
 def get_probe_matrix(
@@ -39,15 +40,13 @@ def get_probe_matrix(
     if not probe:
         raise ValueError(f"Unknown probe ID: {probe_id}")
 
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute(
-        "SELECT model_name, raw_text FROM samples WHERE is_valid = 1 AND probe_id = ?",
-        (probe_id,)
-    )
-    rows = c.fetchall()
-    conn.close()
+    with db._get_connection() as conn:
+        c = conn.cursor()
+        c.execute(
+            "SELECT model_name, raw_text FROM samples WHERE is_valid = 1 AND probe_id = ?",
+            (probe_id,)
+        )
+        rows = c.fetchall()
 
     data = defaultdict(list)
     for r in rows:
@@ -190,14 +189,17 @@ def rank_probes_by_discrimination(
     returning a sorted ranking list (highest MDI first).
     Loads from persistent SQLite cache in 2ms when available.
     """
+    global _RANKING_CACHE
+    if not force_refresh and probe_ids is None and _RANKING_CACHE is not None:
+        return _RANKING_CACHE
+
     from statllm.probes import ALL_PROBES
     if probe_ids is None:
-        conn = sqlite3.connect(db.db_path)
-        c = conn.cursor()
-        c.execute("SELECT DISTINCT probe_id FROM samples WHERE is_valid = 1")
-        db_pids = [r[0] for r in c.fetchall()]
-        conn.close()
-        probe_ids = [pid for pid in db_pids if pid in ALL_PROBES]
+        with db._get_connection() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT probe_id FROM samples WHERE is_valid = 1")
+            db_pids = [r[0] for r in c.fetchall()]
+            probe_ids = [pid for pid in db_pids if pid in ALL_PROBES]
 
     all_cached = db.get_all_probe_matrices_cache() if not force_refresh else {}
     ranked = []
@@ -224,6 +226,10 @@ def rank_probes_by_discrimination(
     ranked.sort(key=lambda x: x["mdi"], reverse=True)
     for rank, item in enumerate(ranked, 1):
         item["rank"] = rank
+
+    if probe_ids is None or len(probe_ids) == len(ALL_PROBES):
+        _RANKING_CACHE = ranked
+
     return ranked
 
 
@@ -238,8 +244,9 @@ def warm_up_matrix_cache(db: Database):
 
 
 def clear_matrix_cache():
-    """Clears in-memory cache of pairwise matrices."""
-    global _MATRIX_CACHE
+    """Clears in-memory cache of pairwise matrices and rankings."""
+    global _MATRIX_CACHE, _RANKING_CACHE
     _MATRIX_CACHE.clear()
+    _RANKING_CACHE = None
 
 

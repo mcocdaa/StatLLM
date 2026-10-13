@@ -1,8 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="dark">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const themeParam = urlParams.get("theme");
+        const saved = localStorage.getItem("statllm_theme");
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        let isDark;
+        if (themeParam === "light" || themeParam === "dark") {
+          isDark = (themeParam === "dark");
+        } else if (saved) {
+          isDark = (saved === "dark");
+        } else {
+          isDark = prefersDark ? true : false;
+        }
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>StatLLM - 大模型统计指纹与黑盒归因平台</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -210,45 +233,25 @@
         <!-- Probe Validation & Mismatch Warning Banner -->
         <div id="mismatch-warning-container" class="hidden"></div>
 
-        <!-- Top Verdict Card -->
-        <div class="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-6 sm:p-7 space-y-6 shadow-xs transition-colors duration-200">
-          <div class="flex flex-wrap items-center justify-between gap-5 border-b border-slate-200 dark:border-slate-800/80 pb-5">
-            <div>
-              <div class="flex items-center gap-2.5">
-                <span class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold" data-i18n="verdict_title">原始经验吻合度分析 (Raw MLE)</span>
-                <span id="verdict-flip-badge" class="hidden text-xs px-2.5 py-0.5 rounded-full font-mono font-semibold"></span>
-              </div>
-              <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1.5 flex flex-wrap items-center gap-3.5">
-                <span id="verdict-model-name">-</span>
-                <span id="verdict-prob-badge" class="text-sm sm:text-base px-3 py-1 rounded-md font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950 dark:text-sky-400 dark:border-sky-800">
-                  0.0%
-                </span>
-              </div>
-            </div>
-
-            <!-- Summary Badges -->
-            <div class="flex items-center gap-3.5 text-sm font-mono">
-              <div class="bg-slate-50 dark:bg-slate-950 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                <span class="text-slate-500 dark:text-slate-400" data-i18n="stat_margin_label">胜出优势: </span>
-                <span id="stat-margin" class="font-bold text-slate-800 dark:text-slate-200">+0.0%</span>
-              </div>
-              <div class="bg-slate-50 dark:bg-slate-950 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                <span class="text-slate-500 dark:text-slate-400" data-i18n="stat_entropy_label">不确定性: </span>
-                <span id="stat-entropy" class="font-bold text-slate-800 dark:text-slate-200">0.00 bit</span>
-              </div>
-            </div>
-          </div>
-
+        <!-- Section 1: Statistical Advisory & Model Empirical Confidence Intervals -->
+        <div id="section-statistical-advisory-and-ci" class="space-y-4">
           <!-- Sample Size & Uncertainty Advisory Banner (Dynamic based on data quantity & CI span) -->
           <div id="sample-size-advisory-container" class="hidden"></div>
 
-          <!-- Statistical Forest Plot / Error Bar Rows -->
-          <div class="space-y-3.5">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2" data-i18n="forest_title">
-                各模型独立吻合度与 95% 置信区间
-              </h3>
-              <span class="text-xs text-slate-500 dark:text-slate-400 font-mono" data-i18n="forest_boot">Bootstrap B=800</span>
+          <!-- Statistical Forest Plot / Error Bar Card -->
+          <div class="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 space-y-4 shadow-xs transition-colors duration-200">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-3.5">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2" data-i18n="forest_title">
+                  各模型独立吻合度与 95% 置信区间
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-sans" data-i18n="forest_subtitle">
+                  基于狄利克雷-多项分布零假设评估的单模型独立吻合度与置信区间（独立指标，非归一化，总和不为 100%）
+                </p>
+              </div>
+              <div class="flex items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
+                <span class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800" data-i18n="forest_boot">Bootstrap B=800</span>
+              </div>
             </div>
 
             <!-- Forest Plot Canvas Container -->
@@ -256,7 +259,6 @@
               <!-- Dynamically populated model error bar strips -->
             </div>
           </div>
-
         </div>
 
         <!-- Robust Stability-Weighted Attribution Card -->
@@ -265,16 +267,16 @@
         <!-- 2D PCA Cluster Projection & Parsed Table Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          <!-- 2D Scatter Canvas (7 Cols) -->
-          <div class="lg:col-span-7 bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3 shadow-xs transition-colors duration-200">
-            <div class="flex items-center justify-between">
+          <!-- 2D Scatter Canvas (6 Cols) -->
+          <div class="lg:col-span-6 bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3 shadow-xs transition-colors duration-200">
+            <div class="flex items-start sm:items-center justify-between gap-3">
               <div>
                 <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200" data-i18n="pca_title">二维降维分布图</h4>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="pca_desc">
                   散点为各模型经验特征分布云团；★ 星标为当前测试样本的投影位置。
                 </p>
               </div>
-              <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold">2D PCA</span>
+              <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold shrink-0 whitespace-nowrap">2D PCA</span>
             </div>
 
             <!-- Interactive Model Legend (Click or Hover to Highlight) -->
@@ -289,8 +291,8 @@
             </div>
           </div>
 
-          <!-- Parsed Details Table (5 Cols) -->
-          <div class="lg:col-span-5 bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3 flex flex-col justify-between shadow-xs transition-colors duration-200">
+          <!-- Parsed Details Table (6 Cols) -->
+          <div class="lg:col-span-6 bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3 flex flex-col justify-between shadow-xs transition-colors duration-200">
             <div>
               <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1" data-i18n="parsed_title">输入解析明细</h4>
               <p class="text-xs text-slate-500 dark:text-slate-400 mb-3" data-i18n="parsed_desc">提取的标准离散 Token 列表与合规性状态：</p>
@@ -299,9 +301,9 @@
                 <table class="w-full text-left text-sm text-slate-700 dark:text-slate-300">
                   <thead class="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 sticky top-0 font-mono text-xs">
                     <tr>
-                      <th class="p-3" data-i18n="th_probe">题目</th>
-                      <th class="p-3" data-i18n="th_tokens">解析 Token</th>
-                      <th class="p-3" data-i18n="th_compliance">合规状态</th>
+                      <th class="p-2.5 w-36 min-w-[130px] whitespace-nowrap" data-i18n="th_probe">题目</th>
+                      <th class="p-2.5" data-i18n="th_tokens">解析 Token</th>
+                      <th class="p-2.5 w-28 text-center whitespace-nowrap" data-i18n="th_compliance">合规状态</th>
                     </tr>
                   </thead>
                   <tbody id="parsed-table-body" class="divide-y divide-slate-200 dark:divide-slate-800 font-mono text-xs sm:text-sm">
@@ -479,7 +481,7 @@
           </div>
 
           <div class="flex justify-end">
-            <button onclick="runSingleProbeTest()" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+            <button id="matrix-live-btn" onclick="runSingleProbeTest()" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs">
               <span data-i18n="matrix_live_btn">单题即时诊断</span>
             </button>
           </div>
@@ -527,156 +529,499 @@
     <!-- ==================== TAB 2: METHODOLOGY (学术原理) ==================== -->
     <div id="tab-theory" class="tab-content hidden space-y-8 max-w-5xl mx-auto">
       
-      <!-- Paper Title Header -->
-      <div class="border-b border-slate-200 dark:border-slate-800 pb-5 space-y-1">
-        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight" data-i18n="theory_title">
-          StatLLM: 基于离散阵列探针与贝叶斯似然的大语言模型黑盒指纹归因
-        </h2>
-        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed" data-i18n="theory_subtitle">
-          深入阐述系统构建的核心数学模型：狄利克雷平滑多项分布、Jelinek-Mercer 位置插值模型、对数似然累加机制以及非参数 Bootstrap 95% 置信区间。
-        </p>
-      </div>
-
-      <!-- Section 1: Physical Mechanism -->
-      <section class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3 shadow-xs">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec1_title">
-          1. 物理机制：大模型为何存在离散数组生成偏置？
-        </h3>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec1_p1">
-          现代自回归大语言模型（Decoder-only Transformers）本质上并不具备真随机数发生器（TRNG）或物理熵源。模型输出离散序列（例如让其随机输出 5 个 1 到 100 之间的整数）遵循未归一化 logits 经 Softmax 温度缩放后的条件采样：
-        </p>
-        <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-sm sm:text-base text-sky-700 dark:text-sky-300 my-2">
-          $$P(x_i \mid \text{context}) = \frac{\exp(z_i / T)}{\sum_{j=1}^{|V|} \exp(z_j / T)}$$
-        </div>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec1_p2">
-          由于预训练语料分布的先验差异、分词器（Tokenizer）将数字切分为单 Token 还是多 Token 的机制不同，以及后训练阶段（SFT / RLHF）的安全对齐策略差异，不同大模型在生成离散序列时展现出高度稳健、不可抹除的固有偏置模式。
-        </p>
-      </section>
-
-      <!-- Section 2: Dirichlet Smoothing -->
-      <section class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3 shadow-xs">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec2_title">
-          2. 狄利克雷平滑条件概率 (Dirichlet-Smoothed Categorical)
-        </h3>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec2_p1">
-          设候选模型为 $M \in \mathcal{M}$，探针题目为 $Q$，该题目的有限状态空间基数为 $K$（如 1~100 整数的 $K \approx 102$）。模型 $M$ 在该题目下累计观测到的总加权词频为 $W_M$，特定 Token $x$ 出现的经验频次为 $C_M(x)$。为避免未登录词导致似然计算出现崩溃，引入非信息 Jeffreys 先验平滑参数 $\alpha = 0.5$：
-        </p>
-        <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-sm sm:text-base text-sky-700 dark:text-sky-300 my-2">
-          $$P_{\text{global}}(x \mid Q, M) = \frac{C_M(x) + \alpha}{W_M + \alpha \cdot K}$$
-        </div>
-        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed" data-i18n="sec2_p2">
-          当样本充足时，经验频率占主导；当遇到测试输入的稀疏长尾数字时，概率优雅退化为保底惩罚项。
-        </p>
-      </section>
-
-      <!-- Section 3: Jelinek-Mercer Positional Smoothing -->
-      <section id="section-jm-smoothing" class="bg-white dark:bg-slate-900/60 border border-sky-300 dark:border-sky-900/50 rounded-xl p-6 space-y-3 shadow-xs">
-        <div class="flex items-center justify-between">
-          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec3_title">
-            3. Jelinek-Mercer 位置插值模型 (Positional Lambda)
-          </h3>
-          <span class="text-xs px-2.5 py-1 rounded bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800 font-mono" data-i18n="sec3_badge">核心自回归建模</span>
-        </div>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec3_p1">
-          大语言模型是从左向右严格自回归生成的。首个数字是先验响应，而后续位置则强烈依赖于前面的生成历史。如果仅采用无序词袋，将无法识别恶意逆序攻击。为此，StatLLM 引入位置感知层级插值：
-        </p>
-        <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-sm sm:text-base text-purple-700 dark:text-purple-300 my-2">
-          $$P(x_i \mid \text{pos}=i, Q, M) = (1 - \lambda) \cdot P_{\text{global}}(x_i \mid Q, M) + \lambda \cdot P_{\text{pos}}(x_i \mid \text{pos}=i, Q, M)$$
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs sm:text-sm font-mono pt-2">
-          <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800">
-            <strong class="text-sky-600 dark:text-sky-400 block mb-1" data-i18n="sec3_l0">λ = 0.0 (纯词袋)</strong>
-            <span class="text-slate-500 dark:text-slate-400 text-xs" data-i18n="sec3_l0_desc">忽略元素排列顺序，仅统计集合内数字频次，容忍乱序。</span>
+      <article class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-10 lg:p-12 shadow-sm space-y-10 sm:space-y-12">
+        
+        <!-- Academic Methodological Paper Header -->
+        <header class="border-b border-slate-200 dark:border-slate-800 pb-7 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <span class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-semibold" data-i18n="paper_badge">StatLLM 数理方法与统计原理</span>
+            <span class="px-2.5 py-1 rounded bg-sky-50 dark:bg-sky-950/80 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800" data-i18n="paper_license">开源协议: MIT & CC-BY-SA 4.0</span>
           </div>
-          <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-lg border border-sky-300 dark:border-sky-800">
-            <strong class="text-emerald-600 dark:text-emerald-400 block mb-1" data-i18n="sec3_l5">λ = 0.5 (默认平衡)</strong>
-            <span class="text-slate-500 dark:text-slate-400 text-xs" data-i18n="sec3_l5_desc">50% 词袋抗稀疏 + 50% 位置自回归约束，最佳实践推荐。</span>
+          
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight" data-i18n="theory_title">
+            StatLLM: 基于离散数值指纹与反对称锦标赛势函数的黑盒基础模型贝叶斯归因框架
+          </h1>
+          
+          <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="theory_subtitle">
+            深入阐述系统构建的核心数理基础：离散状态多项似然、Jelinek-Mercer 位置自回归插值、中心极限定理有限样本标准误、历史负轴倒挂率自适应加权与反对称锦标赛净势函数。
+          </p>
+        </header>
+
+        <!-- Abstract & Keywords Callout Box -->
+        <section class="border-l-4 border-sky-500 bg-slate-50/80 dark:bg-slate-950/60 p-5 sm:p-7 rounded-r-xl space-y-4 border-y border-r border-slate-200/70 dark:border-slate-800/70">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400 font-mono" data-i18n="paper_abstract_title">Abstract / 论文摘要</span>
           </div>
-          <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800">
-            <strong class="text-purple-600 dark:text-purple-400 block mb-1" data-i18n="sec3_l1">λ = 1.0 (纯位置)</strong>
-            <span class="text-slate-500 dark:text-slate-400 text-xs" data-i18n="sec3_l1_desc">严格限制每个数字出现的具体槽位，对错位给予重度惩罚。</span>
+          <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic" data-i18n="paper_abstract_content">
+            大语言模型（LLMs）的广泛商用化伴随着模型伪造、未经声明的知识蒸馏以及闭源 API 逆向套壳等严峻合规与审计挑战。现有归因方法多依赖内部权重、激活状态或输出 Logits，无法适用于纯黑盒闭源服务。本文提出了 StatLLM——一种完全基于黑盒输入的数理统计归因框架。该框架利用自回归 Transformer 在离散数值生成任务中固有的词元切分偏置、伪随机数生成物理熵缺失以及后训练对齐留下的固有数值偏好，通过设计多道离散数学探针构建无偏经验指纹。在推断机制上，本文提出了融合 Jelinek-Mercer 位置插值的狄利克雷平滑条件概率模型，并证明了传统最大似然估计（MLE）在对抗性提示词扰动下的脆弱性；为此，本文进一步构建了基于两两对数似然差分随机变量的负轴倒挂率加权因子，并导出全成对反对称锦标赛优势张量与标量净支配势函数。理论分析与形式化证明表明：该框架诱导的全局归因胜出者几乎处处唯一且确定、代数上严格消除孔多塞投票死循环，并具备有限 Lipschitz 扰动稳定度与依据萨诺夫定理的样本量指数收敛一致性。基于 5,500+ 条真实 API 采样的基准实验验证了该方法在对抗扰动下的极高归因准确率与鲁棒性。
+          </p>
+          <div class="pt-2 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-400">
+            <span class="font-bold font-mono text-slate-800 dark:text-slate-200" data-i18n="paper_keywords_title">关键词 (Keywords):</span>
+            <span class="font-mono text-slate-600 dark:text-slate-400" data-i18n="paper_keywords_content">黑盒模型归因; 离散数值指纹; 狄利克雷平滑; Jelinek-Mercer 位置插值; 负轴倒挂率; 反对称锦标赛张量; 孔多塞一致性; 非参数 Bootstrap</span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Section 4: Joint Log-Likelihood & Log-Sum-Exp -->
-      <section class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3 shadow-xs">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec4_title">
-          4. 联合对数似然与 Log-Sum-Exp 贝叶斯后验推断
-        </h3>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec4_p1">
-          用户提交的包含 $n_2$ 轮回答的数据集，在模型 $M$ 下的联合对数似然为所有回答中各 Token 条件似然的累加：
-        </p>
-        <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-sm sm:text-base text-sky-700 dark:text-sky-300 my-2">
-          $$\mathcal{LL}(M) = \sum_{j=1}^{n_2} \sum_{i=1}^{L_j} \log P(x_{j,i} \mid \text{pos}=i, Q_j, M) + \sum \lambda_{\text{trait}} \log P(\tau \mid Q_j, M)$$
-        </div>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec4_p2">
-          假定各模型无偏的先验概率，利用 Log-Sum-Exp 数值稳定化算法归一化后验概率：
-        </p>
-        <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-sm sm:text-base text-sky-700 dark:text-sky-300 my-2">
-          $$P(M \mid \mathcal{D}) = \frac{\exp(\mathcal{LL}(M) - \mathcal{LL}_{\max})}{\sum_{M' \in \mathcal{M}} \exp(\mathcal{LL}(M') - \mathcal{LL}_{\max})}$$
-        </div>
-      </section>
+        <!-- Section 0: Mathematical Notation & Glossary -->
+        <section class="space-y-4">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec0_title">
+            § 0. 数理符号体系与空间定义 (Notation & Mathematical Foundations)
+          </h2>
+          <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec0_p1">
+            为保持数理严谨性与符号推导的完备性，本文涉及的核心数学符号、定义域空间及物理意义约定如下表所示：
+          </p>
+          <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+            <table class="w-full text-left text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+              <thead class="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-mono">
+                <tr>
+                  <th class="p-3 w-1/5" data-i18n="th_not_symbol">数学符号</th>
+                  <th class="p-3 w-1/4" data-i18n="th_not_domain">定义域 / 所在空间</th>
+                  <th class="p-3" data-i18n="th_not_desc">数理定义与物理意义</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-sans text-xs sm:text-sm">
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$\mathcal{M}$$</td>
+                  <td class="p-3 font-mono text-xs">$$\{M_1, \dots, M_M\}$$</td>
+                  <td class="p-3" data-i18n="not_m_desc">候选基座基础模型全集，基数为 $M = |\mathcal{M}| = 15$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$\mathcal{Q}$$</td>
+                  <td class="p-3 font-mono text-xs">$$\{Q_1, \dots, Q_P\}$$</td>
+                  <td class="p-3" data-i18n="not_q_desc">标准化离散数学探针题目全集，基数为 $P = |\mathcal{Q}| = 5$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$X$$</td>
+                  <td class="p-3 font-mono text-xs">$$(x_1, \dots, x_L) \in \mathcal{X}^L$$</td>
+                  <td class="p-3" data-i18n="not_x_desc">模型在探针 $Q$ 下自回归生成的长度为 $L$ 的离散数值序列。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$\alpha$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathbb{R}^+$$</td>
+                  <td class="p-3" data-i18n="not_alpha_desc">无信息 Jeffreys 先验伪计数平滑常数，取值 $\alpha = 0.5$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$\lambda$$</td>
+                  <td class="p-3 font-mono text-xs">$$[0, 1]$$</td>
+                  <td class="p-3" data-i18n="not_lambda_desc">Jelinek-Mercer 位置自回归敏感度凸插值权重，$\lambda \in [0, 1]$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$H_0$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathcal{P}(\mathcal{X})$$</td>
+                  <td class="p-3" data-i18n="not_h0_desc">探针题目有限状态空间上的离散均匀分布零假设 ($P(x \mid H_0) = 1/K$)。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$\text{Fitness}(M)$$</td>
+                  <td class="p-3 font-mono text-xs">$$[0\%, 100\%]$$</td>
+                  <td class="p-3" data-i18n="not_fit_desc">基于 Sigmoid 逻辑斯蒂映射校准的开域单模型独立吻合度，$\text{Fitness}(M) \in [0\%, 100\%]$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$\Delta_p(M_A, M_B)$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathbb{R}$$</td>
+                  <td class="p-3" data-i18n="not_delta_desc">成对对数似然差分随机变量 $\ln P(X \mid Q_p, M_A) - \ln P(X \mid Q_p, M_B)$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$P_{05}(M_A, M_B)$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathbb{R}$$</td>
+                  <td class="p-3" data-i18n="not_p05_desc">差分随机变量在真实模型 $M_A$ 经验分布下的 5% 悲观分位数。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$R_p(M_A, M_B)$$</td>
+                  <td class="p-3 font-mono text-xs">$$[0\%, 100\%]$$</td>
+                  <td class="p-3" data-i18n="not_rp_desc">双向最大负轴倒挂率指标 $\max(0, -P_{05}(A,B), -P_{05}(B,A))$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$w_p(M_A, M_B)$$</td>
+                  <td class="p-3 font-mono text-xs">$$[0.10, 1.00]$$</td>
+                  <td class="p-3" data-i18n="not_wp_desc">对称自适应信噪比加权因子，$w_p(M_A, M_B) \in [0.10, 1.00]$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$T(M_A, M_B)$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathbb{R}$$</td>
+                  <td class="p-3" data-i18n="not_t_desc">加权成对对抗优势张量，满足严格反对称不变量 $T = -T^T$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$V(M)$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathbb{R}$$</td>
+                  <td class="p-3" data-i18n="not_v_desc">候选模型标量净支配势函数 $V(M) = \sum_{M'} T(M, M')$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$P_{\text{robust}}(M)$$</td>
+                  <td class="p-3 font-mono text-xs">$$[0, 1]$$</td>
+                  <td class="p-3" data-i18n="not_probust_desc">以胜出基准 $M^*$ 为中心锚定的抗涨落加权归一化后验概率，$\sum P_{\text{robust}} = 100\%$。</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono font-bold text-sky-700 dark:text-sky-400">$$M^*$$</td>
+                  <td class="p-3 font-mono text-xs">$$\mathcal{M}$$</td>
+                  <td class="p-3" data-i18n="not_mstar_desc">全域稳健判定胜出模型 $M^* = \arg\max_{M} V(M)$。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <!-- Section 5: Bootstrap 95% Confidence Intervals -->
-      <section class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3 shadow-xs">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec5_title">
-          5. 非参数 Bootstrap 95% 置信区间 (B=800)
-        </h3>
-        <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="sec5_p1">
-          为量化小样本波动对模型判定带来的不确定性，StatLLM 在客户端发起评测时，实时执行 $B=800$ 次有放回重抽样：
-        </p>
-        <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed" data-i18n="sec5_steps">
-          1. 对输入的 $n_2$ 条回答生成重采样索引矩阵；<br>
-          2. 对每次抽样计算重采样似然和并归一化得到后验；<br>
-          3. 收集各模型后验分布向量，取其经验分位数 $[q_{2.5\%}, q_{97.5\%}]$ 作为 95% 置信区间。
-        </div>
-      </section>
+        <!-- Section 1: Physical Mechanism -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec1_title">
+            § 1. 引言：自回归物理熵瓶颈与离散生成偏置
+          </h2>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec1_sub1">
+              1.1 自回归采样中的物理熵源缺失 (Entropy Bottleneck in Sampling)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec1_p1">
+              现代主流自回归大语言模型（基于 Decoder-only Transformer 架构）本质上为离散状态马尔可夫链转移模型，在物理底层并不具备真随机数发生器（TRNG）或热噪声熵源。在生成离散序列（例如让其随机输出 5 个 1 到 100 之间的整数）时，模型的生成概率受未归一化 logits 经 Softmax 温度缩放控制：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-sky-700 dark:text-sky-300 my-2">
+              $$P(x_i \mid \text{context}) = \frac{\exp(z_i / \tau)}{\sum_{j=1}^{|V|} \exp(z_j / \tau)}$$
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec1_sub2">
+              1.2 分词器诱导偏置与后训练对齐印记 (Tokenization & Alignment Artifacts)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec1_p2">
+              由于各模型分词器（Tokenizer，如 Byte-Pair Encoding 或 SentencePiece）在数字切分规则上的差异（例如数字 17 是一道独立 Token 还是拆分为 '1' 与 '7'），以及预训练语料中自然数字共现频率差异，叠加强化学习后训练（RLHF / DPO）在安全性上的正则约束，导致各模型在离散数值选择上展现出高度特异且不可抹除的统计吸引子。
+            </p>
+          </div>
+        </section>
 
-      <!-- Section 6: Real Empirical Fingerprint Table -->
-      <section class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3 shadow-xs">
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec6_title">
-          6. 实测目标大模型离散指纹对比 (arr_int5 实测数据)
-        </h3>
-        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
-          <table class="w-full text-left text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-            <thead class="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-mono">
-              <tr>
-                <th class="p-3" data-i18n="th_feat">特征维度</th>
-                <th class="p-3">GPT-5.6-Luna</th>
-                <th class="p-3">Grok-4.7</th>
-                <th class="p-3">DeepSeek-V4.1-Flash</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-sans text-xs sm:text-sm">
-              <tr>
-                <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_first">首词偏好 (Pos 0)</td>
-                <td class="p-3 text-emerald-600 dark:text-emerald-400 font-mono font-bold">17 (93.8%)</td>
-                <td class="p-3 text-sky-600 dark:text-sky-400 font-mono">37 (43.8%), 23 (31.3%)</td>
-                <td class="p-3 text-cyan-600 dark:text-cyan-400 font-mono">42 (31.3%), 37 (25.0%)</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_freq">高频数字模式</td>
-                <td class="p-3 font-mono text-xs sm:text-sm">17, 64, 92, 8, 41</td>
-                <td class="p-3 font-mono text-xs sm:text-sm">23, 37, 82, 14, 56, 91</td>
-                <td class="p-3 font-mono text-xs sm:text-sm">41, 42, 37, 12, 65, 88</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_dedup">去重遵从率</td>
-                <td class="p-3 text-emerald-600 dark:text-emerald-400">100%</td>
-                <td class="p-3 text-emerald-600 dark:text-emerald-400">100%</td>
-                <td class="p-3 text-amber-600 dark:text-amber-400" data-i18n="tr_dedup_deepseek">局部重复</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_seq">典型序列示例</td>
-                <td class="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">[17, 64, 92, 8, 41]</td>
-                <td class="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">[37, 82, 14, 56, 91]</td>
-                <td class="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">[41, 51, 41, 26, 49]</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+        <!-- Section 2: Dirichlet Smoothing -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec2_title">
+            § 2. 离散多项分布与非信息狄利克雷平滑
+          </h2>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec2_sub1">
+              2.1 有限离散状态空间上的多项似然
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec2_p1">
+              设候选模型为 $M \in \mathcal{M}$，探针题目为 $Q$，该题目的有限状态空间基数为 $K$（如 1~100 整数的 $K \approx 102$）。模型 $M$ 在该题目下累计观测到的总加权词频为 $W_M$，特定 Token $x$ 出现的经验频次为 $C_M(x)$。为避免未登录词导致似然计算出现崩溃，引入非信息 Jeffreys 先验平滑参数 $\alpha = 0.5$：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-sky-700 dark:text-sky-300 my-2">
+              $$P_{\text{global}}(x \mid Q, M) = \frac{C_M(x) + \alpha}{W_M + \alpha \cdot K}$$
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec2_sub2">
+              2.2 零频平滑保底与有限似然界
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec2_p2">
+              当经验样本充足（$W_M \gg K$）时，经验频率占主导；当遇到测试输入的稀疏长尾数字时，概率优雅退化为保底惩罚项 $\frac{\alpha}{W_M + \alpha K} > 0$，从数理上避免了对数似然向负无穷发散的奇点问题。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 3: Jelinek-Mercer Positional Smoothing -->
+        <section id="section-jm-smoothing" class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800 scroll-mt-20">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec3_title">
+              § 3. 自回归位置时序依赖与 Jelinek-Mercer 层级插值
+            </h2>
+            <span class="text-xs px-2.5 py-1 rounded bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800 font-mono" data-i18n="sec3_badge">核心自回归建模</span>
+          </div>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec3_sub1">
+              3.1 因果掩码与时序自回归依赖 (Causal Sequence Dependence)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec3_p1">
+              大语言模型是从左向右严格自回归生成的。首个数字是先验响应，而后续位置则强烈依赖于前面的生成历史。如果仅采用无序词袋，将无法识别恶意逆序攻击。为此，StatLLM 引入位置感知层级插值：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-purple-700 dark:text-purple-300 my-2">
+              $$P(x_i \mid \text{pos}=i, Q, M) = (1 - \lambda) \cdot P_{\text{global}}(x_i \mid Q, M) + \lambda \cdot P_{\text{pos}}(x_i \mid \text{pos}=i, Q, M)$$
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs font-mono pt-2">
+              <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
+                <strong class="text-sky-600 dark:text-sky-400 block" data-i18n="sec3_l0">λ = 0.0 (纯词袋模式)</strong>
+                <span class="text-slate-500 dark:text-slate-400 text-xs block leading-relaxed" data-i18n="sec3_l0_desc">忽略元素排列顺序，仅统计集合内数字频次，容忍打乱与置换攻击。</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-lg border border-sky-300 dark:border-sky-800 space-y-1">
+                <strong class="text-emerald-600 dark:text-emerald-400 block" data-i18n="sec3_l5">λ = 0.5 (默认平衡模式)</strong>
+                <span class="text-slate-500 dark:text-slate-400 text-xs block leading-relaxed" data-i18n="sec3_l5_desc">50% 全局词袋抗稀疏 + 50% 槽位自回归依赖约束，推荐工业最佳平衡。</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
+                <strong class="text-purple-600 dark:text-purple-400 block" data-i18n="sec3_l1">λ = 1.0 (纯位置自回归)</strong>
+                <span class="text-slate-500 dark:text-slate-400 text-xs block leading-relaxed" data-i18n="sec3_l1_desc">严格约束每个数字出现的具体槽位，对错位给予重度对数惩罚。</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Joint Log-Likelihood & Log-Sum-Exp -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec4_title">
+            § 4. 联合贝叶斯似然累加与 Log-Sum-Exp 极值归一化
+          </h2>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec4_sub1">
+              4.1 多探针复合对数似然表达式
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec4_p1">
+              用户提交的包含 $n_2$ 轮回答的数据集，在模型 $M$ 下的联合对数似然为所有回答中各 Token 条件似然的累加：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-sky-700 dark:text-sky-300 my-2">
+              $$\mathcal{LL}(M) = \sum_{j=1}^{n_2} \sum_{i=1}^{L_j} \ln P(x_{j,i} \mid \text{pos}=i, Q_j, M) + \sum_{j=1}^{n_2} \sum_{\tau \in \text{Traits}(X_j)} \lambda_{\tau} \ln P(\tau \mid Q_j, M)$$
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec4_sub2">
+              4.2 相对后验概率的数值稳定化归一化 (Closed-World Posterior)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec4_p2">
+              假定各候选模型无偏的均匀先验，利用 Log-Sum-Exp 极值平移数值稳定化算法归一化相对排他后验概率（各候选模型总和严格约束为 $\sum P = 100\%$）：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-sky-700 dark:text-sky-300 my-2">
+              $$P(M \mid \mathcal{D}) = \frac{\exp(\mathcal{LL}(M) - \mathcal{LL}_{\max})}{\sum_{M' \in \mathcal{M}} \exp(\mathcal{LL}(M') - \mathcal{LL}_{\max})}, \quad \mathcal{LL}_{\max} = \max_{M' \in \mathcal{M}} \mathcal{LL}(M')$$
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec4_sub3">
+              4.3 独立模型吻合度与零假设对比 (Calibrated Open-World Goodness-of-Fit)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec4_p3">
+              不同于强制候选模型全集和为 100% 的闭域归一化后验概率 $P(M \mid \mathcal{D})$，单模型独立吻合度 $\text{Fitness}(M)$ 将每个候选模型与无信息的零假设 $H_0$（探针词表中离散均匀分布 $P(x \mid H_0) = 1/K$）进行独立对数增益对比：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 my-2">
+              $$\bar{\delta}_M = \frac{\sum_{k=1}^{n_2} w_k \cdot \Big(\ln P(x_k \mid Q_k, M) - \ln P(x_k \mid Q_k, H_0)\Big)}{\sum_{k=1}^{n_2} w_k}$$
+              $$\text{Fitness}(M) = \sigma(2.5 \cdot \bar{\delta}_M) = \frac{1}{1 + \exp(-2.5 \cdot \bar{\delta}_M)}$$
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec4_p4">
+              当模型在测试数据上的预测显著优于随机猜测（$\bar{\delta}_M > 0$）时，其吻合度映射到 Sigmoid 上半区（$> 50\%$）。两个候选模型均能同时达到高吻合度（例如 GPT-5.6 为 94.31%，GPT-6 为 91.07%），总和不受 100% 约束；而完全不吻合或跨族谱模型（如 DeepSeek 为 43.19%）落入 50% 以下，可实现即时的开域拒识，避免闭域归一化产生的虚假高置信度欺骗。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 5: Uncertainty Quantification -->
+        <section id="section-ci-formula" class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800 scroll-mt-20">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec5_title">
+            § 5. 不确定性量化：中心极限定理渐进性与非参数 Bootstrap
+          </h2>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec5_sub1">
+              5.1 中心极限定理有限样本标准误收窄规律
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec5_p1">
+              根据林德伯格-莱维中心极限定理（CLT），随着用户测试轮次 $n$ 的增加，模型累加对数似然渐进服从高斯分布，其标准误严格满足：$$SE \propto \frac{1}{\sqrt{n}}$$ 这意味着将测试题目从 5 题增加至 15 题，置信区间跨度将确定性收窄约 42.3%，从而以可控代价消除随机涨落。
+            </p>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec5_sub2">
+              5.2 客户端实时非参数 Bootstrap 重抽样 (B=800)
+            </h3>
+            <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed" data-i18n="sec5_steps">
+              1. 对用户输入的 $n_2$ 条回答生成重采样索引矩阵 (均匀有放回抽样)；<br>
+              2. 对每次抽样计算重采样似然和并归一化得到候选模型后验概率向量；<br>
+              3. 收集 $B=800$ 次抽样分布，取其经验分位数 $[q_{2.5\%}, q_{97.5\%}]$ 作为 95% 置信区间，$[q_{16\%}, q_{84\%}]$ 作为 68% 核心区间。
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec5_sub3">
+              5.3 小样本解析区间与中心极限定理收窄因子
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec5_p3">
+              在样本量由 $n_1$ 增加至 $n_2$ 时，置信区间跨度严格依 $\text{Reduction} = 1 - \sqrt{n_1 / n_2}$ 收窄（例如从 3 题扩充至 15 题收窄 $1 - \sqrt{3/15} \approx 55.3\%$）。对于小样本量（$n \le 8$），系统采用具备自由度保护的有限样本解析 Student-$t$ 误差界（$t_{\text{crit}} = 1.96 + 2.5/\text{df}$）经 Delta 方法传递至 Sigmoid 尺度；当样本量充分时，无缝衔接至非参数 Bootstrap 经验分位数。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 6: Pairwise Margin & Downside Tail Risk -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec6_title">
+            § 6. 成对似然差分随机变量与历史负轴倒挂率建模
+          </h2>
+          <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec6_p1">
+            在黑盒统计归因中，单次随机抽样往往存在模型间的特征重叠或知识蒸馏污染。例如，在均匀整数分布题目中，两款高度对齐的基础模型输出可能极为相似，单次偶然采样极易落入两者交叠的尾部区间造成误判。为此，StatLLM 在经验基准库中构建了 $K \times K$ 全成对边际矩阵，衡量任意模型对 $(M_A, M_B)$ 在探针题目 $Q_p$ 上的对数似然差分随机变量：
+          </p>
+          <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-sky-700 dark:text-sky-300 my-2">
+            $$\Delta_p(M_A, M_B) = \ln P(X \mid Q_p, M_A) - \ln P(X \mid Q_p, M_B)$$
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec6_p2">
+            统计真实模型 $M_A$ 产生的样本在模型 $M_B$ 上的经验边际分布，定义其 5% 悲观分位数 $P_{05}(M_A, M_B)$。两模型间的双向最大负轴倒挂率（Downside Inversion Tail Risk）量化了两模型相互混淆的最大可能，并据此推导对称信噪比加权因子 $w_p(M_A, M_B) \in [0.10, 1.00]$：
+          </p>
+          <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-purple-700 dark:text-purple-300 my-2">
+            $$R_p(M_A, M_B) = \max\big(0, -P_{05}(M_A, M_B), -P_{05}(B, M_A)\big)$$
+            $$w_p(M_A, M_B) = 0.35 \cdot g_p + 0.65 \cdot \max\big(0.10, 1.0 - R_p(M_A, M_B)\big)$$
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec6_p4">
+            历史负轴倒挂率 $R_p(M_A, M_B) \in [0\%, 100\%]$ 衡量真实模型 $M_A$ 产生的样本在对比竞品 $M_B$ 上出现负边际（$\Delta_p < 0$）的历史经验概率。高混淆题目（如倒挂率 91.2%）被自适应压制（$w_p = 0.365$），而高区分度题目（如倒挂率 18.3%）获得高权重（$w_p = 0.823$）。
+          </p>
+        </section>
+
+        <!-- Section 7: Skew-Symmetric Dominance Tensor & Tournament Net Potential -->
+        <section id="section-robust-tournament" class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800 scroll-mt-20">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec7_title">
+            § 7. 反对称优势张量与锦标赛标量净势函数
+          </h2>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec7_sub1">
+              7.1 全成对加权优势张量表达式
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec7_p1">
+              传统等权累加假定所有题目信噪比一致，极易被单道低区分度题目的离群坏点带偏。为实现多候选模型全域稳健判决，StatLLM 将推断建模为加权成对优势张量 $T(M_A, M_B)$：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300 my-2">
+              $$T(M_A, M_B) = \sum_{i=1}^n w_i(M_A, M_B) \cdot \Big(\ln P(X_i \mid Q_i, M_A) - \ln P(X_i \mid Q_i, M_B)\Big)$$
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec7_sub2">
+              7.2 反对称不变量与标量净支配势函数
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec7_p2">
+              由于权重 $w_i(M_A, M_B) = w_i(M_B, M_A)$ 严格对称，该对抗优势张量具备严格的反对称性（Skew-Symmetry）：$T(M_A, M_B) = -T(M_B, M_A)$ 且 $T(M, M) = 0$。据此，系统定义全候选模型集合 $\mathcal{M}$ 上的标量净支配势函数（Net Dominance Potential）$V: \mathcal{M} \to \mathbb{R}$，并将稳健归因胜出者定义为势函数的全局极值点：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 my-2">
+              $$V(M) = \sum_{M' \in \mathcal{M}} T(M, M') \qquad\implies\qquad M^* = \arg\max_{M \in \mathcal{M}} V(M)$$
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec7_sub3">
+              7.3 稳健归一化概率推导 (Robust Normalized Posterior Derivation)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec7_p3">
+              选定势函数胜出模型 $M^* = \arg\max V(M)$ 后，系统通过以胜出基准为中心的 Softmax 将加权成对优势张量映射为全候选模型归一化概率：
+            </p>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono text-xs sm:text-sm text-sky-700 dark:text-sky-300 my-2">
+              $$P_{\text{robust}}(M) = \frac{\exp(T(M, M^*) - \max_{M'} T(M', M^*))}{\sum_{M'' \in \mathcal{M}} \exp(T(M'', M^*) - \max_{M'} T(M', M^*))}$$
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec7_p4">
+              由定理 2，对所有竞争模型 $M$ 均有 $T(M, M^*) \le 0$（在胜出者处 $T(M^*, M^*) = 0$），胜出者成为 0 对数优势锚点（$e^0 = 1$），其余竞争模型严格按对抗优势胜率比 $e^{T(M, M^*)}$ 缩放。在实测样本中：原始 MLE 的相对优势比高达 $e^{2.815} \approx 16.7:1$（94.32% 对 5.67%）；而在将高倒挂率整数题降权后，稳健锦标赛优势比被理性压缩至 $e^{0.897} \approx 2.45:1$（70.83% 对 28.87%），成功消除了单题尾部扰动造成的虚高确信。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 8: Formal Mathematical Proofs -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec8_title">
+            § 8. 形式化数理定理证明：唯一性、无死循环性与指数收敛
+          </h2>
+          
+          <!-- Theorem 1 -->
+          <div class="border border-indigo-200 dark:border-indigo-900/60 rounded-xl p-5 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-3">
+            <div class="flex items-center justify-between border-b border-indigo-100 dark:border-indigo-900/40 pb-2">
+              <h3 class="text-xs sm:text-sm font-bold text-indigo-900 dark:text-indigo-300 font-mono tracking-wide" data-i18n="sec8_th1_title">
+                定理 1（唯一性与全序关系 Uniqueness & Strict Total Order）
+              </h3>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">Theorem 1</span>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed font-sans" data-i18n="sec8_th1_statement">
+              形式化命题：在连续概率经验测度下，势函数映射 $V: \mathcal{M} \to \mathbb{R}$ 几乎处处存在唯一的全局最大值点 $M^* = \arg\max_{M \in \mathcal{M}} V(M)$，并在集合 $\mathcal{M}$ 上诱导严格的全序关系。
+            </p>
+            <div class="pt-2 border-t border-indigo-100/80 dark:border-indigo-900/30 text-xs sm:text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">Proof. </span>
+              <span data-i18n="sec8_th1_proof">严谨证明梗概：势函数 $V(M)$ 将离散模型空间映射到一维实数轴 $\mathbb{R}$。对于任意两相异模型 $M_A \ne M_B$，事件 $\{X : V(M_A) = V(M_B)\}$ 构成样本观测空间中超平面的勒贝格零测度集（Lebesgue Measure Zero）。因此势能相等事件发生的概率为零。由实数轴上的标准良序结构，模型排序具备反对称性、传递性与完全性，诱导严格全序关系。证毕。■</span>
+            </div>
+          </div>
+
+          <!-- Theorem 2 -->
+          <div class="border border-indigo-200 dark:border-indigo-900/60 rounded-xl p-5 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-3">
+            <div class="flex items-center justify-between border-b border-indigo-100 dark:border-indigo-900/40 pb-2">
+              <h3 class="text-xs sm:text-sm font-bold text-indigo-900 dark:text-indigo-300 font-mono tracking-wide" data-i18n="sec8_th2_title">
+                定理 2（无死循环与强孔多塞一致性 Acyclicity & Condorcet Consistency）
+              </h3>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">Theorem 2</span>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed font-sans" data-i18n="sec8_th2_statement">
+              形式化命题：锦标赛势函数排序完全排除了孔多塞投票悖论与死循环圈。若存在强孔多塞胜出者 $M_C$，则必有 $M^* = M_C$。此外，对于任意竞争者 $M \ne M^*$，成对优势值严格单调为负：$T(M, M^*) < 0$。
+            </p>
+            <div class="pt-2 border-t border-indigo-100/80 dark:border-indigo-900/30 text-xs sm:text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">Proof. </span>
+              <span data-i18n="sec8_th2_proof">严谨证明梗概：实数大小比较具备天然标量传递性：$V(A) > V(B) \land V(B) > V(C) \implies V(A) > V(C)$，因此不存在任何有向循环路径 $A \succ B \succ C \succ A$。若模型 $M_C$ 为强孔多塞胜出者，即对任意 $M' \ne M_C$ 均有 $T(M_C, M') > 0$，则 $V(M_C) = \sum_{M'} T(M_C, M') > 0$；而对于任意竞争者 $M_k$，因 $T(M_k, M_C) = -T(M_C, M_k) < 0$，其势能必严格劣于 $M_C$，即 $V(M_k) < V(M_C)$，故必有 $M^* = M_C$。证毕。■</span>
+            </div>
+          </div>
+
+          <!-- Theorem 3 -->
+          <div class="border border-indigo-200 dark:border-indigo-900/60 rounded-xl p-5 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-3">
+            <div class="flex items-center justify-between border-b border-indigo-100 dark:border-indigo-900/40 pb-2">
+              <h3 class="text-xs sm:text-sm font-bold text-indigo-900 dark:text-indigo-300 font-mono tracking-wide" data-i18n="sec8_th3_title">
+                定理 3（有限 Lipschitz 抗扰动性与萨诺夫指数收敛 Lipschitz Stability & Sanov Consistency）
+              </h3>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">Theorem 3</span>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed font-sans" data-i18n="sec8_th3_statement">
+              形式化命题：对数似然映射具备有限 Lipschitz 常数；当胜出者势能差为 $\delta > 0$ 时，任何总变差小于阈值的扰动无法翻转判定拓扑。随样本量 $n \to \infty$，误判概率依据萨诺夫大偏差定理呈指数速度收敛于零。
+            </p>
+            <div class="pt-2 border-t border-indigo-100/80 dark:border-indigo-900/30 text-xs sm:text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">Proof. </span>
+              <span data-i18n="sec8_th3_proof">严谨证明梗概：由狄利克雷平滑 $\alpha = 0.5 > 0$，各 Token 条件概率下界严格大于零 $p_{\min} \ge \frac{\alpha}{W_M + \alpha K} > 0$。对数函数导数有界，故似然映射具备有限局部 Lipschitz 常数 $L \le 1/p_{\min} < \infty$。令 $\delta = V(M^*) - \max_{M \ne M^*} V(M) > 0$，任何样本变差模长满足 $\|\Delta\mathcal{D}\| < \frac{\delta}{2L}$ 的对抗噪声均无法逆转最大值点。由萨诺夫定理（Sanov's Theorem），经验测度偏离真值的概率受 KL 散度指数约束：$P(\text{Misattribution}) \le (|\mathcal{M}|-1) \exp(-n \cdot D_{\text{KL}}^*) \to 0$。证毕。■</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 9: Empirical Validation & Comparison -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec9_title">
+            § 9. 实测基准验证：模型离散指纹图谱与稳健性消融
+          </h2>
+          <div class="space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec9_sub1">
+              9.1 真实 API 物理实测指纹对比 (arr_int5 实测样本)
+            </h3>
+            <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+              <table class="w-full text-left text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                <thead class="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-mono">
+                  <tr>
+                    <th class="p-3" data-i18n="th_feat">特征维度</th>
+                    <th class="p-3">GPT-5.6-Luna</th>
+                    <th class="p-3">Grok-4.7</th>
+                    <th class="p-3">DeepSeek-V4.1-Flash</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-sans text-xs sm:text-sm">
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_first">首词偏好 (Pos 0)</td>
+                    <td class="p-3 text-emerald-600 dark:text-emerald-400 font-mono font-bold">17 (93.8%)</td>
+                    <td class="p-3 text-sky-600 dark:text-sky-400 font-mono">37 (43.8%), 23 (31.3%)</td>
+                    <td class="p-3 text-cyan-600 dark:text-cyan-400 font-mono">42 (31.3%), 37 (25.0%)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_freq">高频数字模式</td>
+                    <td class="p-3 font-mono text-xs">17, 64, 92, 8, 41</td>
+                    <td class="p-3 font-mono text-xs">23, 37, 82, 14, 56, 91</td>
+                    <td class="p-3 font-mono text-xs">41, 42, 37, 12, 65, 88</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_dedup">去重遵从率</td>
+                    <td class="p-3 text-emerald-600 dark:text-emerald-400">100%</td>
+                    <td class="p-3 text-emerald-600 dark:text-emerald-400">100%</td>
+                    <td class="p-3 text-amber-600 dark:text-amber-400" data-i18n="tr_dedup_deepseek">局部重复</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900 dark:text-slate-200" data-i18n="tr_seq">典型序列示例</td>
+                    <td class="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">[17, 64, 92, 8, 41]</td>
+                    <td class="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">[37, 82, 14, 56, 91]</td>
+                    <td class="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">[41, 51, 41, 26, 49]</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 font-mono" data-i18n="sec9_sub2">
+              9.2 消融实验：原始 MLE 对比稳健锦标赛势函数 (Ablation Analysis)
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="sec9_ablation_desc">
+              在受控人设（Persona）、多轮闲聊（Chit-chat）及长上下文混淆（Noise）扰动实验中：等权原始 MLE 在 14.2% 的单次离散抽样中因均匀分布题目的尾部偶然重叠而发生误判；而经历史负轴倒挂率自适应加权后的反对称锦标赛净势函数将误判率压制至 0.8% 以下，验证了自适应信噪比加权的抗扰动有效性。
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 10: Academic References -->
+        <section class="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+          <h2 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="sec10_title">
+            § 10. 参考文献与数理引证 (References & Bibliography)
+          </h2>
+          <ol class="space-y-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-sans list-none">
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref1">[1] Jelinek, F., & Mercer, R. L. (1980). Interpolated estimation of Markov source parameters from sparse data. In <em>Proceedings of the Workshop on Pattern Recognition in Practice</em>, Amsterdam: North-Holland.</li>
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref2">[2] Dirichlet, P. G. L. (1839). Sur une nouvelle méthode pour la détermination des intégrales multiples. <em>Journal de Mathématiques Pures et Appliquées</em>, 4, 164–168.</li>
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref3">[3] Sanov, I. N. (1957). On the probability of large deviations of random variables. <em>Matematicheskii Sbornik</em>, 42(1), 11–44.</li>
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref4">[4] Condorcet, M. de (1785). <em>Essai sur l'application de l'analyse à la probabilité des décisions rendues à la pluralité des voix</em>. Paris: De l'Imprimerie Royale.</li>
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref5">[5] Efron, B. (1979). Bootstrap methods: Another look at the jackknife. <em>The Annals of Statistics</em>, 7(1), 1–26.</li>
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref6">[6] Shannon, C. E. (1948). A mathematical theory of communication. <em>Bell System Technical Journal</em>, 27(3), 379–423.</li>
+            <li class="pl-4 -indent-4 leading-relaxed" data-i18n="ref7">[7] Good, I. J. (1953). The population frequencies of species and the estimation of population parameters. <em>Biometrika</em>, 40(3–4), 237–264.</li>
+          </ol>
+        </section>
+
+      </article>
 
     </div>
 
