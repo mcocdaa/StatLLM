@@ -88,6 +88,15 @@ class Database:
             ON samples (model_name, probe_id);
             """)
 
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS probe_matrices (
+                probe_id TEXT PRIMARY KEY,
+                matrix_json TEXT NOT NULL,
+                mdi REAL NOT NULL DEFAULT 0.0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """)
+
             conn.commit()
 
     def add_model(self, name: str, display_name: str, provider: str = "", color: str = "#3b82f6"):
@@ -553,3 +562,40 @@ class Database:
             cursor.execute("DELETE FROM samples")
             cursor.execute("DELETE FROM token_counts")
             conn.commit()
+
+    def get_probe_matrix_cache(self, probe_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieves precomputed matrix dictionary for a specific probe."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT matrix_json FROM probe_matrices WHERE probe_id = ?", (probe_id,))
+            row = cursor.fetchone()
+            if row and row["matrix_json"]:
+                try:
+                    return json.loads(row["matrix_json"])
+                except Exception:
+                    return None
+            return None
+
+    def set_probe_matrix_cache(self, probe_id: str, matrix_dict: Dict[str, Any], mdi: float = 0.0):
+        """Saves or updates precomputed matrix dictionary for a specific probe."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            INSERT OR REPLACE INTO probe_matrices (probe_id, matrix_json, mdi, updated_at)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            """, (probe_id, json.dumps(matrix_dict), float(mdi)))
+            conn.commit()
+
+    def get_all_probe_matrices_cache(self) -> Dict[str, Dict[str, Any]]:
+        """Retrieves all precomputed probe matrices in a single fast query."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT probe_id, matrix_json FROM probe_matrices")
+            rows = cursor.fetchall()
+            result = {}
+            for r in rows:
+                try:
+                    result[r["probe_id"]] = json.loads(r["matrix_json"])
+                except Exception:
+                    continue
+            return result

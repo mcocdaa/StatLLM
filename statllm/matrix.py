@@ -29,6 +29,12 @@ def get_probe_matrix(
     if not force_refresh and probe_id in _MATRIX_CACHE:
         return _MATRIX_CACHE[probe_id]
 
+    if not force_refresh:
+        db_cached = db.get_probe_matrix_cache(probe_id)
+        if db_cached:
+            _MATRIX_CACHE[probe_id] = db_cached
+            return db_cached
+
     probe = get_probe(probe_id)
     if not probe:
         raise ValueError(f"Unknown probe ID: {probe_id}")
@@ -168,6 +174,7 @@ def get_probe_matrix(
         "matrix": matrix,
         "top_blind_spots": top_blind_spots
     }
+    db.set_probe_matrix_cache(probe_id, res_payload, mdi)
     _MATRIX_CACHE[probe_id] = res_payload
     return res_payload
 
@@ -175,11 +182,13 @@ def get_probe_matrix(
 def rank_probes_by_discrimination(
     db: Database,
     evaluator: LikelihoodEvaluator,
-    probe_ids: Optional[List[str]] = None
+    probe_ids: Optional[List[str]] = None,
+    force_refresh: bool = False
 ) -> List[Dict[str, Any]]:
     """
     Computes MDI for specified or all available probes in the database,
     returning a sorted ranking list (highest MDI first).
+    Loads from persistent SQLite cache in 2ms when available.
     """
     from statllm.probes import ALL_PROBES
     if probe_ids is None:
@@ -190,10 +199,13 @@ def rank_probes_by_discrimination(
         conn.close()
         probe_ids = [pid for pid in db_pids if pid in ALL_PROBES]
 
+    all_cached = db.get_all_probe_matrices_cache() if not force_refresh else {}
     ranked = []
     for pid in probe_ids:
         try:
-            m = get_probe_matrix(db, evaluator, pid)
+            m = _MATRIX_CACHE.get(pid) or all_cached.get(pid)
+            if not m or force_refresh:
+                m = get_probe_matrix(db, evaluator, pid, force_refresh=force_refresh)
             ranked.append({
                 "probe_id": pid,
                 "title": m["title"],
@@ -213,6 +225,16 @@ def rank_probes_by_discrimination(
     for rank, item in enumerate(ranked, 1):
         item["rank"] = rank
     return ranked
+
+
+def warm_up_matrix_cache(db: Database):
+    """Loads all precomputed probe matrices from database into memory cache."""
+    global _MATRIX_CACHE
+    try:
+        all_cached = db.get_all_probe_matrices_cache()
+        _MATRIX_CACHE.update(all_cached)
+    except Exception:
+        pass
 
 
 def clear_matrix_cache():

@@ -15,7 +15,7 @@ from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
 from statllm.probes import list_probes, get_probe
 from statllm.archive import export_archive_bundle, import_archive_bundle
-from statllm.matrix import get_probe_matrix, rank_probes_by_discrimination
+from statllm.matrix import get_probe_matrix, rank_probes_by_discrimination, warm_up_matrix_cache
 
 
 
@@ -57,6 +57,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     evaluator = LikelihoodEvaluator(db, positional_lambda=0.5)
     cluster_projector = ClusterProjector(db)
     cluster_projector.fit()
+    warm_up_matrix_cache(db)
 
     static_dir = os.path.join(os.path.dirname(__file__), "static")
     if os.path.exists(static_dir):
