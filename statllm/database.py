@@ -490,7 +490,7 @@ class Database:
             cursor.execute("SELECT COUNT(*) FROM samples")
             total_samples = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM samples WHERE source_type = 'official'")
+            cursor.execute("SELECT COUNT(*) FROM samples WHERE source_type IN ('official', 'official_api')")
             official_samples = cursor.fetchone()[0]
 
             cursor.execute("SELECT COUNT(*) FROM samples WHERE source_type = 'user'")
