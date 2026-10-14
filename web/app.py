@@ -179,7 +179,8 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
             raise HTTPException(status_code=400, detail=str(e))
 
         # Project user submission to 2D cluster map
-        user_point = cluster_projector.project_user_submission(eval_res["parsed_submissions"])
+        post_weights = eval_res.get("robust_attribution", {}).get("posteriors") or eval_res.get("posteriors")
+        user_point = cluster_projector.project_user_submission(eval_res["parsed_submissions"], posteriors=post_weights)
         cluster_data = cluster_projector.get_cluster_data(user_point=user_point)
 
         # Optional crowdsource collection with user consent & explicit ground truth

@@ -21,6 +21,7 @@ class ClusterProjector:
         self.probe_slices: Dict[str, Tuple[int, int]] = {}
         self.model_centers_2d: Dict[str, List[float]] = {}
         self.model_clouds_2d: Dict[str, List[List[float]]] = {}
+        self.model_base_vecs: Dict[str, np.ndarray] = {}
         self.is_fitted = False
 
     def _build_feature_vocabulary(self) -> None:
@@ -33,6 +34,23 @@ class ClusterProjector:
                 for val in probe.allowed_elements:
                     self.feature_keys.append((pid, val))
                     cur_idx += 1
+            elif pid == "arr_pseudo_cvc5":
+                for c in "BCDFGHJKLMNPQRSTVWXYZ":
+                    self.feature_keys.append((pid, f"init:{c}"))
+                    cur_idx += 1
+                for v in "AEIOU":
+                    self.feature_keys.append((pid, f"vow:{v}"))
+                    cur_idx += 1
+                for c in "BCDFGHJKLMNPQRSTVWXYZ":
+                    self.feature_keys.append((pid, f"coda:{c}"))
+                    cur_idx += 1
+            elif pid == "arr_int_big5":
+                for d in range(1, 10):
+                    self.feature_keys.append((pid, f"lead:{d}"))
+                    cur_idx += 1
+                for p in range(10, 100):
+                    self.feature_keys.append((pid, f"pref:{p}"))
+                    cur_idx += 1
             # Include behavioral trait markers
             self.feature_keys.append((pid, "trait:has_dup_True"))
             cur_idx += 1
@@ -42,9 +60,25 @@ class ClusterProjector:
             cur_idx += 1
             self.probe_slices[pid] = (st, cur_idx)
 
+    @staticmethod
+    def _accumulate_sample_tokens(pid: str, toks: List[Any], cnt: Dict[str, float]) -> None:
+        for tok in toks:
+            tok_str = str(tok)
+            cnt[tok_str] += 1.0
+            if pid == "arr_pseudo_cvc5" and len(tok_str) == 3:
+                cnt[f"init:{tok_str[0]}"] += 1.0
+                cnt[f"vow:{tok_str[1]}"] += 1.0
+                cnt[f"coda:{tok_str[2]}"] += 1.0
+            elif pid == "arr_int_big5":
+                if len(tok_str) >= 1:
+                    cnt[f"lead:{tok_str[0]}"] += 1.0
+                if len(tok_str) >= 2:
+                    cnt[f"pref:{tok_str[:2]}"] += 1.0
+
     def _vectorize_probe_profile(
         self,
-        counts_by_probe: Dict[str, Tuple[Dict[str, float], float]]
+        counts_by_probe: Dict[str, Tuple[Dict[str, float], float]],
+        adaptive_smoothing: bool = False
     ) -> np.ndarray:
         """
         Builds a normalized multi-probe fingerprint vector using Hellinger / square-root embedding.
@@ -57,12 +91,13 @@ class ClusterProjector:
         for pid, (st, ed) in self.probe_slices.items():
             sub_vec = np.zeros(ed - st, dtype=np.float64)
             c_dict, tot = counts_by_probe.get(pid, ({}, 0.0))
-            v_size = PROBES[pid].element_vocab_size if pid in PROBES else 10
+            v_size = max(1, ed - st)
+            alpha = (0.5 * min(1.0, max(0.04, tot / 40.0))) if adaptive_smoothing else 0.5
             for i, idx in enumerate(range(st, ed)):
                 key = self.feature_keys[idx]
                 val = key[1]
                 c = c_dict.get(val, 0.0)
-                prob = (c + 0.5) / (tot + 0.5 * v_size)
+                prob = (c + alpha) / (tot + alpha * v_size)
                 sub_vec[i] = math.sqrt(max(1e-12, prob))
             sub_norm = np.linalg.norm(sub_vec)
             if sub_norm > 0:
@@ -92,10 +127,12 @@ class ClusterProjector:
 
         rng = np.random.default_rng(2026)
         all_fit_vecs = []
+        self.model_base_vecs = {}
 
         if has_empirical_samples:
             for m in model_names:
                 base_vec = self._vectorize_probe_profile(matrix.get(m, {}))
+                self.model_base_vecs[m] = base_vec
                 all_fit_vecs.append(base_vec)
 
                 p_samples_dict = model_probe_samples[m]
@@ -107,21 +144,23 @@ class ClusterProjector:
                             continue
                         resamp = rng.choice(s_list, size=len(s_list), replace=True)
                         cnt = defaultdict(float)
+                        tok_tot = 0.0
                         for s in resamp:
                             try:
                                 toks = json.loads(s["parsed_value"])
                             except Exception:
                                 toks = []
-                            for tok in toks:
-                                cnt[tok] += 1.0
+                            self._accumulate_sample_tokens(pid, toks, cnt)
+                            tok_tot += len(toks)
                             has_dup = len(toks) != len(set(toks))
                             cnt[f"trait:has_dup_{has_dup}"] += 0.5
-                        b_cnts[pid] = (cnt, sum(cnt.values()))
+                        b_cnts[pid] = (cnt, tok_tot)
                     all_fit_vecs.append(self._vectorize_probe_profile(b_cnts))
         else:
             # Synthetic Dirichlet jitter fallback for minimal test fixtures
             for m in model_names:
                 base_vec = self._vectorize_probe_profile(matrix.get(m, {}))
+                self.model_base_vecs[m] = base_vec
                 all_fit_vecs.append(base_vec)
                 d = len(self.feature_keys)
                 for _ in range(pts_count):
@@ -164,7 +203,11 @@ class ClusterProjector:
             })
         return clusters
 
-    def project_user_submission(self, parsed_submissions: List[Dict[str, Any]]) -> Optional[List[float]]:
+    def project_user_submission(
+        self,
+        parsed_submissions: List[Dict[str, Any]],
+        posteriors: Optional[Dict[str, float]] = None
+    ) -> Optional[List[float]]:
         if not self.is_fitted or self.pca is None or not self.feature_keys:
             self.fit()
             if not self.is_fitted or self.pca is None:
@@ -177,14 +220,50 @@ class ClusterProjector:
                 continue
             cnt, tot = user_counts[pid]
             toks = s.get("parsed_tokens", [])
-            for tok in toks:
-                cnt[tok] += 1.0
+            self._accumulate_sample_tokens(pid, toks, cnt)
             traits = s.get("traits", {})
             if "has_duplicates" in traits:
                 cnt[f"trait:has_dup_{traits['has_duplicates']}"] += 0.5
             user_counts[pid] = (cnt, tot + len(toks))
 
-        user_vec = self._vectorize_probe_profile(user_counts)
+        raw_user_vec = self._vectorize_probe_profile(user_counts, adaptive_smoothing=True)
+
+        # Construct posterior-expected or manifold-mean reference profile for unobserved/sparse probes
+        d = len(self.feature_keys)
+        ref_vec = np.zeros(d, dtype=np.float64)
+        if posteriors and self.model_base_vecs:
+            tot_w = 0.0
+            for m, w in posteriors.items():
+                if m in self.model_base_vecs and w > 0:
+                    ref_vec += float(w) * self.model_base_vecs[m]
+                    tot_w += float(w)
+            if tot_w > 0:
+                ref_vec /= tot_w
+            elif self.pca.mean_ is not None:
+                ref_vec = self.pca.mean_.copy()
+        elif self.model_base_vecs:
+            ref_vec = np.mean(list(self.model_base_vecs.values()), axis=0)
+        elif self.pca.mean_ is not None:
+            ref_vec = self.pca.mean_.copy()
+
+        user_vec = np.zeros(d, dtype=np.float64)
+        for pid, (st, ed) in self.probe_slices.items():
+            _, tot = user_counts.get(pid, ({}, 0.0))
+            if tot <= 0.0:
+                # Impute unobserved probe block with posterior/manifold expectation
+                sub_vec = ref_vec[st:ed].copy()
+            else:
+                # Blend finite-sample empirical Hellinger slice with reference slice
+                gamma = (tot / (tot + 15.0)) if posteriors else 1.0
+                sub_vec = gamma * raw_user_vec[st:ed] + (1.0 - gamma) * ref_vec[st:ed]
+            sub_norm = np.linalg.norm(sub_vec)
+            if sub_norm > 0:
+                user_vec[st:ed] = sub_vec / sub_norm
+
+        norm = np.linalg.norm(user_vec)
+        if norm > 0:
+            user_vec = user_vec / norm
+
         pt_2d = self.pca.transform(user_vec.reshape(1, -1))[0]
         return [round(float(pt_2d[0]), 3), round(float(pt_2d[1]), 3)]
 

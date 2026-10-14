@@ -473,16 +473,25 @@ class LikelihoodEvaluator:
         top_raw_model, top_raw_prob = sorted_raw[0]
         runner_up_model, runner_up_prob = sorted_raw[1] if len(sorted_raw) > 1 else (top_raw_model, 0.0)
 
+        probe_ref_tot = {}
+        for rec in parsed_records:
+            p_id = rec["probe_id"]
+            if p_id not in probe_ref_tot:
+                tots = [matrix[mod].get(p_id, ({}, 0.0))[1] for mod in model_names if matrix.get(mod, {}).get(p_id, ({}, 0.0))[1] > 0]
+                probe_ref_tot[p_id] = max(tots) if tots else 100.0
+
         submission_lls = []
         for rec in parsed_records:
             pid = rec["probe_id"]
             tokens = rec["parsed_tokens"]
             v_size = max(1, rec["element_vocab_size"])
             exp_len = rec.get("expected_length", len(tokens))
+            traits = rec.get("traits", {})
             
             sub_m_ll = {}
             for m in model_names:
-                cd, tot = matrix.get(m, {}).get(pid, ({}, 0.0))
+                cd, raw_tot = matrix.get(m, {}).get(pid, ({}, 0.0))
+                tot = raw_tot if raw_tot > 0.0 else probe_ref_tot[pid]
                 rec_ll = 0.0
                 for idx, tok in enumerate(tokens):
                     tok_str = str(tok)
@@ -518,10 +527,40 @@ class LikelihoodEvaluator:
                             p_cvc = p_init * p_vow * p_coda
                         else:
                             p_cvc = 1.0 / 2205.0
-                        p = 0.35 * p_exact + 0.65 * p_cvc
+                        p = 0.40 * p_exact + 0.60 * p_cvc
                     else:
                         p = self.get_interpolated_token_prob(cd, tot, tok_str, idx, v_size, exp_len, lam)
                     rec_ll += math.log(max(p, 1e-12))
+
+                # Include structural sequence traits identically to evaluate()
+                sample_tot = cd.get("trait:has_dup_True", 0.0) + cd.get("trait:has_dup_False", 0.0)
+                if sample_tot <= 0.0:
+                    sample_tot = tot / max(1, exp_len)
+
+                if "has_duplicates" in traits:
+                    dup_tok = f"trait:has_dup_{traits['has_duplicates']}"
+                    c_dup = cd.get(dup_tok, 0.0)
+                    p_dup = (c_dup + self.beta) / (sample_tot + 2.0 * self.beta)
+                    rec_ll += 0.5 * math.log(max(p_dup, 1e-12))
+
+                if "is_sorted" in traits:
+                    sort_tok = f"trait:is_sorted_{traits['is_sorted']}"
+                    c_sort = cd.get(sort_tok, 0.0)
+                    p_sort = (c_sort + self.beta) / (sample_tot + 2.0 * self.beta)
+                    rec_ll += 0.5 * math.log(max(p_sort, 1e-12))
+
+                if "has_consecutive" in traits and traits["has_consecutive"] is not None:
+                    consec_tok = f"trait:consec_{traits['has_consecutive']}"
+                    c_consec = cd.get(consec_tok, 0.0)
+                    p_consec = (c_consec + self.beta) / (sample_tot + 2.0 * self.beta)
+                    rec_ll += 0.5 * math.log(max(p_consec, 1e-12))
+
+                if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
+                    perm_tok = f"perm:{traits['canonical_perm']}"
+                    c_perm = cd.get(perm_tok, 0.0)
+                    p_perm = (c_perm + self.beta) / (sample_tot + 120.0 * self.beta)
+                    rec_ll += 0.8 * math.log(max(p_perm, 1e-12))
+
                 sub_m_ll[m] = rec_ll
             submission_lls.append(sub_m_ll)
 
@@ -555,14 +594,29 @@ class LikelihoodEvaluator:
                     tot_m += w_pair * (submission_lls[s_idx][mA] - submission_lls[s_idx][mB])
                 T[mA][mB] = tot_m
 
-        # 2. Borda / Net Dominance Potential: V(M) = sum_{mB} T[mA][mB]
+        # 2. Condorcet-consistent Net Dominance Potential: V(M) = sum_{mB} T[mA][mB]
         V = {mA: sum(T[mA][mB] for mB in model_names) for mA in model_names}
-        sorted_v = sorted(V.items(), key=lambda x: -x[1])
-        robust_top_model = sorted_v[0][0]
-        robust_runner_up = sorted_v[1][0] if len(sorted_v) > 1 else robust_top_model
+        min_pairwise = {
+            mA: min((T[mA][mB] for mB in model_names if mB != mA), default=0.0)
+            for mA in model_names
+        }
+        champ_order = sorted(
+            model_names,
+            key=lambda m: (1 if min_pairwise[m] >= -1e-9 else 0, V[m]),
+            reverse=True
+        )
+        robust_top_model = champ_order[0]
 
         # 3. Relative delta against champion T[m][robust_top_model] <= 0
+        # Sort all candidates monotonically by champion-anchored margin T(m, M*) with V(m) tie-breaker
         rel_deltas = {m: T[m][robust_top_model] for m in model_names}
+        sorted_candidates = sorted(
+            model_names,
+            key=lambda m: (1 if m == robust_top_model else 0, rel_deltas[m], V[m]),
+            reverse=True
+        )
+        robust_runner_up = sorted_candidates[1] if len(sorted_candidates) > 1 else robust_top_model
+
         max_d = max(rel_deltas.values())
         exps = {m: math.exp(d - max_d) for m, d in rel_deltas.items()}
         tot_e = sum(exps.values())
@@ -572,9 +626,10 @@ class LikelihoodEvaluator:
 
         is_flipped = (robust_top_model != top_raw_model)
 
-        # 4. Multi-model breakdown: all candidates ranked relative to champion
+        # 4. Multi-model breakdown: all candidates ranked monotonically relative to champion
         model_breakdown = []
-        for rank, (m, v_score) in enumerate(sorted_v, 1):
+        for rank, m in enumerate(sorted_candidates, 1):
+            v_score = V[m]
             probe_contribs = []
             for s_idx, rec in enumerate(parsed_records):
                 pid = rec["probe_id"]
