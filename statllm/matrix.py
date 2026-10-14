@@ -23,7 +23,7 @@ def get_probe_matrix(
     force_refresh: bool = False
 ) -> Dict[str, Any]:
     """
-    Computes or retrieves cached 2D 15x15 Pairwise Posterior Margin Matrix
+    Computes or retrieves cached 2D Pairwise Posterior Margin Matrix
     for a specific probe across all empirical baseline samples.
     """
     global _MATRIX_CACHE
@@ -59,6 +59,8 @@ def get_probe_matrix(
     all_win_rates: List[float] = []
 
     full_counts = db.get_all_model_probe_counts()
+    tots_all = [full_counts.get(mod, {}).get(probe_id, ({}, 0.0))[1] for mod in models if full_counts.get(mod, {}).get(probe_id, ({}, 0.0))[1] > 0]
+    ref_tot = max(tots_all) if tots_all else 100.0
 
     for mA in models:
         s_list = data[mA]
@@ -92,13 +94,26 @@ def get_probe_matrix(
                 c_oos[f"trait:is_sorted_{traits['is_sorted']}"] = max(0.0, c_oos.get(f"trait:is_sorted_{traits['is_sorted']}", 0.0) - 1.0)
             if "has_consecutive" in traits and traits["has_consecutive"] is not None:
                 c_oos[f"trait:consec_{traits['has_consecutive']}"] = max(0.0, c_oos.get(f"trait:consec_{traits['has_consecutive']}", 0.0) - 1.0)
+            if "canonical_perm" in traits and traits["canonical_perm"] != "INVALID":
+                c_oos[f"perm:{traits['canonical_perm']}"] = max(0.0, c_oos.get(f"perm:{traits['canonical_perm']}", 0.0) - 1.0)
 
-            m_oos = dict(full_counts)
-            m_oos[mA] = dict(full_counts.get(mA, {}))
-            m_oos[mA][probe_id] = (c_oos, max(1.0, tot - len(tokens)))
-
-            res = evaluator.evaluate([{"probe_id": probe_id, "raw_text": raw}], matrix=m_oos, positional_lambda=0.25)
-            posts_list.append(res["posteriors"])
+            record = {
+                "probe_id": probe_id,
+                "parsed_tokens": tokens,
+                "traits": traits,
+                "element_vocab_size": probe.element_vocab_size,
+                "expected_length": probe.expected_length
+            }
+            lls = {}
+            for mod in models:
+                if mod == mA:
+                    mod_cd, mod_tot = c_oos, max(1.0, tot - len(tokens))
+                else:
+                    mod_cd, raw_mod_tot = full_counts.get(mod, {}).get(probe_id, ({}, 0.0))
+                    mod_tot = raw_mod_tot if raw_mod_tot > 0.0 else ref_tot
+                rec_ll, _, _ = evaluator._score_record_for_model(record, mod_cd, mod_tot, lam=0.25)
+                lls[mod] = rec_ll
+            posts_list.append(evaluator._log_likelihoods_to_posteriors(lls))
 
         matrix[mA] = {}
         for mB in models:

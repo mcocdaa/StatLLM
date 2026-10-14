@@ -92,3 +92,54 @@ def test_engine_probability_conservation(temp_db):
                 p_interp_sum += evaluator.get_interpolated_token_prob(counts_dict, tot, "INVALID", pos, vocab_size, 5, lam)
                 assert pytest.approx(p_interp_sum, rel=1e-5) == 1.0
 
+
+def test_source_type_and_primary_token_denominator_invariants(temp_db):
+    """
+    Verifies that:
+    1. Non-standard source_type strings (e.g., 'official_api') are normalized at write time,
+       so total_samples == official_samples + user_samples always holds.
+    2. Multi-feature probes (arr_int_big5, arr_pseudo_cvc5) only count primary element tokens
+       in the denominator `tot`, preventing 4x denominator inflation.
+    3. The robust tournament ledger is strictly monotonically non-increasing in both
+       champion-anchored margin (delta_ll) and posterior probability.
+    """
+    temp_db.add_sample(
+        model_name="Grok-4.7",
+        probe_id="arr_int_big5",
+        raw_text="[12345, 67890, 23456, 34567, 45678]",
+        parsed_tokens=["12345", "67890", "23456", "34567", "45678"],
+        traits={"has_duplicates": False},
+        source_type="official_api",
+        weight=1.0
+    )
+    temp_db.add_sample(
+        model_name="Grok-4.7",
+        probe_id="arr_pseudo_cvc5",
+        raw_text='["BAK", "MUP", "ZOT", "RIL", "VEN"]',
+        parsed_tokens=["BAK", "MUP", "ZOT", "RIL", "VEN"],
+        traits={"has_duplicates": False},
+        source_type="official_batch",
+        weight=1.0
+    )
+
+    stats = temp_db.get_stats()
+    assert stats["total_samples"] == stats["official_samples"] + stats["user_samples"]
+
+    matrix = temp_db.get_all_model_probe_counts()
+    _, tot_big5 = matrix["Grok-4.7"]["arr_int_big5"]
+    _, tot_cvc5 = matrix["Grok-4.7"]["arr_pseudo_cvc5"]
+    assert tot_big5 == 5.0
+    assert tot_cvc5 == 5.0
+
+    evaluator = LikelihoodEvaluator(temp_db)
+    res = evaluator.evaluate([
+        {"probe_id": "arr_int_big5", "raw_text": "[12345, 67890, 23456, 34567, 45678]"},
+        {"probe_id": "arr_pseudo_cvc5", "raw_text": '["BAK", "MUP", "ZOT", "RIL", "VEN"]'},
+    ], n_boot=100)
+    mb = res["robust_attribution"]["model_breakdown"]
+    assert len(mb) >= 2
+    assert mb[0]["delta_ll"] == 0.0
+    for i in range(len(mb) - 1):
+        assert mb[i]["delta_ll"] >= mb[i + 1]["delta_ll"]
+        assert mb[i]["posterior"] >= mb[i + 1]["posterior"]
+

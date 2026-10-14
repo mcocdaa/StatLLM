@@ -409,7 +409,7 @@ const I18N = {
 
     matrix_badge: "单题两两概率优势矩阵与分位数透视",
     matrix_title: "单题辨识力与经验分位数透视实验室",
-    matrix_subtitle: "针对单一题目，深入透视 15×15 两两概率优势矩阵、五档经验分位数（P05, P25, P50, P75, P95）与核心盲区混淆对。",
+    matrix_subtitle: "针对单一题目，深入透视全量两两概率优势矩阵、五档经验分位数（P05, P25, P50, P75, P95）与核心盲区混淆对。",
     matrix_select_probe: "探针题目透视选择：",
     matrix_select_probe_tip: "可自由切换全量探针（支持高区分度推荐题与实验探索题）",
     matrix_kpi_mdi: "综合区分度 (MDI)",
@@ -440,7 +440,7 @@ const I18N = {
     matrix_live_pa: "模型 A 瞬时后验: ",
     matrix_live_pb: "模型 B 瞬时后验: ",
     matrix_live_delta: "瞬时概率差 Δ: ",
-    matrix_table_title: "15×15 全量两两概率优势矩阵表",
+    matrix_table_title: "全量两两概率优势矩阵表",
     matrix_table_desc: "行代表真实生成模型（真值），列代表比较模型。单元格数字为 [中位数 (%) / 胜率 (小数)]。点击任意单元格可快速在上方透视该对模型的五档分位数详情。",
 
     footer_license: "StatLLM 开源项目 · 遵循 MIT 开源协议",
@@ -748,7 +748,7 @@ const I18N = {
 
     matrix_badge: "SINGLE-PROBE PAIRWISE MATRIX & QUANTILE LAB",
     matrix_title: "Single-Probe Discrimination & Quantile Lab",
-    matrix_subtitle: "Deep-dive inspection for a single probe: 15×15 pairwise margin matrix, 5-level empirical quantiles (P05, P25, P50, P75, P95), and bottleneck confusion pairs.",
+    matrix_subtitle: "Deep-dive inspection for a single probe: full pairwise margin matrix, 5-level empirical quantiles (P05, P25, P50, P75, P95), and bottleneck confusion pairs.",
     matrix_select_probe: "Select Probe Question:",
     matrix_select_probe_tip: "Freely inspect any probe (High Discrimination & Exploratory Probes)",
     matrix_kpi_mdi: "Discrimination (MDI)",
@@ -779,7 +779,7 @@ const I18N = {
     matrix_live_pa: "Model A Instant Posterior: ",
     matrix_live_pb: "Model B Instant Posterior: ",
     matrix_live_delta: "Instant Margin Δ: ",
-    matrix_table_title: "15×15 Full Pairwise Margin Matrix Table",
+    matrix_table_title: "Full Pairwise Margin Matrix Table",
     matrix_table_desc: "Rows represent ground-truth models; columns represent competitors. Cells display [Median (%) / Win Rate (decimal)]. Click any cell to inspect detailed quantiles above.",
 
     footer_license: "StatLLM Open Source Project · Under MIT License",

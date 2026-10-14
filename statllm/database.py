@@ -183,7 +183,7 @@ class Database:
                 parsed_json,
                 1 if is_valid else 0,
                 1 if strictly_complied else 0,
-                source_type,
+                "user" if str(source_type).strip().lower() == "user" else "official",
                 float(weight),
                 int(prompt_tokens),
                 int(completion_tokens),
@@ -303,7 +303,7 @@ class Database:
                     "parsed_value": json.dumps(s["parsed_tokens"], ensure_ascii=False) if isinstance(s.get("parsed_tokens"), list) else str(s.get("parsed_value", "[]")),
                     "is_valid": 1 if s.get("is_valid", True) else 0,
                     "strictly_complied": 1 if s.get("strictly_complied", True) else 0,
-                    "source_type": s.get("source_type", "official"),
+                    "source_type": "user" if str(s.get("source_type", "official")).strip().lower() == "user" else "official",
                     "weight": float(s.get("weight", 1.0))
                 }
                 for s in samples_data
@@ -455,8 +455,8 @@ class Database:
                 p = row["probe_id"]
                 tok = row["token"]
                 w = float(row["weighted_count"])
-                # Only count primary element tokens (exclude trait:, perm:, pos: tokens from total denominator)
-                if not tok.startswith("trait:") and not tok.startswith("perm:") and not tok.startswith("pos:"):
+                # Only count primary element tokens (exclude any derived token containing ':' such as pos:, pref:, lead:, init:, vow:, coda:, trait:, perm:)
+                if ":" not in tok:
                     res[m][p][0][tok] = w
                     res[m][p][1] += w
                 else:
