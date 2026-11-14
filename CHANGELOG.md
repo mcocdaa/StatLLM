@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.2] - 2026-11-14
+
+### Fixed & Changed
+- **Packaging**: Include `web` and `web/static/*` assets inside the Python wheel (`pyproject.toml`), sync FastAPI `version` in `web/app.py` with `statllm.__version__`, and add `httpx>=0.24.0` to `dev` and `test` optional dependencies.
+- **Docker & Deployment**: Parameterize PyPI index via `ARG PIP_INDEX_URL=https://pypi.org/simple` in `Dockerfile`, update `docker-compose.yml` image to `v0.2.2` without overriding container code via default bind mounts, sanitize `deploy/nginx.conf.example` and `deploy/README.md` with `statllm.example.com` and `$connection_upgrade` map, and sync deployment scripts (`deploy/init.sh`, `deploy/.env.example`) to `v0.2.2`.
+- **CLI & Docs**: Fix `-p 8008:8000` Docker port examples, update `--probe` help text (`arr_int5, arr_color5`), reconcile model/probe/sample counts across `README.md`, `README_CN.md`, `AGENTS.md`, and `CONTRIBUTING.md`, untrack unused legacy sample JSON files, and add `.github/dependabot.yml`.
+
+---
+
+## [0.2.1] - 2026-10-13
+
+### Added & Improved
+- **Academic Methodology Paper & Lab**: Added Academic Methodology Paper (§0–§10) and Single-Probe Quantile Lab with KaTeX rendering, theme toggle, and i18n polish in the Web UI.
+- **Statistical Engine & Performance**: Added precomputed `probe_matrices` SQLite caching, refactored attribution/likelihood helpers, fixed P05/`R_p` & credible-interval math, added Condorcet-monotonic leaderboard ranking, added 2D PCA user projection, normalized `source_type` attribution (`6,578` active official samples), and fixed sub-feature denominator inflation.
+
+---
+
 ## [0.2.0] - 2026-10-12
 
 ### Added

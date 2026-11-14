@@ -5,9 +5,10 @@ WORKDIR /app
 ENV PYTHONPATH=/app \
     PYTHONUNBUFFERED=1
 
-# Install python dependencies with fast mirror
+# Install python dependencies (override PIP_INDEX_URL for regional mirrors)
+ARG PIP_INDEX_URL=https://pypi.org/simple
 COPY requirements.txt .
-RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+RUN pip install --no-cache-dir --index-url ${PIP_INDEX_URL} -r requirements.txt
 
 # Copy application files and seed database
 COPY README.md .

@@ -1,16 +1,21 @@
 # StatLLM Nginx 反向代理配置示例
-# 域名: statllm.mcocdaa-newapi.xin -> 127.0.0.1:8008
+# 域名: statllm.example.com -> 127.0.0.1:8008
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
 
 server {
     listen 80;
     listen 443 ssl;
     http2 on;
 
-    server_name statllm.mcocdaa-newapi.xin;
+    server_name statllm.example.com;
 
-    # SSL 证书路径（在宝塔面板配置或通过 acme.sh 申请后启用）
-    # ssl_certificate        /www/server/panel/vhost/cert/statllm.mcocdaa-newapi.xin/fullchain.pem;
-    # ssl_certificate_key    /www/server/panel/vhost/cert/statllm.mcocdaa-newapi.xin/privkey.pem;
+    # SSL 证书路径（通过 Certbot / acme.sh 申请后启用）
+    # ssl_certificate        /etc/letsencrypt/live/statllm.example.com/fullchain.pem;
+    # ssl_certificate_key    /etc/letsencrypt/live/statllm.example.com/privkey.pem;
     # ssl_protocols TLSv1.2 TLSv1.3;
     # ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
     # ssl_prefer_server_ciphers on;
@@ -40,6 +45,6 @@ server {
         add_header Cache-Control "public, no-transform";
     }
 
-    access_log  /www/wwwlogs/statllm.mcocdaa-newapi.xin.log;
-    error_log   /www/wwwlogs/statllm.mcocdaa-newapi.xin.error.log;
+    access_log  /var/log/nginx/statllm.example.com.access.log;
+    error_log   /var/log/nginx/statllm.example.com.error.log;
 }

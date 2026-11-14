@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from statllm import __version__
 from statllm.database import Database
 from statllm.engine import LikelihoodEvaluator
 from statllm.cluster import ClusterProjector
@@ -51,7 +52,7 @@ def create_app(db_path: str = "statllm.db") -> FastAPI:
     app = FastAPI(
         title="StatLLM API",
         description="Statistical Large Language Model Fingerprinting & Attribution Engine",
-        version="0.2.0"
+        version=__version__
     )
 
     db = Database(db_path)

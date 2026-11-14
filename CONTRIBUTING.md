@@ -42,7 +42,7 @@ pytest -v tests/
    - `traits`: Dictionary of behavioral traits (e.g., `first_token`, `has_duplicates`).
    - `is_valid`: Boolean indicating valid array structure.
    - `strictly_complied`: Boolean indicating zero extra markdown formatting.
-3. Add probe metadata to `PROBES` registry.
+3. Add probe metadata to `ALL_PROBES` (and `PROBES` if Tier A/B recommended).
 4. Add corresponding i18n keys in `web/static/app.js` (`I18N.en` and `I18N.zh`).
 5. Add unit tests in `tests/test_probes.py`.
 

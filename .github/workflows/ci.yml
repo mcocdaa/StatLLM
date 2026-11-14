@@ -42,8 +42,9 @@ jobs:
         assert res == [('ok',)], f'Quick check failed: {res}'
         c.execute('SELECT count(*) FROM samples;')
         total = c.fetchone()[0]
+        models = conn.execute('SELECT COUNT(*) FROM models').fetchone()[0]
         assert total >= 1000, f'Expected at least 1000 samples, got {total}'
-        print(f'Database verified healthy with {total} empirical samples across 15 models.')
+        print(f'Database verified healthy with {total} empirical samples across {models} models.')
         "
 
     - name: Run Test Suite

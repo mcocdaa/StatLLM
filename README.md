@@ -1,7 +1,7 @@
 # 📊 StatLLM: Black-Box Statistical Large Language Model Fingerprinting & Attribution
 
 > **Scientific Black-Box LLM Attribution via Discrete Multinomial Bias, Dirichlet-Smoothed Likelihood, Central Limit Theorem Confidence Convergence, and 2D PCA Cluster Projection.**  
-> *Benchmark across 15 Frontier Flagship Models with 5,544+ Empirical Authentic Samples under Multi-Axis Contextual Prompt Perturbations across 9 Discrete Probes.*
+> *Benchmark across 13 Active Frontier Flagship Models with 6,578 Empirical Authentic Samples under Multi-Axis Contextual Prompt Perturbations across 12 Discrete Probes.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
@@ -20,35 +20,35 @@ In today's generative AI ecosystem, model-as-a-service (MaaS) gateways, aggregat
 
 **StatLLM** demonstrates that **you don't need weights or logits to fingerprint an LLM**. Because autoregressive transformers inherently lack physical true randomness, their tokenizer vocabulary, pre-training corpus distributions, and RLHF alignment carve permanent, model-specific discrete biases:
 - **Zero White-box Assumptions**: Evaluates purely on public inputs and output text arrays.
-- **15 Frontier Flagships Covered**: Empirical reference profiles for DeepSeek, Zhipu GLM, Meta, Google Gemma/Gemini, OpenAI, Anthropic, xAI, Alibaba, MiniMax, and Moonshot.
-- **9 High-Precision Discrete Mathematical Probes**: Random integer vectors, color selections, rock-paper-scissors game dynamics, English letter alphabets, full permutation orderings, coin flips, dice roll distributions, prime number sequences, and bitstream run-lengths.
-- **Contextual Noise Immunity**: Over 3,700+ perturbed samples testing resistance against system personas, chit-chat history, and business text wrappers across stratified temperatures ($T \in [0.4, 1.1]$).
+- **13 Active Frontier Flagships Covered**: Empirical reference profiles for DeepSeek, Zhipu GLM, Google Gemma/Gemini, OpenAI, Anthropic, xAI, Alibaba Cloud, MiniMax, and Meta Llama (with 2 legacy models preserved in `archived_models`).
+- **12 High-Precision Discrete Mathematical Probes**: 5 Tier A/B primary probes (`arr_pseudo_cvc5`, `arr_int5`, `arr_letter5`, `arr_int_big5`, `arr_prime5`) plus 7 extended probes covering dice rolls, color selections, permutations, 2D grid walks, coin flips, 8-bit bitstreams, and rock-paper-scissors game dynamics.
+- **Contextual Noise Immunity**: 4,518 perturbed samples (`persona`, `chit_chat`, and `context_noise`) alongside 2,060 baseline samples across stratified temperatures ($T \in [0.40, 1.10]$).
 - **Strict Mathematical Rigor**: Computes Dirichlet-smoothed posterior probabilities, Null Hypothesis baseline likelihoods, and 95%/68% confidence intervals.
 - **Sample-Size Uncertainty Advisory**: Guides users when low sample size ($N \le 5$) widens confidence intervals, showing precise mathematical predictions for how collecting $N \ge 15$ narrows error bounds by $40\%+$.
 
 ---
 
-## 🔬 Benchmark Matrix (15 Models, 5,544 Authentic Samples)
+## 🔬 Benchmark Matrix (13 Active Models, 6,578 Authentic Samples)
 
 Every reference sample in `statllm.db` is harvested through authentic API endpoints under randomized prompt perturbations and stratified sampling temperatures ($T \in [0.40, 1.10]$):
 
 | AI Frontier Lab | Flagship Model | Endpoint / Channel | Samples | Key Discrete Fingerprint Traits |
 |:---|:---|:---|:---:|:---|
-| **DeepSeek** | **DeepSeek-V4.1-Flash** | `openrouter` | **380** | Pronounced favorite integers (7, 23, 41); distinct permutation inversion profile |
-| **xAI** | **Grok-4.7** | `openrouter` | **380** | High affinity for 23, 37, 82; prominent Rock bias in game-theoretic RPS |
-| **Anthropic** | **Claude-Sonnet-5.5** | `openrouter` | **380** | High entropy across color and integer probes with characteristic blue/cyan leads |
-| **OpenAI** | **GPT-6-Astra** | `openrouter` | **380** | Strong integer affinity (17, 42, 64, 92); letter preference for B, Q, L |
-| **Google (Fast)** | **Gemini 2.5 Flash** | `openrouter` | **380** | Fast latency; tight letter clustering (G, P, K, D) |
-| **Google (Cloud)** | **Gemini Pro (Latest)** | `openrouter` | **380** | CoT thinking reasoning traces; distinct 42, 17, 88, 5, 73 preference pattern |
-| **MiniMax** | **MiniMax-M3** | `openrouter` | **380** | Unique tokenizer boundary alignments; Orange/Purple initial selections |
-| **Alibaba Cloud** | **Qwen-3.8-Max** | `openrouter` | **380** | Strong Chinese native representation; Cyan/Orange bias in color probes |
-| **Moonshot AI** | **Kimi-K3** | `openrouter` | **380** | High long-context noise resistance; characteristic letter clusters (F, L, T, Z) |
-| **OpenAI** | **GPT-5.6-Luna** | `openrouter` | **380** | Extreme initial-token integer bias (17 at >90%); high compliance |
-| **Meta AI (Open)** | **Llama-3.3-70B** | `openrouter` | **380** | Uniform integer spread; characteristic cyclic RPS patterns |
-| **Zhipu AI** | **GLM-5.3** | `openrouter` | **380** | Strong affinity for 27, 84, 15; extreme color preference for Purple/Cyan |
-| **OpenAI** | **GPT-6-Luna** | `openrouter` | **380** | High mathematical precision with distinct deterministic clusters |
-| **Google (4-Gen)** | **Gemma 4 31B** | `openrouter` | **380** | Latest 4-series architecture; heavy clustering around 23, 87, 12, 56, 91 |
-| **Meta AI** | **Meta Muse-Spark 1.3** | `opencode` | **224** | Distinct preference for 27, 84, 33; strong permutation 4/5-lead biases |
+| **DeepSeek** | **DeepSeek-V4.1-Flash** | `openrouter` | **506** | Pronounced favorite integers (7, 23, 41); distinct permutation inversion profile |
+| **xAI** | **Grok-4.7** | `openrouter` | **506** | High affinity for 23, 37, 82; prominent Rock bias in game-theoretic RPS |
+| **Anthropic** | **Claude-Sonnet-5.5** | `openrouter` | **506** | High entropy across color and integer probes with characteristic blue/cyan leads |
+| **OpenAI** | **GPT-6-Astra** | `openrouter` | **506** | Strong integer affinity (17, 42, 64, 92); letter preference for B, Q, L |
+| **Google (Fast)** | **Gemini 2.5 Flash** | `openrouter` | **506** | Fast latency; tight letter clustering (G, P, K, D) |
+| **Google (Cloud)** | **Gemini Pro (Latest)** | `openrouter` | **506** | CoT thinking reasoning traces; distinct 42, 17, 88, 5, 73 preference pattern |
+| **MiniMax** | **MiniMax-M3** | `openrouter` | **506** | Unique tokenizer boundary alignments; Orange/Purple initial selections |
+| **Alibaba Cloud** | **Qwen-3.8-Max** | `openrouter` | **506** | Strong Chinese native representation; Cyan/Orange bias in color probes |
+| **OpenAI** | **GPT-5.6-Luna** | `openrouter` | **506** | Extreme initial-token integer bias (17 at >90%); high compliance |
+| **Meta AI (Open)** | **Llama-3.3-70B** | `openrouter` | **506** | Uniform integer spread; characteristic cyclic RPS patterns |
+| **Zhipu AI** | **GLM-5.3** | `openrouter` | **506** | Strong affinity for 27, 84, 15; extreme color preference for Purple/Cyan |
+| **OpenAI** | **GPT-6-Luna** | `openrouter` | **506** | High mathematical precision with distinct deterministic clusters |
+| **Google (4-Gen)** | **Gemma 4 31B** | `openrouter` | **506** | Latest 4-series architecture; heavy clustering around 23, 87, 12, 56, 91 |
+
+> *Note: 2 legacy models (`Kimi-K3`, `Meta-Muse-Spark-1.3`) are also preserved in the `archived_models` / `archived_samples` tables for historical continuity.*
 
 ---
 
@@ -74,13 +74,23 @@ When $N \le 5$, the 95% confidence interval spans roughly $\pm 23\%$. Expanding 
 
 ---
 
-## 🎯 The 5 Standardized Probes
+## 🎯 12 Discrete Mathematical Probes (5 Tier A/B Primary + 7 Extended)
 
-1. **`arr_int5` (Integer Bias Probe)**: Request 5 random integers between 1 and 100 in JSON format. Uncovers numeric distribution preferences and duplicate avoidance.
-2. **`arr_color5` (Finite Set Selection Probe)**: Pick 5 colors from rainbow colors. Exposes multinomial lexical ordering biases.
-3. **`arr_rps5` (Game-Theoretic RPS Probe)**: Play 5 rounds of Rock-Paper-Scissors. Measures symmetry-breaking and transition preferences.
-4. **`arr_perm5` (Permutation Inversion Probe)**: Randomly shuffle $[1, 2, 3, 4, 5]$. Tests inversion count distribution and fixed-point probabilities.
-5. **`arr_letter5` (Alphabet Probe)**: Pick 5 capital letters (A-Z). Reveals tokenizer-level frequency artifacts.
+**Tier A/B Primary Probes (`PROBES`, default active battery):**
+1. **`arr_pseudo_cvc5` (CVC Pseudo-Word Sequence)**: Generate 5 three-letter pronounceable CVC pseudo-words to capture subword BPE Markov transition biases.
+2. **`arr_int5` (Integer Bias Probe)**: Request 5 random integers between 1 and 100 in JSON format. Uncovers numeric distribution preferences, sorting bias, and duplicate avoidance.
+3. **`arr_letter5` (Alphabet Probe)**: Pick 5 capital letters (A–Z). Reveals tokenizer-level frequency artifacts and consonant/vowel clustering.
+4. **`arr_int_big5` (Large Integer Probe)**: Request 5 integers in `[1000, 99999]` to measure multi-digit tokenization fragmentation and leading-digit Benford collapse.
+5. **`arr_prime5` (Prime Sequence Probe)**: Pick 5 primes below 100 (25 candidates) to reveal arithmetic subset attractors.
+
+**Extended Diagnostic Probes (`ALL_PROBES`):**
+6. **`arr_dice6`**: 6 independent 6-sided dice rolls measuring uniformity and adjacent-face avoidance.
+7. **`arr_color5`**: 5 selections from 7 rainbow colors exposing lexical ordering biases.
+8. **`arr_perm5`**: Random shuffle of `[1, 2, 3, 4, 5]` (120 permutations) measuring inversion count and fixed points.
+9. **`arr_grid_walk6`**: 6-step 2D cardinal grid walk detecting autoregressive return-to-origin symmetry.
+10. **`arr_coin10`**: 10 Bernoulli coin flips measuring streak-length avoidance and alternation bias.
+11. **`arr_bit8`**: 8-bit binary vector measuring Hamming weight and bit-flip transitions.
+12. **`arr_rps5`**: 5 rounds of Rock-Paper-Scissors measuring game-theoretic cyclic transitions.
 
 ---
 
@@ -90,7 +100,7 @@ When $N \le 5$, the 95% confidence interval spans roughly $\pm 23\%$. Expanding 
 
 Run the prebuilt multi-architecture container image directly:
 ```bash
-docker run -d -p 8008:8008 --name statllm ghcr.io/mcocdaa/statllm:latest
+docker run -d -p 8008:8000 --name statllm ghcr.io/mcocdaa/statllm:latest
 ```
 
 Or clone and run with Docker Compose:
@@ -127,7 +137,7 @@ statllm serve --port 8008
 # View all standard discrete probes
 statllm probes
 
-# Inspect database summary across all 15 models
+# Inspect database summary across all 13 active models
 statllm stats
 
 # Evaluate a quick response directly from CLI

@@ -40,7 +40,7 @@ def main():
     # Command: eval
     eval_p = subparsers.add_parser("eval", help="Evaluate a sample from CLI")
     eval_p.add_argument("--db", default="statllm.db", help="Database file path")
-    eval_p.add_argument("--probe", required=True, help="Probe ID (e.g. q1_int, q2_color)")
+    eval_p.add_argument("--probe", required=True, help="Probe ID (e.g. arr_int5, arr_color5)")
     eval_p.add_argument("text", help="Raw model response text")
 
     args = parser.parse_args()

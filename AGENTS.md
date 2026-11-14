@@ -45,7 +45,7 @@ StatLLM 是专注于**黑盒大语言模型统计归属鉴定与离散指纹溯�
 StatLLM/
 ├── .github/workflows/          # GitHub Actions CI/CD 流水线 (ci.yml, docker.yml)
 ├── statllm/                    # 核心 Python 算法与数理引擎包
-│   ├── probes.py               # 5 大离散数学探针定义与鲁棒正则解析器
+│   ├── probes.py               # 12 大离散数学探针定义 (ALL_PROBES) 与 5 项 Tier A/B 主探针 (PROBES)
 │   ├── database.py             # SQLite 加权频次存储与预聚合统计层
 │   ├── engine.py               # 贝叶斯对数似然、Fitness、中心极限定理置信区间收窄诊断
 │   ├── cluster.py              # 2D PCA 降维与经验 Bootstrap 散点聚类投影器

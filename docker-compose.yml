@@ -1,6 +1,6 @@
 services:
   statllm:
-    image: ghcr.io/mcocdaa/statllm:v0.2.1
+    image: ghcr.io/mcocdaa/statllm:v0.2.2
     build: .
     container_name: statllm-app
     restart: unless-stopped
@@ -8,8 +8,9 @@ services:
       - "8008:8000"
     volumes:
       - ./statllm.db:/app/statllm.db
-      - ./web:/app/web
-      - ./statllm:/app/statllm
+      # Uncomment below for local live-reload development only:
+      # - ./web:/app/web
+      # - ./statllm:/app/statllm
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:

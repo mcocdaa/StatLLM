@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # StatLLM 镜像部署脚本（无需克隆源码）
 # 参考 termflow / siteflow 架构规范
-# 用法: TAG=v0.1.0 STATLLM_PORT=8008 ./init.sh
+# 用法: TAG=v0.2.2 STATLLM_PORT=8008 ./init.sh
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -17,7 +17,7 @@ set -a
 source .env
 set +a
 
-TAG="${TAG:-v0.1.0}"
+TAG="${TAG:-v0.2.2}"
 PORT="${STATLLM_PORT:-8008}"
 BIND_HOST="${STATLLM_BIND_HOST:-127.0.0.1}"
 CONTAINER_NAME="${CONTAINER_NAME:-statllm}"
@@ -29,7 +29,7 @@ docker pull "$IMAGE"
 # 2. 准备持久化数据目录与基准指纹库
 mkdir -p data
 if [[ ! -f data/statllm.db ]]; then
-    echo "[init] 初始化持久化数据库，提取内置 15 款大模型基准指纹 (1,190 条全真实样本)..."
+    echo "[init] 初始化持久化数据库，提取内置 13 款大模型基准指纹 (6,578 条全真实样本)..."
     docker run --rm --entrypoint cat "$IMAGE" /app/statllm.db > data/statllm.db
     chmod 0644 data/statllm.db
 fi

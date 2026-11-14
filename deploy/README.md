@@ -12,7 +12,7 @@
 ├── stop.sh               # 停止并删除容器脚本 (可执行)
 ├── nginx.conf.example    # Nginx 反向代理配置参考
 ├── data/                 # 持久化数据库挂载目录
-│   └── statllm.db        # SQLite 离散指纹基准数据库 (1,190 条样本)
+│   └── statllm.db        # SQLite 离散指纹基准数据库 (6,578 条样本)
 └── README.md             # 本说明文档
 ```
 
@@ -43,11 +43,11 @@ curl -s http://127.0.0.1:8008/api/stats | jq .
 
 如需升级到最新版本或指定版本：
 ```bash
-TAG=v0.2.0 ./init.sh
+TAG=v0.2.2 ./init.sh
 ```
 数据存储于宿主机 `./data/statllm.db`，升级或重建容器不会丢失任何已收集的真实样本。
 
 ## 反向代理配置
 
-反向代理域名 `statllm.mcocdaa-newapi.xin` 指向 `http://127.0.0.1:8008`，详细配置参见 `nginx.conf.example`。
-在宝塔面板添加反代站点时，目标 URL 填写 `http://127.0.0.1:8008`，发送域名保持 `$host`。
+反向代理域名 `statllm.example.com` 指向 `http://127.0.0.1:8008`，详细配置参见 `nginx.conf.example`。
+如需在 Nginx 或宝塔面板中添加反代站点，目标 URL 填写 `http://127.0.0.1:8008`，发送域名保持 `$host`。
