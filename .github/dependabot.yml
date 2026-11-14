@@ -60,6 +60,8 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "*statllm*"
     groups:
       compose-minor-patch:
         patterns:
